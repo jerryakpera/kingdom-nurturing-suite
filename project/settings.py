@@ -1,20 +1,14 @@
-import os
 from pathlib import Path
 
-import environ
+import dj_database_url
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env(
-    # set casting, default value
-    DEBUG=(bool, False),
-    ALLOWED_HOSTS=(list, [".awsapprunner.com"]),
-)
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-DEBUG = env("DEBUG")
-SECRET_KEY = env("SECRET_KEY")
-ALLOWED_HOSTS: list[str] = env("ALLOWED_HOSTS")
+SECRET_KEY = config("SECRET_KEY")
+DEBUG = config("DEBUG", default=False, cast=bool)
+ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(" ")
 
 
 # Application definition
@@ -68,6 +62,8 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL"))
 
 
 # Password validation

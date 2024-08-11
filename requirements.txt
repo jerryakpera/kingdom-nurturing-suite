@@ -6,15 +6,21 @@
 #
 asgiref==3.8.1
     # via django
+dj-database-url==2.2.0
+    # via -r requirements.in
 django==5.1
-    # via -r requirements.in
-django-environ==0.11.2
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   dj-database-url
 gunicorn==23.0.0
     # via -r requirements.in
 packaging==24.1
     # via gunicorn
+python-decouple==3.8
+    # via -r requirements.in
 sqlparse==0.5.1
     # via django
+typing-extensions==4.12.2
+    # via dj-database-url
 tzdata==2024.1
     # via django
