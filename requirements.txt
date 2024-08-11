@@ -16,6 +16,8 @@ gunicorn==23.0.0
     # via -r requirements.in
 packaging==24.1
     # via gunicorn
+psycopg2-binary==2.9.9
+    # via -r requirements.in
 python-decouple==3.8
     # via -r requirements.in
 sqlparse==0.5.1
