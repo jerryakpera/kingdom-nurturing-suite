@@ -2,7 +2,7 @@
 requires-python = ">=3.12"
 
 [tool.bandit]
-exclude_dirs = ["*/test/*"]
+exclude_dirs = ["*/test/*", "*/tests/*"]
 tests = ["B201", "B301"]
 skips = ["B101", "B601"]
 
@@ -16,7 +16,7 @@ skip_covered = true
 
 [tool.isort]
 profile = "black"
-src_paths = ["potd"]
+src_paths = ["kns"]
 
 [tool.ruff.lint]
 select = [
@@ -38,7 +38,7 @@ select = [
 ]
 ignore = [
     # bandit: Use of `assert` detected
-    "S101", "B101",
+    # "S101", "B101",
 ]
 
 [tool.pytest.ini_options]

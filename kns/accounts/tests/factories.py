@@ -1,4 +1,5 @@
 import factory
+import pytest
 
 
 class UserFactory(factory.django.DjangoModelFactory):
