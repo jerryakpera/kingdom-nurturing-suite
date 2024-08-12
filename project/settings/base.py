@@ -4,7 +4,7 @@ from pathlib import Path
 import dj_database_url
 from decouple import config
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 SECRET_KEY = config("SECRET_KEY")
@@ -14,7 +14,7 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS").split(" ")
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -22,6 +22,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 ]
+
+THIRD_PARTY_APPS = []
+
+LOCAL_APPS = [
+    "kns.accounts",
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -68,8 +76,7 @@ DATABASES = {
 DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL"))
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
+# AUTH SETTINGS
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -85,6 +92,8 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+AUTH_USER_MODEL = "accounts.User"
 
 
 # Internationalization
@@ -114,7 +123,7 @@ STORAGES = {
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "core", "static"),
+    os.path.join(BASE_DIR, "kns", "static"),
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
