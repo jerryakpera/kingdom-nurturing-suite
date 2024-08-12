@@ -2,10 +2,6 @@
 
 set -o errexit  # exit on error
 
-pip install -r requirements.txt
-
-python manage.py collectstatic
-
 python manage.py migrate
 
 # Create superuser
@@ -15,4 +11,4 @@ python manage.py createsu
 # python manage.py createsettings
 
 # Generate data
-# python manage.py generate_prod_data
+# python manage.py generatedata
