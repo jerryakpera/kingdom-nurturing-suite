@@ -1,48 +1,72 @@
 [project]
+# Specifies that the project requires Python 3.12 or higher
 requires-python = ">=3.12"
 
+# Bandit configuration for security checks
 [tool.bandit]
+# Excludes directories named 'test' or 'tests' from Bandit checks
 exclude_dirs = ["*/test/*", "*/tests/*"]
+# Specifies Bandit tests to include (B201 and B301)
 tests = ["B201", "B301"]
+# Specifies Bandit tests to skip (B101 and B601)
 skips = ["B101", "B601"]
 
+# Coverage report settings
 [tool.coverage.report]
+# Sets 100% as the minimum coverage percentage required to pass
 fail_under = 100
 omit = [
-    "*/migrations/*",
+  # Omits migration files from coverage reports
+  "*/migrations/*",
 ]
+# Displays missing lines in the coverage report
 show_missing = true
+# Skips reporting files that are fully covered
 skip_covered = true
 
+# isort configuration for sorting imports
 [tool.isort]
+# Uses the 'black' profile for sorting imports to match Black code style
 profile = "black"
-src_paths = ["kns"]
+# Specifies the source paths to sort imports in
+src_paths = ["kns", "project"]
 
+# ruff configuration for linting
 [tool.ruff.lint]
 select = [
-    # pycodestyle
-    "E",
-    "W",
-    # Pyflakes
-    "F",
-    # pyupgrade
-    "UP",
-    # flake8-bandit
-    "S",
-    # flake8-bugbear
-    "B",
-    # flake8-simplify
-    "SIM",
-    # isort
-    "I",
+  # pycodestyle checks
+  "E",  # Checks for pycodestyle errors (e.g., formatting issues)
+  "W",  # Checks for pycodestyle warnings
+
+  # Pyflakes checks
+  "F",  # Checks for Pyflakes issues (e.g., undefined names)
+
+  # pyupgrade checks
+  "UP",  # Checks for outdated Python syntax
+
+  # flake8-bandit checks
+  "S",  # Includes security checks from flake8-bandit
+
+  # flake8-bugbear checks
+  "B",  # Includes bugbear checks (e.g., potential bugs)
+
+  # flake8-simplify checks
+  "SIM",  # Includes simplify checks (e.g., redundant code)
+
+  # isort checks
+  "I",  # Includes isort checks (e.g., import order)
 ]
+# Ignored linting rules
+# Use of `assert` detected by Bandit is ignored here
 ignore = [
-    # bandit: Use of `assert` detected
-    # "S101", "B101",
+  # "S101"
 ]
 
+# pytest configuration for running tests
 [tool.pytest.ini_options]
+# Additional options for pytest; disables migrations and socket connections during tests
 addopts = "--nomigrations --disable-socket"
+# Specifies the Django settings module to use for testing
 DJANGO_SETTINGS_MODULE = "project.settings.testing_settings"
 filterwarnings = [
     # Elevates warnings from pytest into errors.
@@ -51,6 +75,7 @@ filterwarnings = [
 # This warning is coming from dj-stripe 2.5.1 (Example)
 #    ignore:.*The providing_args argument is deprecated\..*:DeprecationWarning
 #    ignore:.*The providing_args argument is deprecated\..*:PendingDeprecationWarning
+# Specifies the directory to search for test files
 testpaths = [
     "kns",
 ]
