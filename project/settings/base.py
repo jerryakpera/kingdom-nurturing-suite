@@ -23,7 +23,9 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = []
+THIRD_PARTY_APPS = [
+    "admin_honeypot",
+]
 
 LOCAL_APPS = [
     "kns.accounts",
