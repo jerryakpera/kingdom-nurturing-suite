@@ -15,10 +15,13 @@ django==5.1
     #   -r requirements.in
     #   dj-database-url
     #   django-admin-honeypot-updated-2021
+    #   django-use-email-as-username
 django-admin-honeypot-updated-2021==1.2.0
     # via -r requirements.in
 django-ipware==7.0.1
     # via django-admin-honeypot-updated-2021
+django-use-email-as-username==1.4.0
+    # via -r requirements.in
 gunicorn==23.0.0
     # via -r requirements.in
 packaging==24.1

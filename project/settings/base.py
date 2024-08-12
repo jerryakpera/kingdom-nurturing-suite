@@ -25,6 +25,8 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "admin_honeypot",
+    "django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig",
+    "kns.custom_user.apps.CustomUserConfig",
 ]
 
 LOCAL_APPS = [
@@ -95,7 +97,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = "accounts.User"
+AUTH_USER_MODEL = "custom_user.User"
 
 
 # Internationalization

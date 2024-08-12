@@ -1,7 +1,7 @@
 from decouple import config
 from django.core.management.base import BaseCommand
 
-from kns.accounts.models import User
+from kns.custom_user.models import User
 
 
 class Command(BaseCommand):
@@ -18,12 +18,12 @@ class Command(BaseCommand):
 
         email = config("SU_EMAIL")
         password = config("SU_PASSWORD")
-        username = config("SU_USERNAME")
+        # username = config("SU_USERNAME")
 
         User.objects.create_superuser(
             email=email,
             password=password,
-            username=username,
+            # username=username,
         )
 
         self.stdout.write(f'User "{email}" was created')
