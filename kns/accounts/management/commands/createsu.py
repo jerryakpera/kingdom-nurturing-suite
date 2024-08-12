@@ -1,5 +1,6 @@
 from decouple import config
 from django.core.management.base import BaseCommand
+
 from kns.accounts.models import User
 
 

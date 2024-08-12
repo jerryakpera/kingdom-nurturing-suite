@@ -17,7 +17,7 @@ profile = "black"
 src_paths = ["kns", "project"]
 
 [tool.flake8]
-ignore = ["S101"]
+ignore = []
 select = [
   "E",  # pycodestyle errors and warnings
   "W",
@@ -28,6 +28,7 @@ select = [
   "SIM",  # Simplify checks
   "I",  # isort checks
 ]
+src_paths = ["kns", "project"]
 
 [tool.pytest.ini_options]
 addopts = "--nomigrations --disable-socket"
