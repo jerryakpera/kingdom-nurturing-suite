@@ -18,12 +18,10 @@ class Command(BaseCommand):
 
         email = config("SU_EMAIL")
         password = config("SU_PASSWORD")
-        # username = config("SU_USERNAME")
 
         User.objects.create_superuser(
             email=email,
             password=password,
-            # username=username,
         )
 
         self.stdout.write(f'User "{email}" was created')
