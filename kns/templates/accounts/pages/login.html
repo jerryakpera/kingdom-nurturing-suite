@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+  </head>
+  <body>
+    <h2>Login</h2>
+    <form method="POST" action="{% url "accounts:login" %}">
+      {% csrf_token %}
+
+      <!-- Display non-field errors here -->
+      {% if login_form.non_field_errors %}
+        <div>
+          {% for error in login_form.non_field_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div>
+        <label for="{{ login_form.email.id_for_label }}">Email:</label>
+        {{ login_form.email }}
+        {% if login_form.email.errors %}
+          <div>{{ login_form.email.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="{{ login_form.password.id_for_label }}">Password:</label>
+        {{ login_form.password }}
+        {% if login_form.password.errors %}
+          <div>{{ login_form.password.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div>
+        <button type="submit">Login</button>
+      </div>
+    </form>
+  </body>
+</html>

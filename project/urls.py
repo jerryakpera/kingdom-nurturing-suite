@@ -4,6 +4,7 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", include("admin_honeypot.urls")),
     path("control-panel/", admin.site.urls),
+    path("accounts/", include("kns.accounts.urls")),
 ]
 
 admin.site.site_title = "KNS Admin Portal"

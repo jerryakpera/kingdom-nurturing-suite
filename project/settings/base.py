@@ -51,7 +51,7 @@ ROOT_URLCONF = "project.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR, "kns", "templates"],
+        "DIRS": [os.path.join(BASE_DIR, "kns", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -99,6 +99,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = "custom_user.User"
 
+LOGIN_URL = "accounts:login"
+PASSWORD_RESET_COMPLETE_URL = "/accounts/login"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
