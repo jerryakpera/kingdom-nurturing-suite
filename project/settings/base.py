@@ -6,11 +6,11 @@ from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+ENV = config("ENV")
 
 SECRET_KEY = config("SECRET_KEY")
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = True if ENV == "development" else False
 ALLOWED_HOSTS = config("HOSTS_ALLOWED").split(" ")
-
 
 # Application definition
 
