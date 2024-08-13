@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KNS | Set your new password</title>
+  </head>
+<body>
+  <h4>Enter new password</h4>
+  <p>Please enter your new password twice so we can verify you typed it in correctly.</p>
+  <form method="POST" autocomplete="off">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">Submit</button>
+  </form>
+</body>
+</html>
