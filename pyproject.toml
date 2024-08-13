@@ -30,8 +30,20 @@ select = [
 ]
 src_paths = ["kns", "project"]
 
-[tool.pytest.ini_options]
-addopts = "--nomigrations --disable-socket"
-DJANGO_SETTINGS_MODULE = "project.settings.testing_settings"
-filterwarnings = ["error"]
-testpaths = ["kns"]
+# [tool.pytest.ini_options]
+# addopts = "--nomigrations --disable-socket"
+# DJANGO_SETTINGS_MODULE = "project.settings.testing_settings"
+# filterwarnings = ["error"]
+# testpaths = ["kns"]
+
+# [tool.coverage.run]
+# omit = [
+#   "*apps.py",
+#   "*migrations/*",
+#   "*settings*",
+#   "*tests/*",
+#   "*urls.py",
+#   "*wsgi/*",
+#   "*asgi/*",
+#   "manage.py"
+# ]
