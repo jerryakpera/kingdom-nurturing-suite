@@ -1,3 +1,3 @@
-from django.contrib import admin
-
-# Register your models here.
+"""
+Django admin site configuration for the accounts app.
+"""

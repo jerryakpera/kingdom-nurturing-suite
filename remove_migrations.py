@@ -1,8 +1,20 @@
+"""
+Module for deleting Django migration files.
+"""
+
 import glob
 import os
 
 
 def delete_migrations_in_app(app_path):
+    """
+    Delete all migration files in a Django app directory, except for __init__.py.
+
+    Parameters
+    ----------
+    app_path : str
+        The path to the Django app directory from which migration files will be deleted.
+    """
     migrations_path = os.path.join(app_path, "migrations")
     if os.path.exists(migrations_path):
         migration_files = glob.glob(os.path.join(migrations_path, "*.py"))
@@ -17,6 +29,14 @@ def delete_migrations_in_app(app_path):
 
 
 def delete_all_migrations(core_path):
+    """
+    Recursively delete migration files from all Django apps within the specified core directory.
+
+    Parameters
+    ----------
+    core_path : str
+        The root path of the directory to search for Django apps.
+    """
     if not os.path.exists(core_path):
         print(f"The specified path '{core_path}' does not exist.")
         return

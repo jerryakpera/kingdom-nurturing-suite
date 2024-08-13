@@ -16,6 +16,12 @@ repos:
     hooks:
       - id: black
 
+  - repo: https://github.com/numpy/numpydoc
+    rev: v1.6.0
+    hooks:
+      - id: numpydoc-validation
+        exclude: (tests|docs|migrations|project)/.*
+
   - repo: https://github.com/pycqa/flake8
     rev: 7.1.0
     hooks:

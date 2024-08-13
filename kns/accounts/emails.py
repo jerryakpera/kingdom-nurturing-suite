@@ -1,8 +1,20 @@
+"""
+Utility functions for sending emails related to user account management.
+"""
+
 from django.conf import settings
 from django.core.mail import send_mail
 
 
 def send_password_change_email(user_email):
+    """
+    Send an email notification when a user's password is changed.
+
+    Parameters
+    ----------
+    user_email : str
+        The email address of the user who changed their password.
+    """
     subject = "Password Changed Successfully"
 
     message = (

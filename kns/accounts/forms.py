@@ -1,3 +1,7 @@
+"""
+Forms for handling user authentication and password management.
+"""
+
 from django import forms
 from django.forms.widgets import EmailInput, PasswordInput
 from django.utils.translation import gettext_lazy as _
@@ -6,6 +10,10 @@ from .utils import compare_passwords
 
 
 class ChangePasswordForm(forms.Form):
+    """
+    Form for changing a user's password.
+    """
+
     current_password = forms.CharField(
         strip=False,
         required=True,
@@ -47,6 +55,18 @@ class ChangePasswordForm(forms.Form):
     )
 
     def clean(self):
+        """
+        Validate the form data.
+
+        This method checks if the new password is similar to the current password
+        and whether the new password and confirmation password match. Adds errors
+        to the form if validation fails.
+
+        Returns
+        -------
+        dict
+            The cleaned data after validation.
+        """
         cleaned_data = super().clean()
         current_password = cleaned_data.get("current_password")
         new_password = cleaned_data.get("new_password")
@@ -69,6 +89,10 @@ class ChangePasswordForm(forms.Form):
 
 
 class LoginForm(forms.Form):
+    """
+    Form for user login.
+    """
+
     email = forms.EmailField(
         required=True,
         widget=EmailInput(
@@ -90,6 +114,10 @@ class LoginForm(forms.Form):
 
 
 class SetPasswordForm(forms.Form):
+    """
+    Form for setting a new password.
+    """
+
     new_password = forms.CharField(
         required=True,
         label="New password",
@@ -115,6 +143,18 @@ class SetPasswordForm(forms.Form):
     )
 
     def clean(self):
+        """
+        Validate the form data.
+
+        This method checks that the new password meets minimum length requirements
+        and that both new password fields match. Adds errors to the form if validation
+        fails.
+
+        Returns
+        -------
+        dict
+            The cleaned data after validation.
+        """
         new_password = self.cleaned_data.get("new_password")
         confirm_password = self.cleaned_data.get("confirm_password")
 

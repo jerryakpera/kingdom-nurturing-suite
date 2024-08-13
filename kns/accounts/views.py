@@ -1,3 +1,11 @@
+"""
+Views for handling user authentication and account management.
+
+This module includes views for user login, logout, password change, and
+the user dashboard. It also handles form submissions, user authentication,
+password changes, and related email notifications.
+"""
+
 import logging
 
 from django.contrib import messages
@@ -15,6 +23,19 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def index(request):
+    """
+    Render the user dashboard page.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template for the user dashboard.
+    """
     return render(
         request=request,
         template_name="accounts/pages/index.html",
@@ -23,6 +44,23 @@ def index(request):
 
 
 def login_view(request):
+    """
+    Handle user login.
+
+    Renders the login form and processes user authentication. On successful
+    login, the user is redirected to the intended URL or the default dashboard
+    page. On failure, an error message is shown.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template for the login page or a redirect response.
+    """
     form = LoginForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
@@ -34,8 +72,7 @@ def login_view(request):
         if user is not None:
             login(request, user)
 
-            # Redirect to the URL where the user
-            # intended to go or the default index page
+            # Redirect to the URL where the user intended to go or the default index page
             next_url = request.POST.get("next", "accounts:index")
 
             if is_safe_url(next_url, allowed_hosts=request.get_host()):
@@ -59,12 +96,46 @@ def login_view(request):
 
 
 def logout_view(request):
+    """
+    Handle user logout.
+
+    Logs out the user and redirects to the login page.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+
+    Returns
+    -------
+    HttpResponse
+        A redirect response to the login page.
+    """
     logout(request)
     return redirect("accounts:login")
 
 
 @login_required
 def change_password(request):
+    """
+    Handle password change for the logged-in user.
+
+    Renders the password change form and processes the password update. If the
+    current password is correct and the new passwords match, the user's password
+    is updated, the user is re-authenticated, and a notification email is sent.
+    On success, the user is redirected to the dashboard page. On failure, an error
+    message is shown.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template for the password change page or a redirect response.
+    """
     if request.method == "POST":
         change_password_form = ChangePasswordForm(request.POST)
 
