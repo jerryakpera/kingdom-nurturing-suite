@@ -15,7 +15,9 @@ jobs:
 
     env:
       # Environment variables used during the job
+      ENV: 'development'
       HOSTS_ALLOWED: '*'
+      SECRET_KEY: 'a random secret key'
 
     steps:
       - name: Get the code
@@ -45,7 +47,8 @@ jobs:
 
       - name: Test it
         # Runs the tests and generates coverage reports
-        run: make coverage
+        run: |
+          pytest --cov=kns --cov-report=xml
 
       - name: Check deploy configuration
         # Checks the Django deployment configuration for issues
