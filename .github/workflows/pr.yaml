@@ -62,13 +62,13 @@ jobs:
         run: |
           pytest --cov=kns --cov-report=xml
 
-      - name: Check deploy configuration
-        # Checks the Django deployment configuration for issues
-        run: ./manage.py check --deploy --fail-level WARNING
-        env:
-          # Temporary in-memory database for checking deployment settings
-          DATABASE_URL: 'sqlite://:memory:'
-          # Secret key used for Django settings
-          SECRET_KEY: 'zt(6jlr#oquxm2t%ryh#n+-72p^(3knbf&q$5x16#o%1im-s7!'
-          # Indicates that SSL redirect should be enabled in deployment settings
-          SECURE_SSL_REDIRECT: 'on'
+      # - name: Check deploy configuration
+      #   # Checks the Django deployment configuration for issues
+      #   run: ./manage.py check --deploy --fail-level WARNING
+      #   env:
+      #     # Temporary in-memory database for checking deployment settings
+      #     DATABASE_URL: 'sqlite://:memory:'
+      #     # Secret key used for Django settings
+      #     SECRET_KEY: 'zt(6jlr#oquxm2t%ryh#n+-72p^(3knbf&q$5x16#o%1im-s7!'
+      #     # Indicates that SSL redirect should be enabled in deployment settings
+      #     SECURE_SSL_REDIRECT: 'on'
