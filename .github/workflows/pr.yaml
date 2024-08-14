@@ -52,7 +52,7 @@ jobs:
         run: pip install -r requirements.txt -r requirements-dev.txt
 
       - name: Create static directories
-        run: mkdir -p staticfiles static
+        run: mkdir -p staticfiles kns/static
 
       - name: Set execute permissions on manage.py
         run: chmod +x manage.py
