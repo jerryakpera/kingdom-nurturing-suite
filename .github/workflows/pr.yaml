@@ -51,8 +51,8 @@ jobs:
         # Installs Python packages from requirements files
         run: pip install -r requirements.txt -r requirements-dev.txt
 
-      - name: Create staticfiles directory
-        run: mkdir -p staticfiles
+      - name: Create static directories
+        run: mkdir -p staticfiles static
 
       - name: Set execute permissions on manage.py
         run: chmod +x manage.py
