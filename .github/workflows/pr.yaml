@@ -1,0 +1,59 @@
+# Defines the name of the workflow
+name: Tests Runner
+
+on:
+  push:
+    branches:
+      - dev-deployment
+
+jobs:
+  test:
+    # Name of the job
+    name: Run Tests
+    # Specifies the operating system for the runner
+    runs-on: ubuntu-22.04
+
+    env:
+      # Environment variables used during the job
+      HOSTS_ALLOWED: '*'
+
+    steps:
+      - name: Get the code
+        # Checks out the code from the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        # Sets up the Python environment
+        uses: actions/setup-python@v4
+        with:
+          # Specifies the Python version to use
+          python-version: '3.12.0'
+          # Caches Python packages to speed up installation
+          cache: 'pip'
+          # Specifies the dependency files to cache
+          cache-dependency-path: 'requirements*.txt'
+
+      - name: Install OS packages
+        # Installs OS-level packages needed for the build
+        run: |
+          sudo apt install \
+          python3-dev graphviz libgraphviz-dev
+
+      - name: Install Python packages
+        # Installs Python packages from requirements files
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Test it
+        # Runs the tests and generates coverage reports
+        run: make coverage
+
+      - name: Check deploy configuration
+        # Checks the Django deployment configuration for issues
+        run: ./manage.py check --deploy --fail-level WARNING
+        env:
+          # Temporary in-memory database for checking deployment settings
+          DATABASE_URL: 'sqlite://:memory:'
+          # Secret key used for Django settings
+          SECRET_KEY: 'zt(6jlr#oquxm2t%ryh#n+-72p^(3knbf&q$5x16#o%1im-s7!'
+          # Indicates that SSL redirect should be enabled in deployment settings
+          SECURE_SSL_REDIRECT: 'on'
