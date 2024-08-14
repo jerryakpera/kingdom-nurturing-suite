@@ -18,6 +18,12 @@ jobs:
       ENV: 'development'
       HOSTS_ALLOWED: '*'
       SECRET_KEY: 'a random secret key'
+      EMAIL_HOST: 'sandbox.smtp.mailtrap.io'
+      EMAIL_HOST_PASSWORD: '24118585c3447b'
+      EMAIL_HOST_USER: 'd0ef8fcb992c8d'
+      EMAIL_PORT: 2525
+      SU_EMAIL: 'jerryakpera@gmail.com'
+      SU_PASSWORD: 'JTA1-2-3-4$#@!'
 
     steps:
       - name: Get the code
