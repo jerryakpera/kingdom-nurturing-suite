@@ -60,7 +60,7 @@ jobs:
       - name: Test it
         # Runs the tests and generates coverage reports
         run: |
-          pytest --cov=kns --cov-report=xml
+          pytest --cov=kns --cov-report=xml --cov-fail-under=100
 
       # - name: Check deploy configuration
       #   # Checks the Django deployment configuration for issues
