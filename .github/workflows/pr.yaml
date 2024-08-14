@@ -54,6 +54,9 @@ jobs:
       - name: Create staticfiles directory
         run: mkdir -p staticfiles
 
+      - name: Set execute permissions on manage.py
+        run: chmod +x manage.py
+
       - name: Test it
         # Runs the tests and generates coverage reports
         run: |
