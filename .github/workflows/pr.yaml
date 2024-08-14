@@ -51,6 +51,9 @@ jobs:
         # Installs Python packages from requirements files
         run: pip install -r requirements.txt -r requirements-dev.txt
 
+      - name: Create staticfiles directory
+        run: mkdir -p staticfiles
+
       - name: Test it
         # Runs the tests and generates coverage reports
         run: |
