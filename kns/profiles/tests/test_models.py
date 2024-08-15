@@ -1,10 +1,8 @@
-from django.test import TestCase
-
 from kns.custom_user.models import User
 from kns.profiles.models import Profile
 
 
-class ProfileModelTests(TestCase):
+class ProfileModelTests:
     def setUp(self):
         # Set up any necessary data for the tests
         self.user = User.objects.create_user(
