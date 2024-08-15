@@ -6,10 +6,11 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from kns.core.modelmixins import TimestampedModel
 from kns.custom_user.models import User
 
 
-class Profile(models.Model):
+class Profile(TimestampedModel, models.Model):
     """
     Represents a user profile in the system.
     """
