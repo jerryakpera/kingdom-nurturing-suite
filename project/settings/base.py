@@ -32,6 +32,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "kns.accounts",
     "kns.core",
+    "kns.profiles",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
