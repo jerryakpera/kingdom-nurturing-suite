@@ -10,3 +10,4 @@ class TestUser:
 
         # bandit: disable=B101
         assert user is not None
+        assert user.profile is not None
