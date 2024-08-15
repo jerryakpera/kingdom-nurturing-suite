@@ -8,7 +8,8 @@ class ProfileModelTests(TestCase):
     def setUp(self):
         # Set up any necessary data for the tests
         self.user = User.objects.create_user(
-            email="testuser@example.com", password="testpassword"
+            email="testuser@example.com",
+            password="testpassword",
         )
 
     def test_profile_creation_on_user_creation(self):
@@ -39,3 +40,21 @@ class ProfileModelTests(TestCase):
 
         # Check if the exception is related to the unique constraint
         self.assertTrue("UNIQUE constraint failed" in str(context.exception))
+
+    def test_profile_created_at_exists(self):
+        """
+        Test that the created_at field exists on the profile instance.
+        """
+
+        profile = Profile.objects.get(user=self.user)
+
+        assert profile.created_at is not None
+
+    def test_profile_updated_at_exists(self):
+        """
+        Test that the updated_at field exists on the profile instance.
+        """
+
+        profile = Profile.objects.get(user=self.user)
+
+        assert profile.updated_at is not None
