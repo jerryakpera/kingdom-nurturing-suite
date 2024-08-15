@@ -58,3 +58,33 @@ class ProfileModelTests(TestCase):
         profile = Profile.objects.get(user=self.user)
 
         assert profile.updated_at is not None
+
+    def test_profile_verified_exists(self):
+        """
+        Test that the verified field exists on the profile instance.
+        """
+
+        profile = Profile.objects.get(user=self.user)
+
+        assert profile.verified is not None
+        assert not profile.verified
+
+    def test_profile_is_visitor_exists(self):
+        """
+        Test that the is_visitor field exists on the profile instance.
+        """
+
+        profile = Profile.objects.get(user=self.user)
+
+        assert profile.is_visitor is not None
+        assert not profile.is_visitor
+
+    def test_profile_agreed_to_terms_exists(self):
+        """
+        Test that the agreed_to_terms field exists on the profile instance.
+        """
+
+        profile = Profile.objects.get(user=self.user)
+
+        assert profile.agreed_to_terms is not None
+        assert not profile.agreed_to_terms

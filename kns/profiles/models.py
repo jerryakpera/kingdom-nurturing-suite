@@ -27,6 +27,10 @@ class Profile(TimestampedModel, models.Model):
         blank=True,
     )
 
+    verified = models.BooleanField(default=False)
+    is_visitor = models.BooleanField(default=False)
+    agreed_to_terms = models.BooleanField(default=False)
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
