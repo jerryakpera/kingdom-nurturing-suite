@@ -15,7 +15,6 @@ from django.shortcuts import redirect, render
 
 from .emails import send_password_change_email
 from .forms import ChangePasswordForm, LoginForm
-from .utils import is_safe_url
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -73,16 +72,13 @@ def login_view(request):
             login(request, user)
 
             # Redirect to the URL where the user intended to go or the default index page
-            next_url = request.POST.get("next", "accounts:index")
+            return redirect("accounts:index")
 
-            if is_safe_url(next_url, allowed_hosts=request.get_host()):
-                return redirect(next_url)
-            else:
-                return redirect("accounts:index")
         else:
-            form.add_error(None, "Incorrect email or password. Please try again.")
-            # Log the failed attempt for debugging purposes
-            logger.warning(f"Failed login attempt for email: {email}")
+            form.add_error(
+                None,
+                "Incorrect email or password. Please try again.",
+            )
 
     context = {
         "login_form": form,
