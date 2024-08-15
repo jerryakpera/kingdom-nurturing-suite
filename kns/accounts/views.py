@@ -6,18 +6,14 @@ the user dashboard. It also handles form submissions, user authentication,
 password changes, and related email notifications.
 """
 
-import logging
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
+from .decorators import guest_required
 from .emails import send_password_change_email
 from .forms import ChangePasswordForm, LoginForm
-
-# Configure logging
-logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -42,6 +38,7 @@ def index(request):
     )
 
 
+@guest_required
 def login_view(request):
     """
     Handle user login.
@@ -91,6 +88,7 @@ def login_view(request):
     )
 
 
+@login_required
 def logout_view(request):
     """
     Handle user logout.

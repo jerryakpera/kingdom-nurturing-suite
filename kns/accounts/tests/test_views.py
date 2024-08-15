@@ -15,32 +15,68 @@ class AuthenticationViewsTests(TestCase):
             email="testuser@example.com",
             password="oldpassword",
         )
-        self.client.login(email="testuser@example.com", password="oldpassword")
+
+        self.client.login(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
 
     def test_index_view(self):
         """
         Test that the user dashboard (index) view is accessible.
         """
         response = self.client.get(reverse("accounts:index"))
+
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "accounts/pages/index.html")
 
-    def test_login_view_get(self):
+    def test_login_view_get_authenticated(self):
         """
-        Test that the login view renders the login form.
+        Test that authenticated users are redirected away from the login view.
         """
         response = self.client.get(reverse("accounts:login"))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("accounts:index"))
 
+    def test_login_view_post_failure_authenticated(self):
+        """
+        Test that authenticated users are redirected away from the login view
+        even if they attempt a login request.
+        """
+        response = self.client.post(
+            reverse("accounts:login"),
+            data={
+                "email": "testuser@example.com",
+                "password": "wrongpassword",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("accounts:index"))
+
+    def test_login_view_get_unauthenticated(self):
+        """
+        Test that the login view renders the login form for unauthenticated users.
+        """
+        self.client.logout()  # Ensure the user is not authenticated
+        response = self.client.get(reverse("accounts:login"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(
-            response,
-            "accounts/pages/login.html",
-        )
+        self.assertTemplateUsed(response, "accounts/pages/login.html")
+        self.assertIsInstance(response.context["login_form"], LoginForm)
 
-        self.assertIsInstance(
-            response.context["login_form"],
-            LoginForm,
+    def test_login_view_post_success_unauthenticated(self):
+        """
+        Test that the login view handles successful login for unauthenticated users.
+        """
+        self.client.logout()  # Ensure the user is not authenticated
+        response = self.client.post(
+            reverse("accounts:login"),
+            data={
+                "email": "testuser@example.com",
+                "password": "oldpassword",
+            },
         )
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("accounts:index"))
 
     def test_login_view_post_success(self):
         """
@@ -61,6 +97,9 @@ class AuthenticationViewsTests(TestCase):
         """
         Test that the login view handles failed login.
         """
+
+        self.client.logout()
+
         response = self.client.post(
             reverse("accounts:login"),
             data={
