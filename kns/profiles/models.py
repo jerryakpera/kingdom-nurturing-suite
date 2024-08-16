@@ -43,27 +43,27 @@ class Profile(TimestampedModel, models.Model):
         unique=True,
         default="default@email.kns",
     )
-    # last_name = models.CharField(
-    #     max_length=25,
-    #     null=True,
-    #     blank=True,
-    # )
-    # first_name = models.CharField(
-    #     max_length=25,
-    #     null=True,
-    #     blank=True,
-    # )
-    # gender = models.CharField(
-    #     max_length=6,
-    #     choices=GENDER_OPTIONS,
-    #     null=True,
-    #     blank=True,
-    # )
+    last_name = models.CharField(
+        max_length=25,
+        null=True,
+        blank=True,
+    )
+    first_name = models.CharField(
+        max_length=25,
+        null=True,
+        blank=True,
+    )
+    gender = models.CharField(
+        max_length=6,
+        choices=GENDER_OPTIONS,
+        null=True,
+        blank=True,
+    )
 
-    # date_of_birth = models.CharField(
-    #     null=True,
-    #     blank=True,
-    # )
+    date_of_birth = models.DateField(
+        null=True,
+        blank=True,
+    )
 
 
 @receiver(post_save, sender=User)

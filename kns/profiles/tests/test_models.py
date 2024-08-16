@@ -85,3 +85,17 @@ def test_profile_agreed_to_terms_exists(user):
 
     assert profile.agreed_to_terms is not None
     assert not profile.agreed_to_terms
+
+
+def test_profile_role_exists(user):
+    """
+    Test that the role field exists on the profile instance.
+    """
+    profile = Profile.objects.get(user=user)
+
+    assert profile.role is not None
+    assert profile.role in [
+        "member",
+        "leader",
+        "external_person",
+    ]
