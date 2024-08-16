@@ -9,6 +9,8 @@ from django.dispatch import receiver
 from kns.core.modelmixins import TimestampedModel
 from kns.custom_user.models import User
 
+from .constants import GENDER_OPTIONS, PROFILE_ROLE_OPTIONS
+
 
 class Profile(TimestampedModel, models.Model):
     """
@@ -27,9 +29,41 @@ class Profile(TimestampedModel, models.Model):
         blank=True,
     )
 
+    role = models.CharField(
+        max_length=20,
+        choices=PROFILE_ROLE_OPTIONS,
+        default="member",
+    )
+
     verified = models.BooleanField(default=False)
     is_visitor = models.BooleanField(default=False)
     agreed_to_terms = models.BooleanField(default=False)
+
+    email = models.EmailField(
+        unique=True,
+        default="default@email.kns",
+    )
+    # last_name = models.CharField(
+    #     max_length=25,
+    #     null=True,
+    #     blank=True,
+    # )
+    # first_name = models.CharField(
+    #     max_length=25,
+    #     null=True,
+    #     blank=True,
+    # )
+    # gender = models.CharField(
+    #     max_length=6,
+    #     choices=GENDER_OPTIONS,
+    #     null=True,
+    #     blank=True,
+    # )
+
+    # date_of_birth = models.CharField(
+    #     null=True,
+    #     blank=True,
+    # )
 
 
 @receiver(post_save, sender=User)
