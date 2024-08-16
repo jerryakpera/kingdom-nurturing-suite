@@ -14,6 +14,7 @@ class TestViews(TestCase):
             email="testuser@example.com",
             password="oldpassword",
         )
+        User.objects.create_user(email="adminuser@example.com", password="oldpassword")
 
         self.client.login(
             email="testuser@example.com",
@@ -40,6 +41,10 @@ class TestViews(TestCase):
         self.assertTemplateUsed(response, "profiles/pages/index.html")
 
         self.assertIn("profiles", response.context)
+        self.assertEqual(
+            response.context["profiles"].count(),
+            1,
+        )
 
         # Ensure the profile is listed
         assert b"Test User" in response.content

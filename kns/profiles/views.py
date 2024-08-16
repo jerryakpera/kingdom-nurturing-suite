@@ -23,7 +23,13 @@ def index(request):
     HttpResponse
         The rendered template with a list of profiles.
     """
-    profiles = Profile.objects.all()
+    profiles = Profile.objects.filter(
+        first_name__isnull=False,
+        last_name__isnull=False,
+    ).exclude(
+        first_name="",
+        last_name="",
+    )
 
     context = {
         "profiles": profiles,
