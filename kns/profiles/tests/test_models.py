@@ -57,36 +57,6 @@ def test_profile_updated_at_exists(user):
     assert profile.updated_at is not None
 
 
-def test_profile_verified_exists(user):
-    """
-    Test that the verified field exists on the profile instance.
-    """
-    profile = Profile.objects.get(user=user)
-
-    assert profile.verified is not None
-    assert not profile.verified
-
-
-def test_profile_is_visitor_exists(user):
-    """
-    Test that the is_visitor field exists on the profile instance.
-    """
-    profile = Profile.objects.get(user=user)
-
-    assert profile.is_visitor is not None
-    assert not profile.is_visitor
-
-
-def test_profile_agreed_to_terms_exists(user):
-    """
-    Test that the agreed_to_terms field exists on the profile instance.
-    """
-    profile = Profile.objects.get(user=user)
-
-    assert profile.agreed_to_terms is not None
-    assert not profile.agreed_to_terms
-
-
 def test_profile_role_exists(user):
     """
     Test that the role field exists on the profile instance.

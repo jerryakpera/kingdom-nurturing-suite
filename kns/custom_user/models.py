@@ -2,6 +2,7 @@
 User model definition for the application.
 """
 
+from django.db import models
 from django_use_email_as_username.models import BaseUser, BaseUserManager
 
 
@@ -15,3 +16,8 @@ class User(BaseUser):
     """
 
     objects = BaseUserManager()
+
+    # User settings
+    verified = models.BooleanField(default=False)
+    is_visitor = models.BooleanField(default=False)
+    agreed_to_terms = models.BooleanField(default=False)

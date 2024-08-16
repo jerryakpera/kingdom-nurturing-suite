@@ -35,10 +35,6 @@ class Profile(TimestampedModel, models.Model):
         default="member",
     )
 
-    verified = models.BooleanField(default=False)
-    is_visitor = models.BooleanField(default=False)
-    agreed_to_terms = models.BooleanField(default=False)
-
     email = models.EmailField(
         unique=True,
         default="default@email.kns",
@@ -64,6 +60,13 @@ class Profile(TimestampedModel, models.Model):
         null=True,
         blank=True,
     )
+
+    chat_is_disabled = models.BooleanField(default=False)
+    email_notificaitons = models.BooleanField(default=True)
+
+    display_hints = models.BooleanField(default=True)
+    bio_details_is_visible = models.BooleanField(default=True)
+    contact_details_is_visible = models.BooleanField(default=True)
 
 
 @receiver(post_save, sender=User)
