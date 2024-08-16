@@ -7,6 +7,34 @@
 </head>
 <body>
   <h1>Account page</h1>
+
+  <div>
+    Email
+    <div>{{ user.email }}</div>
+  </div>
+
+  <hr>
+
+  <div>
+    Verified
+    <div>{{ user.verified }}</div>
+  </div>
+
+  <hr>
+
+  <div>
+    Visitor
+    <div>{{ user.is_visitor }}</div>
+  </div>
+
+  <hr>
+
+  <div>
+    Agreed to terms
+    <div>{{ user.agreed_to_terms }}</div>
+  </div>
+
+
   <a href="{% url "accounts:logout" %}">Logout</a>
   <a href="{% url "accounts:change_password" %}">Change password</a>
 </body>

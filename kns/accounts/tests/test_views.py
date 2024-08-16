@@ -23,12 +23,20 @@ class AuthenticationViewsTests(TestCase):
 
     def test_index_view(self):
         """
-        Test that the user dashboard (index) view is accessible.
+        Test that the user dashboard (index) view is accessible and
+        context contains the expected data.
         """
         response = self.client.get(reverse("accounts:index"))
 
+        # Check if the response status code is 200 OK
         self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
         self.assertTemplateUsed(response, "accounts/pages/index.html")
+
+        # Check if the context contains the correct data
+        self.assertIn("user", response.context)
+        self.assertEqual(response.context["user"], self.user)
 
     def test_login_view_get_authenticated(self):
         """

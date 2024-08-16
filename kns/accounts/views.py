@@ -31,10 +31,15 @@ def index(request):
     HttpResponse
         The rendered template for the user dashboard.
     """
+
+    context = {
+        "user": request.user,
+    }
+
     return render(
         request=request,
         template_name="accounts/pages/index.html",
-        context={},
+        context=context,
     )
 
 
