@@ -51,7 +51,7 @@ def test_change_passwords_do_not_match(form_data):
     assert "confirm_new_password" in form.errors
 
 
-def test_login_form_valid(user):
+def test_login_form_valid():
     form_data = {
         "email": "testuser@example.com",
         "password": "password123",

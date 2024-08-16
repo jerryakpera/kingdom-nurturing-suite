@@ -2,6 +2,8 @@
 Models for the profiles app.
 """
 
+from uuid import uuid4
+
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -27,6 +29,14 @@ class Profile(TimestampedModel, models.Model):
         unique=True,
         null=True,
         blank=True,
+    )
+
+    slug = models.SlugField(
+        unique=True,
+        default=uuid4,
+        null=True,
+        blank=True,
+        editable=False,
     )
 
     role = models.CharField(

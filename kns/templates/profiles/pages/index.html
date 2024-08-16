@@ -1,0 +1,9 @@
+<h1>Profiles</h1>
+
+{% for profile in profiles %}
+  <h4>
+    <a href="{% url "profiles:profile_detail" profile_slug=profile.slug %}">
+      {{ profile.first_name }} {{ profile.last_name }}
+    </a>
+  </h4>
+{% endfor %}
