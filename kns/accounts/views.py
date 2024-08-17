@@ -176,6 +176,6 @@ def change_password(request):
 
     return render(
         request=request,
-        template_name="accounts/pages/change-password.html",
+        template_name="accounts/pages/change_password.html",
         context=context,
     )

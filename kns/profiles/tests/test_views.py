@@ -65,7 +65,7 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Check if the correct template is used
-        self.assertTemplateUsed(response, "profiles/pages/profile-detail.html")
+        self.assertTemplateUsed(response, "profiles/pages/profile_detail.html")
 
         # Ensure the profile details are present
         self.assertIn("Test User", response.content.decode())

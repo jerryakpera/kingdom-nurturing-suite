@@ -142,7 +142,7 @@ class AuthenticationViewsTests(TestCase):
         """
         response = self.client.get(reverse("accounts:change_password"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "accounts/pages/change-password.html")
+        self.assertTemplateUsed(response, "accounts/pages/change_password.html")
         self.assertIsInstance(
             response.context["change_password_form"], ChangePasswordForm
         )

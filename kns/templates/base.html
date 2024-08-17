@@ -1,0 +1,22 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>
+      {% block title %}
+        KNS | Kingdom Nurturing Suite
+      {% endblock %}
+    </title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    {% comment %} Include css files {% endcomment %}
+    {% include "head/css.html" %}
+  </head>
+  <body>
+    {% block base_content %}
+      {% comment %} Base content block {% endcomment %}
+    {% endblock base_content %}
+  </body>
+</html>

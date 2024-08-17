@@ -76,6 +76,6 @@ def profile_detail(request, profile_slug):
 
     return render(
         request=request,
-        template_name="profiles/pages/profile-detail.html",
+        template_name="profiles/pages/profile_detail.html",
         context=context,
     )
