@@ -16,10 +16,15 @@
   </head>
   <body>
     {% include "core/components/navbar/navbar.html" %}
-    {% block base_content %}
-      {% comment %} Base content block {% endcomment %}
-    {% endblock base_content %}
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.5.2/flowbite.min.js"></script>
+    <div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
+      {% block base_content %}
+        {% comment %} Base content block {% endcomment %}
+      {% endblock base_content %}
+    </div>
+
+    {% include "core/components/footer/footer.html" %}
+
+    {% include "head/body_scripts.html" %}
   </body>
 </html>
