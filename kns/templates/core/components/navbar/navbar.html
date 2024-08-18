@@ -38,10 +38,10 @@
               <div id="usefulLinksDropdown" class="z-10 hidden font-normal bg-white divide-y divide-gray-100 rounded-lg shadow w-[90%] sm:w-44 dark:bg-gray-700 dark:divide-gray-600">
                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-400" aria-labelledby="dropdownLargeButton">
                   <li>
-                    <a href="/faqs" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">FAQs</a>
+                    <a href="{% url "core:faqs" %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">FAQs</a>
                   </li>
                   <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Submit Ticket</a>
+                    <a href="{% url "core:submit_ticket" %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Submit Ticket</a>
                   </li>
                   <li>
                     <a href="https://docs.google.com/document/d/15TzIigYjEXI8Bbg4R1LbIk-QhdOjFKAMcL6SvMa3MTU/edit?usp=sharing" target="__blank" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Terms & Conditions</a>

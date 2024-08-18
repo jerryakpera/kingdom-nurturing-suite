@@ -48,3 +48,15 @@ class TestViews(TestCase):
 
         # Check if the FAQs are being passed to the context
         self.assertIn("faqs", response.context)
+
+    def test_submit_ticket_response(self):
+        """
+        An user gets a valid response.
+        """
+        response = self.client.get(reverse("core:submit_ticket"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "core/pages/submit_ticket.html",
+        )

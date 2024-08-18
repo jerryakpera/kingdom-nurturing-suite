@@ -79,3 +79,26 @@ def faqs_view(request):
         template_name="core/pages/faqs.html",
         context=context,
     )
+
+
+def submit_ticket_view(request):
+    """
+    Render the submit ticket page of the core application.
+
+    Parameters
+    ----------
+    request : django.http.HttpRequest
+        The HTTP request object.
+
+    Returns
+    -------
+    django.http.HttpResponse
+        The rendered HTML response for the submit ticket page.
+    """
+    context = {}
+
+    return render(
+        request=request,
+        template_name="core/pages/submit_ticket.html",
+        context=context,
+    )
