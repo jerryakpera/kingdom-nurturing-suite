@@ -15,16 +15,18 @@
     {% include "head/css.html" %}
   </head>
   <body>
-    {% include "core/components/navbar/navbar.html" %}
+    <main class="flex flex-col min-h-screen">
+      {% include "core/components/navbar/navbar.html" %}
 
-    <div>
-      {% block base_content %}
-        {% comment %} Base content block {% endcomment %}
-      {% endblock base_content %}
-    </div>
+      <div class="flex-grow">
+        {% block base_content %}
+          {% comment %} Base content block {% endcomment %}
+        {% endblock base_content %}
+      </div>
 
-    {% include "core/components/footer/footer.html" %}
+      {% include "core/components/footer/footer.html" %}
 
-    {% include "head/body_scripts.html" %}
+      {% include "head/body_scripts.html" %}
+    </main>
   </body>
 </html>

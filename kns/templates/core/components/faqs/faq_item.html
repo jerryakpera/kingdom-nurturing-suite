@@ -1,0 +1,38 @@
+<h2 id="accordion-collapse-heading-{{ forloop.counter }}">
+  <button type="button" class="flex items-center justify-between w-full p-5 font-medium rtl:text-right text-gray-500 border {% if forloop.counter == faqs.count %}border-b-1{% endif %} border-gray-200 {% if forloop.counter == 1 %}rounded-t-xl{% endif %} focus:ring-4 focus:ring-gray-200 gap-3" data-accordion-target="#accordion-collapse-body-{{ forloop.counter }}" aria-expanded="false" aria-controls="accordion-collapse-body-{{ forloop.counter }}">
+    <span>{{ faq.question }}</span>
+    <iconify-icon icon="formkit:caretdown" class="text-xs caret-down hidden"></iconify-icon>
+    <iconify-icon icon="formkit:caretup" class="text-xs caret-up"></iconify-icon>
+  </button>
+</h2>
+<div id="accordion-collapse-body-{{ forloop.counter }}" class="hidden" aria-labelledby="accordion-collapse-heading-{{ forloop.counter }}">
+  <div class="p-5 border {% if forloop.counter == faqs.count %}border-b-1 {% else %} border-b-0 {% endif %} border-gray-200">
+    <p class="mb-2 text-gray-500">{{ faq.answer }}</p>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const accordions = document.querySelectorAll('[data-accordion-target]');
+
+    accordions.forEach((accordion) => {
+      accordion.addEventListener('click', function () {
+        const target = document.querySelector(accordion.getAttribute('data-accordion-target'));
+        const isOpen = target.classList.toggle('hidden');
+
+        // Toggle the caret icons
+        const caretDown = accordion.querySelector('.caret-down');
+        const caretUp = accordion.querySelector('.caret-up');
+
+        if (isOpen) {
+          caretDown.classList.remove('hidden');
+          caretUp.classList.add('hidden');
+        } else {
+          caretDown.classList.add('hidden');
+          caretUp.classList.remove('hidden');
+        }
+      });
+    });
+  });
+
+</script>
