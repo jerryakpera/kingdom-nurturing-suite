@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+  KNS | Contact Us
+{% endblock title %}
+
+{% block base_content %}
+  <section class="container-default py-16 md:py-32">
+    <div class="flex-col justify-start lg:items-start items-center gap-4 flex">
+      <h6 class="text-gray-400 text-base font-normal leading-relaxed">Get in Touch</h6>
+      <div class="w-full flex-col justify-start lg:items-start items-center gap-3 flex">
+        <h2 class="text-black text-4xl font-bold font-manrope leading-normal lg:text-start text-center">
+          Contact Us
+        </h2>
+        <p class="text-gray-800 font-semibold text-base leading-relaxed lg:text-start text-center">
+          If you have any questions, feedback, or need assistance, please feel free to reach out to us. We're here to help you with your journey in spiritual growth and leadership development through the Kingdom Nurturing Suite (KNS).
+        </p>
+      </div>
+    </div>
+
+    <form action="#" method="post" class="space-y-8">
+      {% csrf_token %}
+      <div>
+        <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Your Email</label>
+        <input type="email" id="email" name="email" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5" placeholder="you@example.com" required>
+      </div>
+      <div>
+        <label for="subject" class="block mb-2 text-sm font-medium text-gray-900">Subject</label>
+        <input type="text" id="subject" name="subject" class="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500" placeholder="How can we assist you?" required>
+      </div>
+      <div>
+        <label for="message" class="block mb-2 text-sm font-medium text-gray-900">Your Message</label>
+        <textarea id="message" name="message" rows="6" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500" placeholder="Your message here..."></textarea>
+      </div>
+
+      <button type="submit" class="text-white bg-knsSecondary-700 hover:bg-knsSecondary-800 focus:ring-4 focus:ring-knsSecondary-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none">Submit</button>
+    </form>
+  </section>
+{% endblock base_content %}

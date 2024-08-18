@@ -60,3 +60,15 @@ class TestViews(TestCase):
             response,
             "core/pages/submit_ticket.html",
         )
+
+    def test_contact_response(self):
+        """
+        An user gets a valid response.
+        """
+        response = self.client.get(reverse("core:contact"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "core/pages/contact.html",
+        )

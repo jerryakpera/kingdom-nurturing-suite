@@ -25,4 +25,9 @@ urlpatterns = [
         views.submit_ticket_view,
         name="submit_ticket",
     ),
+    path(
+        "contact",
+        views.contact_view,
+        name="contact",
+    ),
 ]

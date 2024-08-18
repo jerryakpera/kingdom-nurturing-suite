@@ -102,3 +102,26 @@ def submit_ticket_view(request):
         template_name="core/pages/submit_ticket.html",
         context=context,
     )
+
+
+def contact_view(request):
+    """
+    Render the contact page of the core application.
+
+    Parameters
+    ----------
+    request : django.http.HttpRequest
+        The HTTP request object.
+
+    Returns
+    -------
+    django.http.HttpResponse
+        The rendered HTML response for the contact page.
+    """
+    context = {}
+
+    return render(
+        request=request,
+        template_name="core/pages/contact.html",
+        context=context,
+    )
