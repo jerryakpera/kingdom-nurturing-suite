@@ -6,7 +6,7 @@ from django.urls import include, path
 from kns.core.views import index
 
 urlpatterns = [
-    path("", view=index, name="index"),
+    path("", include("kns.core.urls")),
     path("admin/", include("admin_honeypot.urls")),
     path("control-panel/", admin.site.urls),
     path("accounts/", include("kns.accounts.urls")),

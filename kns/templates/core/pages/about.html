@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+  KNS | About
+{% endblock title %}
+
+{% block base_content %}
+  <section class="container-default py-16 md:py-32">
+    <div class="mx-auto">
+      <div class="w-full justify-start items-center xl:gap-12 gap-10 grid lg:grid-cols-2 grid-cols-1">
+        <div class="w-full flex-col justify-center lg:items-start items-center gap-10 inline-flex">
+          <div class="w-full flex-col justify-center items-start gap-8 flex">
+            <div class="flex-col justify-start lg:items-start items-center gap-4 flex">
+              <h6 class="text-gray-400 text-base font-normal leading-relaxed">About Us</h6>
+              <div class="w-full flex-col justify-start lg:items-start items-center gap-3 flex">
+                <h2
+                  class="text-black text-4xl font-bold font-manrope leading-normal lg:text-start text-center">
+                  Kingdom Nurturing Suite
+                </h2>
+                <p
+                  class="text-gray-800 font-semibold text-base leading-relaxed lg:text-start text-center">
+                  The Kingdom Nurturing Suite (KNS) is a comprehensive platform designed to empower individuals, groups, and communities in their spiritual growth and leadership development. Rooted in biblical principles, KNS provides tools and resources to guide users in nurturing their faith and fostering meaningful connections within the Body of Christ.
+                </p>
+              </div>
+            </div>
+            <div class="w-full flex-col justify-center items-start gap-6 flex">
+              <div class="w-full justify-start items-center gap-8 grid md:grid-cols-2 grid-cols-1">
+                <div
+                  class="w-full h-full p-3.5 rounded-xl border border-gray-200 hover:border-gray-400 transition-all duration-700 ease-in-out flex-col justify-start items-start gap-2.5 inline-flex">
+                  <h4 class="text-gray-900 text-2xl font-bold font-manrope leading-9">33+ Members</h4>
+                  <p class="text-gray-500 text-base font-normal leading-relaxed">Influencing Digital
+                    Landscapes Together</p>
+                </div>
+                <div
+                  class="w-full h-full p-3.5 rounded-xl border border-gray-200 hover:border-gray-400 transition-all duration-700 ease-in-out flex-col justify-start items-start gap-2.5 inline-flex">
+                  <h4 class="text-gray-900 text-2xl font-bold font-manrope leading-9">4+ Mentorships
+                  </h4>
+                  <p class="text-gray-500 text-base font-normal leading-relaxed">Excellence Achieved
+                    Through Success</p>
+                </div>
+              </div>
+              <div class="w-full h-full justify-start items-center gap-8 grid md:grid-cols-2 grid-cols-1">
+                <div
+                  class="w-full p-3.5 rounded-xl border border-gray-200 hover:border-gray-400 transition-all duration-700 ease-in-out flex-col justify-start items-start gap-2.5 inline-flex">
+                  <h4 class="text-gray-900 text-2xl font-bold font-manrope leading-9">12+ Groups</h4>
+                  <p class="text-gray-500 text-base font-normal leading-relaxed">
+                    Our Dedication to Innovation Wins Understanding
+                  </p>
+                </div>
+                <div
+                  class="w-full h-full p-3.5 rounded-xl border border-gray-200 hover:border-gray-400 transition-all duration-700 ease-in-out flex-col justify-start items-start gap-2.5 inline-flex">
+                  <h4 class="text-gray-900 text-2xl font-bold font-manrope leading-9">
+                    18+ M. Trainings
+                  </h4>
+                  <p class="text-gray-500 text-base font-normal leading-relaxed">Mirrors our Focus on
+                    Client Satisfaction.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="w-full lg:justify-start justify-center items-start flex">
+          <div
+            class="sm:w-[564px] w-full sm:h-[646px] h-full sm:bg-gray-100 rounded-3xl sm:border border-gray-200 relative">
+            <img
+              alt="about Us image"
+              src="{% static "core/images/treking.jpg" %}"
+              class="sm:mt-5 sm:ml-5 w-full h-full rounded-3xl object-cover"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-knsLight-300 container-default py-16 md:py-32 overflow-hidden">
+    <div class="mx-auto">
+      <div class="flex flex-wrap -m-12">
+        <div class="p-12 md:w-1/2 flex flex-col items-start">
+          <span class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">MISSION</span>
+          <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">Nurturing Kingdom Leaders for Tomorrow</h2>
+          <p class="leading-relaxed mb-8">
+            Our mission is to nurture and develop kingdom-minded leaders who will impact the world for Christ. We believe in providing the resources, mentorship, and community support necessary for individuals to grow in their faith and leadership abilities.
+          </p>
+        </div>
+        <div class="p-12 md:w-1/2 flex flex-col items-start">
+          <span class="inline-block py-1 px-2 rounded bg-indigo-50 text-indigo-500 text-xs font-medium tracking-widest">VISION</span>
+          <h2 class="sm:text-3xl text-2xl title-font font-medium text-gray-900 mt-4 mb-4">Building a Future of Faith and Impact</h2>
+          <p class="leading-relaxed mb-8">
+            Our vision is to see a world where believers are fully equipped to live out their faith in every area of life, leading with integrity and influencing their communities for the Kingdom of God. We aspire to build a global network of spiritually mature and active leaders.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock base_content %}
