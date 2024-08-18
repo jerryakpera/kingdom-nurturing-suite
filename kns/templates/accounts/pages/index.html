@@ -1,41 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KNS Account Page</title>
-</head>
-<body>
-  <h1>Account page</h1>
+{% extends "base.html" %}
 
-  <div>
-    Email
-    <div>{{ user.email }}</div>
-  </div>
+{% block title %}
+  KNS | Account page
+{% endblock title %}
 
-  <hr>
+{% block base_content %}
+  <section class="container-default">
+    <h1>Account page</h1>
 
-  <div>
-    Verified
-    <div>{{ user.verified }}</div>
-  </div>
+    <div>
+      Email
+      <div>{{ user.email }}</div>
+    </div>
 
-  <hr>
+    <hr>
 
-  <div>
-    Visitor
-    <div>{{ user.is_visitor }}</div>
-  </div>
+    <div>
+      Verified
+      <div>{{ user.verified }}</div>
+    </div>
 
-  <hr>
+    <hr>
 
-  <div>
-    Agreed to terms
-    <div>{{ user.agreed_to_terms }}</div>
-  </div>
+    <div>
+      Visitor
+      <div>{{ user.is_visitor }}</div>
+    </div>
+
+    <hr>
+
+    <div>
+      Agreed to terms
+      <div>{{ user.agreed_to_terms }}</div>
+    </div>
 
 
-  <a href="{% url "accounts:logout" %}">Logout</a>
-  <a href="{% url "accounts:change_password" %}">Change password</a>
-</body>
-</html>
+    <a href="{% url "accounts:logout" %}">Logout</a>
+    <a href="{% url "accounts:change_password" %}">Change password</a>
+  </section>
+{% endblock base_content %}

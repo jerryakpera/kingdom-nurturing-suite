@@ -1,46 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-  </head>
-  <body>
-    <h2>Login</h2>
+{% extends "base.html" %}
 
-    <form method="POST" action="{% url "accounts:login" %}">
-      {% csrf_token %}
+{% block title %}
+  KNS | Sign into your account
+{% endblock title %}
 
-      <!-- Display non-field errors here -->
-      {% if login_form.non_field_errors %}
-        <div>
-          {% for error in login_form.non_field_errors %}
-            <p>{{ error }}</p>
-          {% endfor %}
+{% block base_content %}
+  <section class="container-default py-16 md:py-32">
+    <div>
+      <h2 class="mb-4 text-center text-2xl font-bold text-gray-800 md:mb-8 lg:text-3xl">Login</h2>
+
+      <form
+        method="POST"
+        autocomplete="off"
+        action="{% url "accounts:login" %}"
+        class="mx-auto w-full sm:w-2/3 lg:w-2/5 rounded-lg border"
+      >
+        {% csrf_token %}
+
+        <div class="flex flex-col gap-4 p-4 md:p-8">
+          <div>
+            <label for="email" class="mb-2 inline-block text-sm text-gray-800 sm:text-base">Email</label>
+            {{ login_form.email }}
+          </div>
+
+          <div>
+            <label for="password" class="mb-2 inline-block text-sm text-gray-800 sm:text-base">Password</label>
+            {{ login_form.password }}
+          </div>
+
+          <button type="submit" class="block rounded-lg bg-gray-800 px-8 py-3 text-center text-sm font-semibold text-white outline-none ring-gray-300 transition duration-100 hover:bg-gray-700 focus-visible:ring active:bg-gray-600 md:text-base">Log in</button>
         </div>
-      {% endif %}
-
-      <div>
-        <label for="{{ login_form.email.id_for_label }}">Email:</label>
-        {{ login_form.email }}
-        {% if login_form.email.errors %}
-          <div>{{ login_form.email.errors }}</div>
-        {% endif %}
-      </div>
-
-      <div>
-        <label for="{{ login_form.password.id_for_label }}">Password:</label>
-        {{ login_form.password }}
-        {% if login_form.password.errors %}
-          <div>{{ login_form.password.errors }}</div>
-        {% endif %}
-      </div>
-
-      <a href="{% url "reset_password" %}">Forgot password</a>
-
-      <div>
-        <button type="submit">Login</button>
-      </div>
-    </form>
-  </body>
-</html>
+      </form>
+    </div>
+  </section>
+{% endblock base_content %}
