@@ -16,7 +16,11 @@
   </head>
   <body>
     <main class="flex flex-col min-h-screen">
-      {% include "core/components/navbar/navbar.html" %}
+      {% if request.user.is_authenticated %}
+        {% include "core/components/navbar/secondary_navbar.html" %}
+      {% else %}
+        {% include "core/components/navbar/navbar.html" %}
+      {% endif %}
 
       <div class="flex-grow">
         {% block base_content %}
@@ -24,7 +28,9 @@
         {% endblock base_content %}
       </div>
 
-      {% include "core/components/footer/footer.html" %}
+      {% if not request.user.is_authenticated %}
+        {% include "core/components/footer/footer.html" %}
+      {% endif %}
 
       {% include "head/body_scripts.html" %}
     </main>
