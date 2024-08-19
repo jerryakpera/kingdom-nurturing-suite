@@ -11,6 +11,7 @@ urlpatterns = [
     path("control-panel/", admin.site.urls),
     path("accounts/", include("kns.accounts.urls")),
     path("profiles/", include("kns.profiles.urls")),
+    path("groups/", include("kns.groups.urls")),
     # Password reset urls
     path(
         "reset_password/",

@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
 
-import dj_database_url
+import cloudinary
+import cloudinary.api
+import cloudinary.uploader
 from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -27,6 +29,8 @@ THIRD_PARTY_APPS = [
     "admin_honeypot",
     "django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig",
     "kns.custom_user.apps.CustomUserConfig",
+    "cloudinary",
+    "django_countries",
 ]
 
 LOCAL_APPS = [
@@ -150,3 +154,12 @@ EMAIL_HOST = config("EMAIL_HOST")
 EMAIL_PORT = config("EMAIL_PORT")
 EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+
+# Cloudinary configuration
+
+
+cloudinary.config(
+    cloud_name=config("CLOUDINARY_CLOUD_NAME"),
+    api_key=config("CLOUDINARY_CLOUD_API_KEY"),
+    api_secret=config("CLOUDINARY_CLOUD_API_SECRET"),
+)

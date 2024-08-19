@@ -10,4 +10,9 @@ urlpatterns = [
         views.index,
         name="index",
     ),
+    path(
+        "<slug:group_slug>",
+        views.group_detail,
+        name="group_detail",
+    ),
 ]

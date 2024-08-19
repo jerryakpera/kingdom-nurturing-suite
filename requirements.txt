@@ -5,8 +5,14 @@
 #    pip-compile requirements.in
 #
 asgiref==3.8.1
-    # via django
+    # via
+    #   django
+    #   django-countries
 brotli==1.1.0
+    # via -r requirements.in
+certifi==2024.7.4
+    # via cloudinary
+cloudinary==1.41.0
     # via -r requirements.in
 dj-database-url==2.2.0
     # via -r requirements.in
@@ -15,28 +21,43 @@ django==5.1
     #   -r requirements.in
     #   dj-database-url
     #   django-admin-honeypot-updated-2021
+    #   django-js-asset
     #   django-use-email-as-username
 django-admin-honeypot-updated-2021==1.2.0
     # via -r requirements.in
+django-countries==7.6.1
+    # via -r requirements.in
 django-ipware==7.0.1
     # via django-admin-honeypot-updated-2021
+django-js-asset==2.2.0
+    # via django-mptt
+django-mptt==0.16.0
+    # via -r requirements.in
 django-use-email-as-username==1.4.0
     # via -r requirements.in
 gunicorn==23.0.0
     # via -r requirements.in
 packaging==24.1
     # via gunicorn
+pillow==10.4.0
+    # via -r requirements.in
 psycopg2-binary==2.9.9
     # via -r requirements.in
 python-decouple==3.8
     # via -r requirements.in
 python-ipware==3.0.0
     # via django-ipware
+six==1.16.0
+    # via cloudinary
 sqlparse==0.5.1
     # via django
 typing-extensions==4.12.2
-    # via dj-database-url
+    # via
+    #   dj-database-url
+    #   django-countries
 tzdata==2024.1
     # via django
+urllib3==2.2.2
+    # via cloudinary
 whitenoise==6.7.0
     # via -r requirements.in

@@ -4,8 +4,6 @@ from django.urls import reverse
 
 from kns.custom_user.models import User
 
-from ..models import Profile
-
 
 class TestViews(TestCase):
     def setUp(self):

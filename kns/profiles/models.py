@@ -4,9 +4,12 @@ Models for the profiles app.
 
 from uuid import uuid4
 
+from cloudinary import CloudinaryImage
+from cloudinary.models import CloudinaryField
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django_countries.fields import CountryField
 
 from kns.core.modelmixins import TimestampedModel
 from kns.custom_user.models import User
@@ -64,9 +67,75 @@ class Profile(TimestampedModel, models.Model):
         choices=GENDER_OPTIONS,
         null=True,
         blank=True,
+        default="male",
     )
 
     date_of_birth = models.DateField(
+        null=True,
+        blank=True,
+    )
+
+    chat_is_disabled = models.BooleanField(
+        default=False,
+    )
+    email_notificaitons = models.BooleanField(
+        default=True,
+    )
+
+    display_hints = models.BooleanField(
+        default=True,
+    )
+    bio_details_is_visible = models.BooleanField(
+        default=True,
+    )
+    contact_details_is_visible = models.BooleanField(
+        default=True,
+    )
+
+    place_of_birth_country = CountryField(
+        null=True,
+        blank=True,
+    )
+    place_of_birth_city = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+    )
+
+    phone = models.CharField(
+        max_length=15,
+        null=True,
+        blank=True,
+    )
+    phone_prefix = models.CharField(
+        max_length=5,
+        null=True,
+        blank=True,
+    )
+
+    is_movement_training_facilitator = models.BooleanField(
+        default=False,
+    )
+    reason_is_not_movement_training_facilitator = models.CharField(
+        max_length=150,
+        null=True,
+        blank=True,
+    )
+
+    is_skill_training_facilitator = models.BooleanField(
+        default=False,
+    )
+    reason_is_not_skill_training_facilitator = models.CharField(
+        max_length=150,
+        null=True,
+        blank=True,
+    )
+
+    is_mentor = models.BooleanField(
+        default=False,
+    )
+    reason_is_not_mentor = models.CharField(
+        max_length=500,
         null=True,
         blank=True,
     )
@@ -77,6 +146,29 @@ class Profile(TimestampedModel, models.Model):
     display_hints = models.BooleanField(default=True)
     bio_details_is_visible = models.BooleanField(default=True)
     contact_details_is_visible = models.BooleanField(default=True)
+
+    email_token = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+    )
+
+    image = CloudinaryField(
+        null=True,
+        blank=True,
+        folder="kns/images/profiles/",
+    )
+
+    def get_full_name(self):
+        """
+        Return the full name of the profile instance.
+
+        Returns
+        -------
+        str
+            Full name of the profile instance.
+        """
+        return f"{self.first_name} {self.last_name}"
 
 
 @receiver(post_save, sender=User)
