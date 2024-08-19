@@ -163,7 +163,16 @@ import cloudinary.uploader
 # isort: on
 
 cloudinary.config(
-    cloud_name=config("CLOUDINARY_CLOUD_NAME"),
-    api_key=config("CLOUDINARY_CLOUD_API_KEY"),
-    api_secret=config("CLOUDINARY_CLOUD_API_SECRET"),
+    cloud_name=config(
+        "CLOUDINARY_CLOUD_NAME",
+        default="default_cloud_name",
+    ),
+    api_key=config(
+        "CLOUDINARY_CLOUD_API_KEY",
+        default="default_api_key",
+    ),
+    api_secret=config(
+        "CLOUDINARY_CLOUD_API_SECRET",
+        default="default_api_secret",
+    ),
 )
