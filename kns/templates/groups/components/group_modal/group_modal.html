@@ -1,0 +1,128 @@
+{% load static %}
+
+<!-- Modal toggle -->
+<button class="block text-white bg-knsPrimary-700 hover:bg-knsPrimary-800 focus:ring-4 focus:outline-none focus:ring-knsPrimary-300 font-medium rounded-lg text-xs w-6 h-6 justify-center" type="button" id="open-group-modal-button-{{ group.id }}">
+  <iconify-icon icon="lets-icons:view-fill" class="mt-0.5"></iconify-icon>
+</button>
+
+<!-- Extra Large Modal -->
+<div id="extralarge-modal-{{ group.id }}" tabindex="-1" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+  <div class="relative w-full max-w-7xl h-full">
+    <!-- Modal content -->
+    <div class="relative rounded-lg shadow bg-knsDark h-full overflow-y-scroll">
+      <!-- Modal header -->
+      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+        <h3 class="text-xl font-medium text-white">
+          {{ group.name }}
+        </h3>
+
+        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" data-modal-hide="extralarge-modal-{{ group.id }}" id="close-group-modal-button-{{ group.id }}">
+          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+          </svg>
+          <span class="sr-only">Close modal</span>
+        </button>
+      </div>
+      <!-- Modal body -->
+      <div class="py-4 md:py-8">
+        <div class="mx-auto max-w-screen-xl px-4 md:px-8">
+          <!-- text - start -->
+          <div class="mb-8 md:mb-12">
+            <h2 class="text-center text-2xl font-bold text-white lg:text-3xl">
+              {{ group.name }}
+            </h2>
+            <p class="mx-auto max-w-screen-md text-center text-white md:text-lg">
+              {{ group.description }}
+            </p>
+          </div>
+          <!-- text - end -->
+
+
+          <div class="w-11/12 sm:w-9/12 md:w-8/12 lg:w-7/12 mx-auto grid grid-cols-2 gap-2 sm:grid-cols-4 lg:gap-4 justify-center">
+            <div>
+              {% with title="Descendant groups" %}
+                {% with value=group.get_descendant_count %}
+                  {% with icon="typcn:flow-children" %}
+                    {% include "groups/components/group_modal/group_stat_item.html" %}
+                  {% endwith %}
+                {% endwith %}
+              {% endwith %}
+            </div>
+
+            <div>
+              {% with title="Total members in group" %}
+                {% with value=group.members.count %}
+                  {% with icon="fluent:people-add-32-light" %}
+                    {% include "groups/components/group_modal/group_stat_item.html" %}
+                  {% endwith %}
+                {% endwith %}
+              {% endwith %}
+            </div>
+
+            <div>
+              {% with title="Male members" %}
+                {% with value=group.male_count %}
+                  {% with icon="fa-solid:male" %}
+                    {% include "groups/components/group_modal/group_stat_item.html" %}
+                  {% endwith %}
+                {% endwith %}
+              {% endwith %}
+            </div>
+
+            <div>
+              {% with title="Female members" %}
+                {% with value=group.female_count %}
+                  {% with icon="fa-solid:female" %}
+                    {% include "groups/components/group_modal/group_stat_item.html" %}
+                  {% endwith %}
+                {% endwith %}
+              {% endwith %}
+            </div>
+
+            <div>
+              {% with title="Leaders in group" %}
+                {% with value=group.leaders_count %}
+                  {% with icon="heroicons:user-group-16-solid" %}
+                    {% include "groups/components/group_modal/group_stat_item.html" %}
+                  {% endwith %}
+                {% endwith %}
+              {% endwith %}
+            </div>
+
+            <div>
+              {% with title="Members in group" %}
+                {% with value=group.members_count %}
+                  {% with icon="iconamoon:profile-light" %}
+                    {% include "groups/components/group_modal/group_stat_item.html" %}
+                  {% endwith %}
+                {% endwith %}
+              {% endwith %}
+            </div>
+
+            <div>
+              {% with title="E. Persons" %}
+                {% with value=group.external_persons_count %}
+                  {% with icon="fluent:person-ribbon-24-regular" %}
+                    {% include "groups/components/group_modal/group_stat_item.html" %}
+                  {% endwith %}
+                {% endwith %}
+              {% endwith %}
+            </div>
+
+            <div>
+              {% with title="Mentors" %}
+                {% with value=group.mentors_count %}
+                  {% with icon="hugeicons:teacher" %}
+                    {% include "groups/components/group_modal/group_stat_item.html" %}
+                  {% endwith %}
+                {% endwith %}
+              {% endwith %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="{% static "groups/js/group_modal.js" %}"></script>

@@ -5,7 +5,7 @@
       src="{{ group.image.url }}"
       class="lg:h-48 md:h-36 w-full object-cover object-center"
     >
-    <div class="p-6">
+    <div class="p-6 sm:p-4 md:p-6">
       <h6 class="tracking-widest text-xs title-font font-semibold text-gray-600 mb-1">
         {% if group.location_country %}
           <span class="mb-0 fw-semibold">
@@ -23,25 +23,31 @@
           </div>
         </div>
       </h6>
-      <h3 class="font-serif text-lg font-bold text-knsDark-900 mb-3">
+      <h3 class="font-serif text-lg font-bold text-knsDark-900 mb-2">
         {{ group.name }}
       </h3>
-      <p class="leading-relaxed mb-3">
+      <p class="leading-relaxed mb-3 text-sm">
         {{ group.description }}
       </p>
-      <div class="flex items-center flex-wrap ">
+      <div class="flex items-center flex-wrap justify-between">
         <a class="w-28 h-8 text-xs font-medium text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSebg-knsSecondary-300 dark:bg-knsSecondary-600 dark:hover:bg-knsSecondary-700 dark:focus:ring-knsSebg-knsSecondary-800 gap-x-2 flex items-center justify-center cursor-pointer" href="{{ group.get_absolute_url }}">
           View group
           <iconify-icon icon="ph:arrow-right-fill" class="text-lg"></iconify-icon>
         </a>
-        <span class="text-gray-800 font-bold mr-3 inline-flex items-center lg:ml-auto md:ml-0 ml-auto leading-none text-sm pr-3 py-1 border-r border-gray-300 gap-x-1">
-          <iconify-icon icon="iconamoon:profile-fill" class="text-xl"></iconify-icon>
-          {{ group.total_members_count }}
-        </span>
-        <span class="text-gray-800 inline-flex items-center leading-none text-sm gap-x-1 font-bold">
-          <iconify-icon icon="mdi:family-tree" class="text-xl"></iconify-icon>
-          {{ group.get_descendant_count }}
-        </span>
+
+        <div class="flex space-x-4 justify-between">
+          <span class="text-gray-800 font-bold inline-flex items-center leading-none text-sm border-gray-300 gap-x-1">
+            <iconify-icon icon="iconamoon:profile-fill" class="text-lg"></iconify-icon>
+            {{ group.total_members_count }}
+          </span>
+          <span class="text-gray-800 inline-flex items-center leading-none text-sm gap-x-1 font-bold">
+            <iconify-icon icon="mdi:family-tree" class="text-lg"></iconify-icon>
+            {{ group.get_descendant_count }}
+          </span>
+        </div>
+
+        <!-- Include the modal specific to this group -->
+        {% include "groups/components/group_modal/group_modal.html" %}
       </div>
     </div>
   </div>
