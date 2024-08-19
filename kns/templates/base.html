@@ -14,7 +14,7 @@
     {% comment %} Include css files {% endcomment %}
     {% include "head/css.html" %}
   </head>
-  <body>
+  <body class="bg-knsLight-300">
     <main class="flex flex-col min-h-screen">
       {% if request.user.is_authenticated %}
         {% include "core/components/navbar/secondary_navbar.html" %}

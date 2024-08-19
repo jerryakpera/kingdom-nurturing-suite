@@ -1,14 +1,14 @@
 {% load static %}
 
-<button type="button" class="text-sm bg-white w-8 h-8 flex items-center justify-center rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
+<button type="button" class="text-sm bg-knsSecondary w-8 h-8 flex items-center justify-center rounded-full md:me-0 focus:ring-4 focus:ring-knsSecondary-300 dark:focus:ring-knsSecondary-600" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
   <span class="sr-only">Open user menu</span>
-  <iconify-icon icon="iconamoon:profile-fill" class="text-2xl"></iconify-icon>
+  <iconify-icon icon="iconamoon:profile-fill" class="text-2xl text-white"></iconify-icon>
 </button>
 <!-- Dropdown menu -->
-<div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow dark:bg-gray-700 dark:divide-gray-600" id="user-dropdown">
+<div class="z-50 hidden my-4 text-base list-none divide-y divide-gray-400 rounded-lg shadow bg-knsSecondary-700" id="user-dropdown">
   <div class="px-4 py-3">
-    <span class="block text-sm text-gray-900 dark:text-white">Bonnie Green</span>
-    <span class="block text-sm  text-gray-500 truncate dark:text-gray-400">name@flowbite.com</span>
+    <span class="block text-sm text-white">Bonnie Green</span>
+    <span class="block text-sm  text-white truncate">name@flowbite.com</span>
   </div>
   <ul class="py-2" aria-labelledby="user-menu-button">
     <li>
