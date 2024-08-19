@@ -96,6 +96,14 @@ def register_group(request):
     """
     profile = request.user.profile
 
+    if profile.is_leading_group():
+        messages.warning(
+            request=request,
+            message="You are already leading a group and cannot register a new group.",
+        )
+
+        return redirect(profile.group_led.get_absolute_url())
+
     if request.method == "POST":
         group_form = GroupForm(
             request.POST,
@@ -108,9 +116,12 @@ def register_group(request):
             # Assign the leader
             group.leader = profile
 
-            # Handle the case where the profile is already a member of a group
+            # Handle the case where the profile is already a member
+            # of a group
             try:
-                group_member = GroupMember.objects.get(profile=profile)
+                group_member = GroupMember.objects.get(
+                    profile=profile,
+                )
                 group.parent = group_member.group
             except GroupMember.DoesNotExist:
                 pass

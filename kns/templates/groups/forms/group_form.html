@@ -1,0 +1,47 @@
+<div class="space-y-6">
+  <div>
+    {% with form=group_form %}
+      {% include 'core/components/forms/form_error.html' %}
+    {% endwith %}
+  </div>
+
+  <div>
+    {% with field=group_form.name %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+
+  <div>
+    {% with field=group_form.description %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+
+  <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-2">
+    <div class="w-full">
+      {% with field=group_form.location_country %}
+        {% include "core/components/forms/form_field.html" %}
+      {% endwith %}
+    </div>
+
+    <div class="w-full">
+      {% with field=group_form.location_city %}
+        {% include "core/components/forms/form_field.html" %}
+      {% endwith %}
+    </div>
+  </div>
+
+  <div class="flex flex-col items-center">
+    <div class="w-full">
+      {% with field=group_form.image %}
+        {% include "core/components/forms/form_field.html" %}
+      {% endwith %}
+    </div>
+
+    <div class="w-full">
+      {% if group and group.image %}
+        <img src="{{ group.get_image }}" alt="" class="rounded-md shadow-sm w-1/3">
+      {% endif %}
+    </div>
+  </div>
+</div>

@@ -14,7 +14,7 @@
     {% comment %} Include css files {% endcomment %}
     {% include "head/css.html" %}
   </head>
-  <body class="bg-knsLight-300">
+  <body class="bg-gray-50">
     <main class="flex flex-col min-h-screen">
       {% if request.user.is_authenticated %}
         {% include "core/components/navbar/secondary_navbar.html" %}
@@ -23,6 +23,8 @@
       {% endif %}
 
       <div class="flex-grow">
+        {% include "core/components/layout/messages_alert.html" %}
+
         {% block base_content %}
           {% comment %} Base content block {% endcomment %}
         {% endblock base_content %}

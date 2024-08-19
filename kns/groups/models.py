@@ -5,7 +5,6 @@ Models for the `groups` app.
 from collections import Counter
 from uuid import uuid4
 
-from cloudinary import CloudinaryImage
 from cloudinary.models import CloudinaryField
 from django.db import models
 from django.urls import reverse

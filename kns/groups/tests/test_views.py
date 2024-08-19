@@ -4,7 +4,6 @@ from django.urls import reverse
 from kns.custom_user.models import User
 from kns.groups.forms import GroupForm
 from kns.groups.models import Group
-from kns.profiles.models import Profile
 
 
 class TestGroupViews(TestCase):
@@ -268,3 +267,26 @@ class TestRegisterGroupView(TestCase):
 
         # Check if the form has errors
         self.assertTrue(form.errors)
+
+    def test_register_group_user_already_leading_group(self):
+        """
+        A logged-in user who is already leading a group receives
+        a warning message and is redirected to the group's detail page.
+        """
+        # Set up a group led by the profile
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Existing Group",
+            slug="existing-group",
+            description="An existing group description",
+        )
+
+        # Add the profile as a leader
+        self.profile.group_led = self.group
+        self.profile.save()
+
+        # Attempt to access the group registration view
+        response = self.client.get(self.register_group_url)
+
+        # Check the redirection to the existing group's detail page
+        self.assertRedirects(response, self.group.get_absolute_url())

@@ -35,10 +35,9 @@ class GroupForm(forms.ModelForm):
                 "name": "group_name",
                 "autocomplete": "off",
                 "class": (
-                    "bg-gray-50 border border-gray-300 ",
-                    "text-gray-900 text-sm rounded-lg ",
-                    "focus:ring-primary-600 focus:border-primary-600 ",
-                    "block w-full p-2.5",
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
                 ),
             }
         ),
@@ -49,15 +48,14 @@ class GroupForm(forms.ModelForm):
         label="Description",
         widget=forms.Textarea(
             attrs={
-                "rows": 8,
+                "rows": 4,
                 "autocomplete": "off",
                 "id": "group_description",
                 "name": "group_description",
                 "class": (
-                    "bg-gray-50 border border-gray-300 ",
-                    "text-gray-900 text-sm rounded-lg ",
-                    "focus:ring-primary-600 focus:border-primary-600 ",
-                    "block w-full p-2.5",
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
                 ),
             }
         ),
@@ -72,10 +70,9 @@ class GroupForm(forms.ModelForm):
                 "id": "location_country",
                 "name": "location_country",
                 "class": (
-                    "bg-gray-50 border border-gray-300 ",
-                    "text-gray-900 text-sm rounded-lg ",
-                    "focus:ring-primary-600 focus:border-primary-600 ",
-                    "block w-full p-2.5",
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
                 ),
             }
         ),
@@ -90,10 +87,9 @@ class GroupForm(forms.ModelForm):
                 "id": "location_city",
                 "name": "location_city",
                 "class": (
-                    "bg-gray-50 border border-gray-300 ",
-                    "text-gray-900 text-sm rounded-lg ",
-                    "focus:ring-primary-600 focus:border-primary-600 ",
-                    "block w-full p-2.5",
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
                 ),
             }
         ),

@@ -4,7 +4,6 @@ Models for the profiles app.
 
 from uuid import uuid4
 
-from cloudinary import CloudinaryImage
 from cloudinary.models import CloudinaryField
 from django.db import models
 from django.db.models.signals import post_save
@@ -169,6 +168,23 @@ class Profile(TimestampedModel, models.Model):
             Full name of the profile instance.
         """
         return f"{self.first_name} {self.last_name}"
+
+    def is_leading_group(self):
+        """
+        Return if the profile instance is a leader of a group.
+
+        Returns
+        -------
+        bool
+            True/False if profile is leading group.
+        """
+        try:
+            if self.group_led:
+                return True
+        except AttributeError:
+            # Handle the case where self.group_led is not an attribute
+            return False
+        return False
 
 
 @receiver(post_save, sender=User)
