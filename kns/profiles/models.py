@@ -182,9 +182,7 @@ class Profile(TimestampedModel, models.Model):
             if self.group_led:
                 return True
         except AttributeError:
-            # Handle the case where self.group_led is not an attribute
             return False
-        return False
 
 
 @receiver(post_save, sender=User)
