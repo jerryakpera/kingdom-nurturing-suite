@@ -1,5 +1,13 @@
-{% for group in groups %}
-  <h1>
-    {{ group.name }}
-  </h1>
-{% endfor %}
+{% extends "base.html" %}
+
+{% block title %}
+  KNS | Groups
+{% endblock title %}
+
+{% block base_content %}
+  <div class="container-default py-4 md:py-8">
+    {% include "groups/components/group_header.html" %}
+
+    {% include "groups/components/groups_list/groups_list.html" %}
+  </div>
+{% endblock base_content %}
