@@ -11,7 +11,12 @@ urlpatterns = [
         name="index",
     ),
     path(
-        "<slug:group_slug>",
+        "new/",
+        views.register_group,
+        name="register_group",
+    ),
+    path(
+        "<slug:group_slug>/",
         views.group_detail,
         name="group_detail",
     ),

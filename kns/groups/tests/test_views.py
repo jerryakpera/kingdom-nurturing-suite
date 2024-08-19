@@ -1,9 +1,10 @@
-import pytest
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.custom_user.models import User
+from kns.groups.forms import GroupForm
 from kns.groups.models import Group
+from kns.profiles.models import Profile
 
 
 class TestGroupViews(TestCase):
@@ -108,3 +109,162 @@ class TestGroupViews(TestCase):
 
         # Check if the response status code is 404 Not Found
         self.assertEqual(response.status_code, 404)
+
+
+class TestRegisterGroupView(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Set up a user and profile for testing
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password123",
+        )
+        self.profile = self.user.profile
+
+        # Log the user in
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        # URL for the register group view
+        self.register_group_url = reverse("groups:register_group")
+
+    def test_register_group_get_response(self):
+        """
+        A logged-in user gets a valid response and sees the
+        group registration form.
+        """
+        response = self.client.get(self.register_group_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "groups/pages/register_group.html",
+        )
+        self.assertIsInstance(
+            response.context["group_form"],
+            GroupForm,
+        )
+
+    def test_register_group_post_valid_data(self):
+        """
+        A logged-in user can create a group with valid data.
+        """
+        data = {
+            "name": "Test Group",
+            "description": "This is a test group.",
+            "location_city": "Lagos",
+            "location_country": "NG",
+        }
+
+        response = self.client.post(
+            self.register_group_url,
+            data,
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Group.objects.count(), 1)
+
+        group = Group.objects.first()
+
+        self.assertEqual(group.name, "Test Group")
+        self.assertEqual(group.leader, self.profile)
+
+        url = reverse(
+            "groups:group_detail",
+            kwargs={
+                "group_slug": group.slug,
+            },
+        )
+
+        self.assertEqual(
+            response.url,
+            url,
+        )
+
+    def test_register_group_post_valid_data_parent_group(self):
+        """
+        A logged-in group member can create a group with valid data.
+        """
+        data = {
+            "name": "Test Group",
+            "description": "This is a test group.",
+            "location_city": "Lagos",
+            "location_country": "NG",
+        }
+
+        origin_user = User.objects.create_user(
+            email="origin@user.com",
+            password="password",
+        )
+        origin_group = Group.objects.create(
+            leader=origin_user.profile,
+            name="Origin group",
+            slug="origin-group",
+            description="A test group description",
+        )
+
+        origin_group.add_member(self.profile)
+
+        response = self.client.post(
+            self.register_group_url,
+            data,
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Group.objects.count(), 2)
+
+        group = Group.objects.last()
+
+        self.assertEqual(group.name, "Test Group")
+        self.assertEqual(group.leader, self.profile)
+
+        url = reverse(
+            "groups:group_detail",
+            kwargs={
+                "group_slug": group.slug,
+            },
+        )
+
+        self.assertEqual(
+            response.url,
+            url,
+        )
+
+    def test_register_group_post_invalid_data(self):
+        """
+        A logged-in user cannot create a group with invalid data.
+        """
+        data = {
+            "name": "",
+            "description": "This is a test group.",
+            "location_city": "Lagos",
+            "location_country": "NG",
+        }
+
+        response = self.client.post(
+            self.register_group_url,
+            data,
+        )
+
+        # Check response status and template used
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertTemplateUsed(
+            response,
+            "groups/pages/register_group.html",
+        )
+
+        # Access the form from the response context
+        form = response.context.get("group_form")
+
+        # Ensure form is not None and is an instance of GroupForm
+        self.assertIsNotNone(form)
+        self.assertIsInstance(form, GroupForm)
+
+        # Check if the form has errors
+        self.assertTrue(form.errors)
