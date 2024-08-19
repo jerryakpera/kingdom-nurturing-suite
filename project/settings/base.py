@@ -1,9 +1,6 @@
 import os
 from pathlib import Path
 
-import cloudinary
-import cloudinary.api
-import cloudinary.uploader
 from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -157,6 +154,13 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 
 # Cloudinary configuration
 
+# flake8: noqa
+# isort: off
+import cloudinary
+import cloudinary.api
+import cloudinary.uploader
+
+# isort: on
 
 cloudinary.config(
     cloud_name=config("CLOUDINARY_CLOUD_NAME"),
