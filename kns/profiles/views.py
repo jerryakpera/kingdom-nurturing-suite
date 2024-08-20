@@ -81,28 +81,3 @@ def profile_detail(request, profile_slug):
         template_name="profiles/pages/profile_detail.html",
         context=context,
     )
-
-
-@login_required
-def create_profile(request):
-    """
-    View to render page to create profile for user.
-
-    Parameters
-    ----------
-    request : HttpRequest
-        The request object used to generate the response.
-
-    Returns
-    -------
-    HttpResponse
-        The rendered template with a profile bio form.
-    """
-
-    context = {}
-
-    return render(
-        request=request,
-        template_name="profiles/pages/create_profile.html",
-        context=context,
-    )
