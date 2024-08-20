@@ -11,6 +11,11 @@ urlpatterns = [
         name="profile_detail",
     ),
     path(
+        "create-profile",
+        views.create_profile,
+        name="create_profile",
+    ),
+    path(
         "",
         views.index,
         name="index",

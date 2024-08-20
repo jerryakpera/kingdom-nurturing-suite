@@ -32,7 +32,10 @@ class AuthenticationViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         # Check if the correct template is used
-        self.assertTemplateUsed(response, "accounts/pages/index.html")
+        self.assertTemplateUsed(
+            response,
+            "accounts/pages/index.html",
+        )
 
         # Check if the context contains the correct data
         self.assertIn("user", response.context)
@@ -40,7 +43,8 @@ class AuthenticationViewsTests(TestCase):
 
     def test_login_view_get_authenticated(self):
         """
-        Test that authenticated users are redirected away from the login view.
+        Test that authenticated users are redirected away
+        from the login view.
         """
         response = self.client.get(reverse("accounts:login"))
         self.assertEqual(response.status_code, 302)
@@ -48,8 +52,8 @@ class AuthenticationViewsTests(TestCase):
 
     def test_login_view_post_failure_authenticated(self):
         """
-        Test that authenticated users are redirected away from the login view
-        even if they attempt a login request.
+        Test that authenticated users are redirected away from the
+        login view even if they attempt a login request.
         """
         response = self.client.post(
             reverse("accounts:login"),
@@ -63,13 +67,20 @@ class AuthenticationViewsTests(TestCase):
 
     def test_login_view_get_unauthenticated(self):
         """
-        Test that the login view renders the login form for unauthenticated users.
+        Test that the login view renders the login form for
+        unauthenticated users.
         """
         self.client.logout()  # Ensure the user is not authenticated
         response = self.client.get(reverse("accounts:login"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "accounts/pages/login.html")
-        self.assertIsInstance(response.context["login_form"], LoginForm)
+        self.assertTemplateUsed(
+            response,
+            "accounts/pages/login.html",
+        )
+        self.assertIsInstance(
+            response.context["login_form"],
+            LoginForm,
+        )
 
     def test_login_view_post_success_unauthenticated(self):
         """
@@ -84,7 +95,10 @@ class AuthenticationViewsTests(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse("accounts:index"))
+        self.assertRedirects(
+            response,
+            reverse("accounts:index"),
+        )
 
     def test_login_view_post_success(self):
         """

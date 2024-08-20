@@ -79,3 +79,19 @@ class TestViews(TestCase):
 
         # Check if the response status code is 404 Not Found
         self.assertEqual(response.status_code, 404)
+
+    def test_create_profile_view(self):
+        """
+        Test the create_profile view to ensure it renders correctly
+        and lists profiles.
+        """
+        response = self.client.get(reverse("profiles:create_profile"))
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/create_profile.html",
+        )
