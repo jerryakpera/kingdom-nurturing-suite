@@ -9,6 +9,7 @@ from django.urls import reverse
 
 from kns.groups.forms import GroupForm
 from kns.groups.models import Group, GroupMember
+from kns.profiles.decorators import profile_required
 
 
 @login_required
@@ -73,6 +74,7 @@ def group_detail(request, group_slug):
 
 
 @login_required
+@profile_required(redirect_url="/groups")
 def register_group(request):
     """
     View function to register a new group.

@@ -5,6 +5,7 @@ Views for the profiles app.
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 
+from .decorators import profile_required
 from .models import Profile
 
 
@@ -43,6 +44,7 @@ def index(request):
 
 
 @login_required
+@profile_required(redirect_url="/profiles/new/")
 def profile_detail(request, profile_slug):
     """
     View to render a page displaying details for a specific profile.
