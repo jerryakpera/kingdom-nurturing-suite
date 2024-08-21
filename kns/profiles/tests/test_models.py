@@ -69,3 +69,26 @@ def test_profile_role_exists(user):
         "leader",
         "external_person",
     ]
+
+
+def test_profile_get_role_display_str(user):
+    """
+    Test that the get_role_display_str method returns the correct
+    string representation for the profile's role.
+    """
+    profile = Profile.objects.get(user=user)
+
+    # Test when role is "member"
+    profile.role = "member"
+    profile.save()
+    assert profile.get_role_display_str() == "Member"
+
+    # Test when role is "leader"
+    profile.role = "leader"
+    profile.save()
+    assert profile.get_role_display_str() == "Leader"
+
+    # Test when role is "external_person"
+    profile.role = "external_person"
+    profile.save()
+    assert profile.get_role_display_str() == "External Person"

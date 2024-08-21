@@ -86,7 +86,11 @@ class AuthenticationViewsTests(TestCase):
         """
         Test that the login view handles successful login for unauthenticated users.
         """
-        self.client.logout()  # Ensure the user is not authenticated
+        self.client.logout()
+
+        self.user.profile.role = "leader"
+        self.user.profile.save()
+
         response = self.client.post(
             reverse("accounts:login"),
             data={
@@ -137,7 +141,8 @@ class AuthenticationViewsTests(TestCase):
         self.assertIsInstance(form, LoginForm)
         self.assertFalse(form.is_valid())
         self.assertIn(
-            "Incorrect email or password. Please try again.", form.errors["__all__"]
+            "Incorrect email or password. Please try again.",
+            form.errors["__all__"],
         )
 
     def test_logout_view(self):
@@ -202,4 +207,34 @@ class AuthenticationViewsTests(TestCase):
         self.assertIn(
             "You entered an incorrect password",
             form.errors["current_password"],
+        )
+
+    def test_login_view_post_permission_denied(self):
+        """
+        Test that the login view denies access to users who are not superusers
+        and do not have the 'leader' role.
+        """
+        self.client.logout()  # Ensure the user is logged out
+
+        # Create a user with a role other than 'leader'
+        self.user.profile.role = "member"
+        self.user.profile.save()
+
+        response = self.client.post(
+            reverse("accounts:login"),
+            data={
+                "email": self.user.email,
+                "password": "oldpassword",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context.get("login_form")
+
+        self.assertIsInstance(form, LoginForm)
+        self.assertFalse(form.is_valid())
+        self.assertIn(
+            "Access denied. You do not have the necessary permissions.",
+            form.errors["__all__"],
         )

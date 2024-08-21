@@ -11,6 +11,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
+from kns.custom_user.models import User
+from kns.profiles.models import Profile
+
 from .decorators import guest_required
 from .emails import send_password_change_email
 from .forms import ChangePasswordForm, LoginForm
@@ -68,14 +71,34 @@ def login_view(request):
         email = form.cleaned_data.get("email")
         password = form.cleaned_data.get("password")
 
-        user = authenticate(email=email, password=password)
+        # Authenticate the user first
+        user = authenticate(
+            email=email,
+            password=password,
+        )
 
         if user is not None:
-            login(request, user)
+            # Now that user is authenticated, check if they are a superuser or a leader
+            if not user.is_superuser and user.profile.role != "leader":
+                form.add_error(
+                    None,
+                    "Access denied. You do not have the necessary permissions.",
+                )
 
-            # Redirect to the URL where the user intended to go or the default index page
-            return redirect("accounts:index")
+                context = {
+                    "login_form": form,
+                }
 
+                return render(
+                    request=request,
+                    template_name="accounts/pages/login.html",
+                    context=context,
+                )
+            else:
+                # Log the user in
+                login(request, user)
+
+                return redirect("accounts:index")
         else:
             form.add_error(
                 None,

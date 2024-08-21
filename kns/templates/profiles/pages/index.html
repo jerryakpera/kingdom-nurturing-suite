@@ -5,13 +5,16 @@
 {% endblock %}
 
 {% block base_content %}
-  <h1>Profiles</h1>
+  <section class="container-default py-4 md:py-8">
+    <div class="border-b border-b-knsDark-300">
+      <h1 class="text-2xl font-semibold font-serif">
+        Profiles
+      </h1>
+      <p class="text-sm sm:text-md">
+        View all the people that are members of groups who are descended from your group.
+      </p>
+    </div>
 
-  {% for profile in profiles %}
-    <h4>
-      <a href="{% url "profiles:profile_detail" profile_slug=profile.slug %}">
-        {{ profile.first_name }} {{ profile.last_name }}
-      </a>
-    </h4>
-  {% endfor %}
+    {% include "profiles/components/profiles_list/profiles_list.html" %}
+  </section>
 {% endblock base_content %}

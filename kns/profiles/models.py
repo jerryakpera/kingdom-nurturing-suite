@@ -8,6 +8,7 @@ from cloudinary.models import CloudinaryField
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.urls import reverse
 from django_countries.fields import CountryField
 
 from kns.core.modelmixins import TimestampedModel
@@ -183,6 +184,36 @@ class Profile(TimestampedModel, models.Model):
                 return True
         except AttributeError:
             return False
+
+    def get_absolute_url(self):
+        """
+        Return the absolute URL to access a detail view of this profile.
+
+        Returns
+        -------
+        str
+            The absolute URL of the profile's detail view.
+        """
+        return reverse(
+            "profiles:profile_detail",
+            kwargs={
+                "profile_slug": self.slug,
+            },
+        )
+
+    def get_role_display_str(self):
+        """
+        Return the string display for this profile role.
+
+        Returns
+        -------
+        str
+            The str representation of the profiles role.
+        """
+        if self.role in ["leader", "member"]:
+            return self.role.title()
+
+        return "External Person"
 
 
 @receiver(post_save, sender=User)
