@@ -4,3 +4,4 @@ pre-commit
 pytest-cov==5.0.0
 pytest-django==4.8.0
 pytest-socket==0.7.0
+pytest-xdist==3.6.1
