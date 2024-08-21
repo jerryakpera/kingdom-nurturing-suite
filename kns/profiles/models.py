@@ -201,6 +201,54 @@ class Profile(TimestampedModel, models.Model):
             },
         )
 
+    def get_involvements_url(self):
+        """
+        Return the involvements URL to access a detail view of this profile.
+
+        Returns
+        -------
+        str
+            The involvements URL of the profile's detail view.
+        """
+        return reverse(
+            "profiles:profile_involvements",
+            kwargs={
+                "profile_slug": self.slug,
+            },
+        )
+
+    def get_trainings_url(self):
+        """
+        Return the trainings URL to access a detail view of this profile.
+
+        Returns
+        -------
+        str
+            The trainings URL of the profile's detail view.
+        """
+        return reverse(
+            "profiles:profile_trainings",
+            kwargs={
+                "profile_slug": self.slug,
+            },
+        )
+
+    def get_activities_url(self):
+        """
+        Return the activities URL to access a detail view of this profile.
+
+        Returns
+        -------
+        str
+            The activities URL of the profile's detail view.
+        """
+        return reverse(
+            "profiles:profile_activities",
+            kwargs={
+                "profile_slug": self.slug,
+            },
+        )
+
     def get_role_display_str(self):
         """
         Return the string display for this profile role.

@@ -1,0 +1,48 @@
+<div class="rounded-lg border py-4">
+  <div class="space-y-4">
+    <div class="flex justify-between px-4 items-end">
+      <div>
+        <h2 class="text-lg font-bold text-gray-800 lg:text-xl">
+          {{ profile.get_full_name }}
+        </h2>
+
+        <div class="text-sm text-gray-500">
+          {{ profile.get_role_display_str }}
+          {% if profile.group_led %}
+            ,
+            <a
+              title="Edit bio details"
+              href="{{ profile.group_led.get_absolute_url }}"
+              class="text-base font-semibold text-blue-600 hover:text-blue-700"
+            >
+              {{ profile.group_led.name }}
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <button type="button" class="text-white bg-knsSecondary-700 hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300 font-medium rounded-lg text-sm p-1.5 text-center inline-flex items-center">
+        <iconify-icon icon="material-symbols:edit" class="text-md"></iconify-icon>
+        <span class="sr-only">Edit profile</span>
+      </button>
+    </div>
+
+    <div class="mb-0.5 flex items-center gap-2">
+      {% if not profile.image %}
+        <img class="lg:h-48 md:h-36 w-full object-cover object-center" src="https://dummyimage.com/720x400" alt="blog">
+      {% else %}
+        <img
+          src="{{ profile.image.url }}"
+          alt="{{ profile.get_full_name }}"
+          class="h-48 lg:h-48 md:h-36 w-full object-cover object-center"
+        >
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="p-4 pb-0 space-y-4">
+    {% include "profiles/components/profile_icons/profile_icons.html" %}
+
+    <a href="#" class="block rounded-lg border bg-white px-4 py-2 text-center text-sm font-semibold text-gray-500 outline-none ring-indigo-300 transition duration-100 hover:bg-gray-100 focus-visible:ring active:bg-gray-200 md:px-8 md:py-3 md:text-base">Write a review</a>
+  </div>
+</div>

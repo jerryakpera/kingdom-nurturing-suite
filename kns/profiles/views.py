@@ -44,7 +44,6 @@ def index(request):
 
 
 @login_required
-@profile_required(redirect_url="/profiles/new/")
 def profile_detail(request, profile_slug):
     """
     View to render a page displaying details for a specific profile.
@@ -79,5 +78,122 @@ def profile_detail(request, profile_slug):
     return render(
         request=request,
         template_name="profiles/pages/profile_detail.html",
+        context=context,
+    )
+
+
+@login_required
+def profile_involvements(request, profile_slug):
+    """
+    View to render a page displaying involvements for a specific profile.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The request object used to generate the response.
+    profile_slug : str
+        The slug of the profile to retrieve.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template with the involvements of the specified
+        profile.
+
+    Raises
+    ------
+    Profile.DoesNotExist
+        If no Profile with the given slug exists.
+    """
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    context = {
+        "profile": profile,
+    }
+
+    return render(
+        request=request,
+        template_name="profiles/pages/profile_involvements.html",
+        context=context,
+    )
+
+
+@login_required
+def profile_trainings(request, profile_slug):
+    """
+    View to render a page displaying trainings for a specific profile.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The request object used to generate the response.
+    profile_slug : str
+        The slug of the profile to retrieve.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template with the trainings of the specified
+        profile.
+
+    Raises
+    ------
+    Profile.DoesNotExist
+        If no Profile with the given slug exists.
+    """
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    context = {
+        "profile": profile,
+    }
+
+    return render(
+        request=request,
+        template_name="profiles/pages/profile_trainings.html",
+        context=context,
+    )
+
+
+@login_required
+def profile_activities(request, profile_slug):
+    """
+    View to render a page displaying activities for a specific profile.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The request object used to generate the response.
+    profile_slug : str
+        The slug of the profile to retrieve.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template with the activities of the specified
+        profile.
+
+    Raises
+    ------
+    Profile.DoesNotExist
+        If no Profile with the given slug exists.
+    """
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    context = {
+        "profile": profile,
+    }
+
+    return render(
+        request=request,
+        template_name="profiles/pages/profile_activities.html",
         context=context,
     )

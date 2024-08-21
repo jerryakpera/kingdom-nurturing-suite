@@ -1,0 +1,111 @@
+<div class="w-full flex justify-around items-center border-b border-gray-300 pb-2">
+  <div
+    x-data="{ tooltip: false }"
+    x-on:mouseover="tooltip = true"
+    x-on:mouseleave="tooltip = false"
+  >
+    {% if profile.gender == 'female' %}
+      <iconify-icon icon="fa-solid:female" class="text-xl text-[#7B287D]"></iconify-icon>
+    {% else %}
+      <iconify-icon icon="fa-solid:male" class="text-xl text-[#347FC4]"></iconify-icon>
+    {% endif %}
+
+    <!-- Tooltip -->
+    <div
+      x-show="tooltip"
+      class="absolute bottom-full mb-2 w-max bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+    >
+      {{ profile.gender.title }}
+    </div>
+  </div>
+
+  <div
+    x-data="{ tooltip: false }"
+    x-on:mouseover="tooltip = true"
+    x-on:mouseleave="tooltip = false"
+  >
+    {% if profile.is_mentor %}
+      <iconify-icon
+        icon="hugeicons:mentor"
+        class="text-2xl text-[#3185FC]"
+      ></iconify-icon>
+    {% else %}
+      <iconify-icon
+        icon="hugeicons:mentor"
+        class="text-2xl text-[#E54B4B]"
+      ></iconify-icon>
+    {% endif %}
+
+    <!-- Tooltip -->
+    <div
+      x-show="tooltip"
+      class="absolute bottom-full mb-2 w-max bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+    >
+      {% if profile.is_mentor %}
+        Willing to mentor others
+      {% else %}
+        Not willing to mentor others
+      {% endif %}
+    </div>
+  </div>
+
+  <div
+    x-data="{ tooltip: false }"
+    x-on:mouseover="tooltip = true"
+    x-on:mouseleave="tooltip = false"
+  >
+    {% if profile.movement_training_facilitator %}
+      <iconify-icon
+        icon="icon-park-solid:circles-seven"
+        class="text-xl text-[#3185FC]"
+      ></iconify-icon>
+    {% else %}
+      <iconify-icon
+        icon="icon-park-solid:circles-seven"
+        class="text-xl text-[#E54B4B]"
+      ></iconify-icon>
+    {% endif %}
+
+    <!-- Tooltip -->
+    <div
+      x-show="tooltip"
+      class="absolute bottom-full mb-2 w-max bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+    >
+      {% if profile.movement_training_facilitator %}
+        Willing to facilitate movement trainings
+      {% else %}
+        Not willing to facilitate movement trainings
+      {% endif %}
+    </div>
+  </div>
+
+  <div
+    x-data="{ tooltip: false }"
+    x-on:mouseover="tooltip = true"
+    x-on:mouseleave="tooltip = false"
+  >
+    {% if profile.skill_training_facilitator %}
+      <iconify-icon
+        icon="healthicons:i-training-class"
+        class="text-2xl text-[#3185FC]"
+      ></iconify-icon>
+    {% else %}
+      <iconify-icon
+        icon="healthicons:i-training-class"
+        class="text-2xl text-[#E54B4B]"
+      ></iconify-icon>
+    {% endif %}
+
+    <!-- Tooltip -->
+    <div
+      x-show="tooltip"
+      class="absolute bottom-full mb-2 w-max bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+    >
+      {% if profile.skill_training_facilitator %}
+        Willing to facilitate skill trainings
+      {% else %}
+        Not willing to facilitate skill trainings
+      {% endif %}
+    </div>
+  </div>
+</div>
