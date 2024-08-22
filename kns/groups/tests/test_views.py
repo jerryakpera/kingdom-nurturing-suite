@@ -5,6 +5,8 @@ from kns.custom_user.models import User
 from kns.groups.forms import GroupForm
 from kns.groups.models import Group
 
+from . import test_constants
+
 
 class TestGroupViews(TestCase):
     def setUp(self):
@@ -21,7 +23,7 @@ class TestGroupViews(TestCase):
             leader=self.user.profile,
             name="Test Group",
             slug="test-group",
-            description="A test group description",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
         )
 
     def test_index_view_authenticated(self):
@@ -153,7 +155,7 @@ class TestRegisterGroupView(TestCase):
         """
         data = {
             "name": "Test Group",
-            "description": "This is a test group.",
+            "description": test_constants.VALID_GROUP_DESCRIPTION,
             "location_city": "Lagos",
             "location_country": "NG",
         }
@@ -189,7 +191,7 @@ class TestRegisterGroupView(TestCase):
         """
         data = {
             "name": "Test Group",
-            "description": "This is a test group.",
+            "description": test_constants.VALID_GROUP_DESCRIPTION,
             "location_city": "Lagos",
             "location_country": "NG",
         }
@@ -202,7 +204,7 @@ class TestRegisterGroupView(TestCase):
             leader=origin_user.profile,
             name="Origin group",
             slug="origin-group",
-            description="A test group description",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
         )
 
         origin_group.add_member(self.profile)
@@ -238,7 +240,7 @@ class TestRegisterGroupView(TestCase):
         """
         data = {
             "name": "",
-            "description": "This is a test group.",
+            "description": test_constants.VALID_GROUP_DESCRIPTION,
             "location_city": "Lagos",
             "location_country": "NG",
         }

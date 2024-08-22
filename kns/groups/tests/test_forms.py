@@ -1,6 +1,7 @@
 import pytest
 
 from ..forms import GroupForm
+from . import test_constants
 
 
 @pytest.fixture
@@ -10,8 +11,8 @@ def form_data():
     """
     return {
         "name": "Test Group",
-        "description": "This is a test group description.",
         "location_country": "US",
+        "description": test_constants.VALID_GROUP_DESCRIPTION,
         "location_city": "New York",
         "image": None,
     }

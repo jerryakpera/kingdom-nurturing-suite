@@ -4,8 +4,10 @@ Forms for `groups`.
 
 from cloudinary.forms import CloudinaryFileField
 from django import forms
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django_countries.fields import CountryField
 
+from . import constants
 from .models import Group
 
 
@@ -59,6 +61,16 @@ class GroupForm(forms.ModelForm):
                 ),
             }
         ),
+        validators=[
+            MinLengthValidator(
+                constants.GROUP_DESCRIPTION_MIN_LENGTH,
+                message="Description must be at least 10 characters long.",
+            ),
+            MaxLengthValidator(
+                constants.GROUP_DESCRIPTION_MAX_LENGTH,
+                message="Description cannot exceed 500 characters.",
+            ),
+        ],
     )
 
     location_country = CountryField().formfield(

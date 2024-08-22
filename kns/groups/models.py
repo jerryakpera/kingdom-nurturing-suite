@@ -6,12 +6,16 @@ from collections import Counter
 from uuid import uuid4
 
 from cloudinary.models import CloudinaryField
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.urls import reverse
 from mptt.models import MPTTModel, TreeForeignKey
 
 from kns.core.modelmixins import ModelWithLocation, TimestampedModel
 from kns.profiles.models import Profile
+
+from . import constants
 
 
 class Group(TimestampedModel, ModelWithLocation, MPTTModel):
@@ -53,7 +57,12 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         editable=False,
     )
 
-    description = models.TextField()
+    description = models.TextField(
+        validators=[
+            MinLengthValidator(constants.GROUP_DESCRIPTION_MIN_LENGTH),
+            MaxLengthValidator(constants.GROUP_DESCRIPTION_MAX_LENGTH),
+        ]
+    )
 
     leader = models.OneToOneField(
         Profile,

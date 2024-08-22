@@ -145,14 +145,6 @@ def register_group(request):
                     },
                 ),
             )
-        else:
-            messages.error(
-                request,
-                (
-                    "There was an error creating the group.",
-                    "Please check the form and try again.",
-                ),
-            )
     else:
         group_form = GroupForm()
 
