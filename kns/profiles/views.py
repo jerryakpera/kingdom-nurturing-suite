@@ -2,10 +2,11 @@
 Views for the profiles app.
 """
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 
-from .decorators import profile_required
+from .forms import ProfileSettingsForm
 from .models import Profile
 
 
@@ -195,5 +196,60 @@ def profile_activities(request, profile_slug):
     return render(
         request=request,
         template_name="profiles/pages/profile_activities.html",
+        context=context,
+    )
+
+
+@login_required
+def profile_settings(request, profile_slug):
+    """
+    View to render a page displaying settings for a specific profile.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The request object used to generate the response.
+    profile_slug : str
+        The slug of the profile to retrieve.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template with the settings of the specified
+        profile.
+
+    Raises
+    ------
+    Profile.DoesNotExist
+        If no Profile with the given slug exists.
+    """
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    profile_settings_form = ProfileSettingsForm(
+        request.POST or None,
+        instance=profile,
+    )
+
+    if request.method == "POST":
+        if profile_settings_form.is_valid():
+            profile_settings_form.save()
+
+            messages.success(
+                request,
+                f"{profile.get_full_name()} settings updated",
+            )
+
+            return redirect(profile)
+
+    context = {
+        "profile_settings_form": profile_settings_form,
+    }
+
+    return render(
+        request=request,
+        template_name="profiles/pages/profile_settings.html",
         context=context,
     )

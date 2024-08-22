@@ -4,6 +4,9 @@ Views for the core application.
 
 from django.shortcuts import render
 
+from kns.groups.models import Group
+from kns.profiles.models import Profile
+
 from .models import FAQ
 
 
@@ -44,7 +47,10 @@ def about_view(request):
     django.http.HttpResponse
         The rendered HTML response for the about page.
     """
-    context = {}
+    context = {
+        "groups_count": Group.objects.all().count(),
+        "members_count": Profile.objects.all().count(),
+    }
 
     return render(
         request=request,

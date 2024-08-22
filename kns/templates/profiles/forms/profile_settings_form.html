@@ -1,0 +1,14 @@
+<div class="space-y-4">
+  <div>
+    {% with form=profile_settings_form %}
+      {% include 'core/components/forms/form_error.html' %}
+    {% endwith %}
+  </div>
+
+  {% for field in profile_settings_form %}
+    <div>
+      {% include "core/components/forms/form_checkbox.html" %}
+    </div>
+  {% endfor %}
+  </div>
+</div>

@@ -92,3 +92,17 @@ def test_profile_get_role_display_str(user):
     profile.role = "external_person"
     profile.save()
     assert profile.get_role_display_str() == "External Person"
+
+
+def test_profile_str_method(user):
+    """
+    Test that the __str__ method returns the full name of the profile.
+    """
+    profile = Profile.objects.get(user=user)
+
+    profile.last_name = "Doe"
+    profile.first_name = "John"
+
+    profile.save()
+
+    assert str(profile) == "John Doe"

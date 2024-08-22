@@ -159,6 +159,17 @@ class Profile(TimestampedModel, models.Model):
         folder="kns/images/profiles/",
     )
 
+    def __str__(self):
+        """
+        Return the full name of the profile as string representation.
+
+        Returns
+        -------
+        str
+            The first and last name of the profile instance.
+        """
+        return f"{self.get_full_name()}"
+
     def get_full_name(self):
         """
         Return the full name of the profile instance.

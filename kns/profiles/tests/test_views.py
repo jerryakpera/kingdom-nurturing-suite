@@ -213,3 +213,65 @@ class TestViews(TestCase):
             response.status_code,
             404,
         )
+
+    def test_profile_settings_view(self):
+        """
+        Test the profile_settings view to ensure it renders and
+        updates the profile settings.
+        """
+        url = reverse(
+            "profiles:profile_settings",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        # Get the profile settings page
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/profile_settings.html",
+        )
+
+        # Ensure the form is present in the response
+        self.assertIn("profile_settings_form", response.context)
+
+        # Now test the POST request to update the profile settings
+        new_data = {
+            "bio_details_is_visible": False,
+            "contact_details_is_visible": False,
+            # Add other profile fields here if necessary
+        }
+
+        response = self.client.post(
+            url,
+            data=new_data,
+        )
+
+        # Refresh the profile from the database
+        self.profile.refresh_from_db()
+
+        self.assertEqual(
+            self.profile.bio_details_is_visible,
+            False,
+        )
+        self.assertEqual(
+            self.profile.contact_details_is_visible,
+            False,
+        )
+
+        # Check if the response redirects after saving
+        self.assertEqual(response.status_code, 302)
+
+        # Ensure the success message is in the messages
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            f"{self.profile.get_full_name()} settings updated",
+        )

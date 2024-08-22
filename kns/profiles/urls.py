@@ -6,6 +6,11 @@ app_name = "profiles"
 
 urlpatterns = [
     path(
+        "<slug:profile_slug>/settings",
+        views.profile_settings,
+        name="profile_settings",
+    ),
+    path(
         "<slug:profile_slug>/activities",
         views.profile_activities,
         name="profile_activities",
