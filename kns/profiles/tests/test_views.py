@@ -11,7 +11,10 @@ class TestViews(TestCase):
             email="testuser@example.com",
             password="oldpassword",
         )
-        User.objects.create_user(email="adminuser@example.com", password="oldpassword")
+        User.objects.create_user(
+            email="adminuser@example.com",
+            password="oldpassword",
+        )
 
         self.client.login(
             email="testuser@example.com",
@@ -72,7 +75,10 @@ class TestViews(TestCase):
         Test the profile_detail view with a non-existent profile slug.
         """
         url = reverse(
-            "profiles:profile_detail", kwargs={"profile_slug": "non-existent"}
+            "profiles:profile_detail",
+            kwargs={
+                "profile_slug": "non-existent",
+            },
         )
         response = self.client.get(url)
 
@@ -219,15 +225,9 @@ class TestViews(TestCase):
         Test the profile_settings view to ensure it renders and
         updates the profile settings.
         """
-        url = reverse(
-            "profiles:profile_settings",
-            kwargs={
-                "profile_slug": self.profile.slug,
-            },
-        )
 
         # Get the profile settings page
-        response = self.client.get(url)
+        response = self.client.get(self.profile.get_settings_url())
 
         # Check if the response status code is 200 OK
         self.assertEqual(response.status_code, 200)
@@ -249,7 +249,7 @@ class TestViews(TestCase):
         }
 
         response = self.client.post(
-            url,
+            self.profile.get_settings_url(),
             data=new_data,
         )
 

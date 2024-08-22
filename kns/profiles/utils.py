@@ -1,5 +1,5 @@
 """
-Utility functions for the `profiles` app.
+Util functions for the `profiles` app.
 """
 
 from django.urls import resolve
@@ -27,7 +27,7 @@ def get_profile_slug(request):
 
     if request.path.startswith("/profiles/"):
         match = resolve(request.path_info)
-        # Extract the slug from the request path
-        slug = match.kwargs.get("profile_slug")
+        # Extract the slug from the request path, default to an empty string if not found
+        slug = match.kwargs.get("profile_slug", "")
 
     return slug

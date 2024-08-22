@@ -260,6 +260,23 @@ class Profile(TimestampedModel, models.Model):
             },
         )
 
+    def get_settings_url(self):
+        """
+        Return the settings URL to access a detail view of this profile.
+
+        Returns
+        -------
+        str
+            The settings URL of the profile's detail view.
+        """
+
+        return reverse(
+            "profiles:profile_settings",
+            kwargs={
+                "profile_slug": self.slug,
+            },
+        )
+
     def get_role_display_str(self):
         """
         Return the string display for this profile role.

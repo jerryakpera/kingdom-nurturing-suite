@@ -43,6 +43,9 @@ urlpatterns = [
     ),
 ]
 
+handler404 = "kns.core.views.error_404"
+# handler500 = "core.suite.views.error_500"
+
 if settings.DEBUG:
     # If in production
     from django.conf.urls.static import static

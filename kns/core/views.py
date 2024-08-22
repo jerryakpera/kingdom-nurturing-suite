@@ -2,6 +2,7 @@
 Views for the core application.
 """
 
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 
 from kns.groups.models import Group
@@ -130,4 +131,37 @@ def contact_view(request):
         request=request,
         template_name="core/pages/contact.html",
         context=context,
+    )
+
+
+# def error_500(request, *args, **argv):
+#     return render(request, "500.html", status=500)
+
+
+def error_404(
+    request: HttpRequest,
+    exception: Exception,
+) -> HttpResponse:
+    """
+    Render the error page of the core application.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    exception : Exception
+        The exception that triggered the 404 error.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered HTML response for the error page.
+    """
+    context = {}
+
+    return render(
+        request,
+        "404.html",
+        context,
+        status=404,
     )

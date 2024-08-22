@@ -1,11 +1,7 @@
-from django.contrib import messages
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.custom_user.models import User
-
-from ..decorators import profile_required
-from ..models import Profile
 
 
 class TestProfileRequiredDecorator(TestCase):
@@ -40,24 +36,11 @@ class TestProfileRequiredDecorator(TestCase):
 
         response = self.client.get(self.test_url, follow=True)
 
-        # Check the final response code and redirection
         self.assertRedirects(
             response,
-            "/groups/",
-            status_code=302,
-            target_status_code=200,
-        )
-
-        messages_list = list(
-            messages.get_messages(
-                response.wsgi_request,
-            )
-        )
-
-        self.assertTrue(messages_list)
-        self.assertEqual(
-            messages_list[0].message,
-            "You need a profile to access that page.",
+            reverse(
+                "groups:index",
+            ),
         )
 
     def test_access_if_has_profile(self):

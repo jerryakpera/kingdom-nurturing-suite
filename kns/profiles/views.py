@@ -245,6 +245,7 @@ def profile_settings(request, profile_slug):
             return redirect(profile)
 
     context = {
+        "profile": profile,
         "profile_settings_form": profile_settings_form,
     }
 
