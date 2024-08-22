@@ -57,10 +57,17 @@ def profile_context(request):
     """
 
     profile = None
-    slug = request.resolver_match.kwargs.get("slug") if request.resolver_match else None
-    if slug:
+    profile_slug = (
+        request.resolver_match.kwargs.get("profile_slug")
+        if request.resolver_match
+        else None
+    )
+    if profile_slug:
         try:
-            profile = get_object_or_404(Profile, slug=slug)
+            profile = get_object_or_404(
+                Profile,
+                slug=profile_slug,
+            )
         except Http404:
             # Handle not found case if needed
             profile = None

@@ -1,0 +1,26 @@
+<div class="flex flex-wrap text-lg sm:text-sm border-b border-gray-300 gap-x-10 sm:gap-x-5 md:gap-x-8 pb-1 items-end" role="tablist">
+  <a href="{{ group.get_absolute_url }}" class="{% if request.path == group.get_absolute_url %}text-knsPrimary font-semibold{% endif %}">
+    <iconify-icon icon="ri:dashboard-fill" class="text-xl"></iconify-icon>
+    <span class="hidden sm:block">
+      Overview
+    </span>
+  </a>
+  <a href="{{ group.get_members_url }}" class="{% if request.path == group.get_members_url %}text-knsPrimary font-semibold{% endif %}">
+    <iconify-icon icon="la:users" class="text-xl"></iconify-icon>
+    <div class="hidden sm:block">
+      Members
+    </div>
+  </a>
+  <a href="{{ group.get_activities_url }}" class="{% if request.path == group.get_activities_url %}text-knsPrimary font-semibold{% endif %}">
+    <iconify-icon icon="uim:list-ul" class="text-xl"></iconify-icon>
+    <span class="hidden sm:block">
+      Activities
+    </span>
+  </a>
+  <a href="{{ group.get_subgroups_url }}" class="{% if request.path == group.get_subgroups_url %}text-knsPrimary font-semibold{% endif %}">
+    <iconify-icon icon="pajamas:subgroup" class="text-xl"></iconify-icon>
+    <span class="hidden sm:block">
+      Sub groups
+    </span>
+  </a>
+</div>

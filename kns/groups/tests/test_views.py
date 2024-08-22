@@ -61,16 +61,17 @@ class TestGroupViews(TestCase):
         # Ensure the profile is listed
         assert b"Test Group" in response.content
 
-    def test_group_detail_view(self):
+    def test_group_overview_view(self):
         """
-        Test the group_detail view for authenticated users to ensure it renders the specific group.
+        Test the group_overview view for authenticated users to ensure
+        it renders the specific group.
         """
         self.client.login(
             email="testuser@example.com",
             password="password123",
         )
         url = reverse(
-            "groups:group_detail",
+            "groups:group_overview",
             kwargs={
                 "group_slug": self.group.slug,
             },
@@ -83,25 +84,178 @@ class TestGroupViews(TestCase):
         # Check if the correct template is used
         self.assertTemplateUsed(
             response,
-            "groups/pages/group_detail.html",
+            "groups/pages/group_overview.html",
         )
 
-        # Ensure the group details are present
+        # Ensure the group overview are present
         self.assertIn(
             "Test Group",
             response.content.decode(),
         )
 
-    def test_group_detail_view_not_found(self):
+    def test_group_overview_view_not_found(self):
         """
-        Test the group_detail view with a non-existent group slug.
+        Test the group_overview view with a non-existent group slug.
         """
         self.client.login(
             email="testuser@example.com",
             password="password123",
         )
         url = reverse(
-            "groups:group_detail",
+            "groups:group_overview",
+            kwargs={
+                "group_slug": "non-existent-group",
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 404 Not Found
+        self.assertEqual(response.status_code, 404)
+
+    def test_group_members_view(self):
+        """
+        Test the group_members view for authenticated users to
+        ensure it renders the specific group.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+        url = reverse(
+            "groups:group_members",
+            kwargs={
+                "group_slug": self.group.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "groups/pages/group_members.html",
+        )
+
+        # Ensure the group members are present
+        self.assertIn(
+            "Test Group",
+            response.content.decode(),
+        )
+
+    def test_group_members_view_not_found(self):
+        """
+        Test the group_members view with a non-existent group slug.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+        url = reverse(
+            "groups:group_members",
+            kwargs={
+                "group_slug": "non-existent-group",
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 404 Not Found
+        self.assertEqual(response.status_code, 404)
+
+    def test_group_activities_view(self):
+        """
+        Test the group_activities view for authenticated users to
+        ensure it renders the specific group.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+        url = reverse(
+            "groups:group_activities",
+            kwargs={
+                "group_slug": self.group.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "groups/pages/group_activities.html",
+        )
+
+        # Ensure the group activities are present
+        self.assertIn(
+            "Test Group",
+            response.content.decode(),
+        )
+
+    def test_group_activities_view_not_found(self):
+        """
+        Test the group_activities view with a non-existent group slug.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+        url = reverse(
+            "groups:group_activities",
+            kwargs={
+                "group_slug": "non-existent-group",
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 404 Not Found
+        self.assertEqual(response.status_code, 404)
+
+    def test_group_subgroups_view(self):
+        """
+        Test the group_subgroups view for authenticated users to
+        ensure it renders the specific group.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+        url = reverse(
+            "groups:group_subgroups",
+            kwargs={
+                "group_slug": self.group.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "groups/pages/group_subgroups.html",
+        )
+
+        # Ensure the group subgroups are present
+        self.assertIn(
+            "Test Group",
+            response.content.decode(),
+        )
+
+    def test_group_subgroups_view_not_found(self):
+        """
+        Test the group_subgroups view with a non-existent group slug.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+        url = reverse(
+            "groups:group_subgroups",
             kwargs={
                 "group_slug": "non-existent-group",
             },
@@ -174,7 +328,7 @@ class TestRegisterGroupView(TestCase):
         self.assertEqual(group.leader, self.profile)
 
         url = reverse(
-            "groups:group_detail",
+            "groups:group_overview",
             kwargs={
                 "group_slug": group.slug,
             },
@@ -223,7 +377,7 @@ class TestRegisterGroupView(TestCase):
         self.assertEqual(group.leader, self.profile)
 
         url = reverse(
-            "groups:group_detail",
+            "groups:group_overview",
             kwargs={
                 "group_slug": group.slug,
             },

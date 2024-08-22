@@ -65,6 +65,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "kns.profiles.context_processors.user_profile_context",
                 "kns.profiles.context_processors.profile_context",
+                "kns.groups.context_processors.group_context",
             ],
         },
     },

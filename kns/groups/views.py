@@ -41,9 +41,9 @@ def index(request):
 
 
 @login_required
-def group_detail(request, group_slug):
+def group_overview(request, group_slug):
     """
-    View function to display the details of a specific group.
+    View function to display the overview of a specific group.
 
     Parameters
     ----------
@@ -55,7 +55,7 @@ def group_detail(request, group_slug):
     Returns
     -------
     HttpResponse:
-        The rendered template displaying the details of the group.
+        The rendered template displaying the overviews of the group.
     """
     group = get_object_or_404(
         Group,
@@ -68,7 +68,7 @@ def group_detail(request, group_slug):
 
     return render(
         request=request,
-        template_name="groups/pages/group_detail.html",
+        template_name="groups/pages/group_overview.html",
         context=context,
     )
 
@@ -93,7 +93,7 @@ def register_group(request):
         On GET: The rendered template displaying the form to create
         a group.
 
-        On POST: Redirect to the group's detail page or re-render
+        On POST: Redirect to the group's overview page or re-render
         the form with errors.
     """
     profile = request.user.profile
@@ -131,7 +131,7 @@ def register_group(request):
             # Save the group
             group.save()
 
-            # Redirect to the group detail page
+            # Redirect to the group overview page
             messages.success(
                 request,
                 "Group created successfully!",
@@ -139,7 +139,7 @@ def register_group(request):
 
             return redirect(
                 reverse(
-                    "groups:group_detail",
+                    "groups:group_overview",
                     kwargs={
                         "group_slug": group.slug,
                     },
@@ -155,5 +155,104 @@ def register_group(request):
     return render(
         request=request,
         template_name="groups/pages/register_group.html",
+        context=context,
+    )
+
+
+@login_required
+def group_members(request, group_slug):
+    """
+    View function to display the members of a specific group.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    group_slug : str
+        The slug of the group to display.
+
+    Returns
+    -------
+    HttpResponse:
+        The rendered template displaying the members of the group.
+    """
+    group = get_object_or_404(
+        Group,
+        slug=group_slug,
+    )
+
+    context = {
+        "group": group,
+    }
+
+    return render(
+        request=request,
+        template_name="groups/pages/group_members.html",
+        context=context,
+    )
+
+
+@login_required
+def group_activities(request, group_slug):
+    """
+    View function to display the activities of a specific group.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    group_slug : str
+        The slug of the group to display.
+
+    Returns
+    -------
+    HttpResponse:
+        The rendered template displaying the activities of the group.
+    """
+    group = get_object_or_404(
+        Group,
+        slug=group_slug,
+    )
+
+    context = {
+        "group": group,
+    }
+
+    return render(
+        request=request,
+        template_name="groups/pages/group_activities.html",
+        context=context,
+    )
+
+
+@login_required
+def group_subgroups(request, group_slug):
+    """
+    View function to display the subgroups of a specific group.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    group_slug : str
+        The slug of the group to display.
+
+    Returns
+    -------
+    HttpResponse:
+        The rendered template displaying the subgroups of the group.
+    """
+    group = get_object_or_404(
+        Group,
+        slug=group_slug,
+    )
+
+    context = {
+        "group": group,
+    }
+
+    return render(
+        request=request,
+        template_name="groups/pages/group_subgroups.html",
         context=context,
     )

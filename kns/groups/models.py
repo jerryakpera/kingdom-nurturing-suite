@@ -102,15 +102,63 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
 
     def get_absolute_url(self):
         """
-        Return the absolute URL to access a detail view of this group.
+        Return the absolute URL to access a overview view of this group.
 
         Returns
         -------
         str
-            The absolute URL of the group's detail view.
+            The absolute URL of the group's overview view.
         """
         return reverse(
-            "groups:group_detail",
+            "groups:group_overview",
+            kwargs={
+                "group_slug": self.slug,
+            },
+        )
+
+    def get_members_url(self):
+        """
+        Return the members URL to access the members view of this group.
+
+        Returns
+        -------
+        str
+            The members URL of the group.
+        """
+        return reverse(
+            "groups:group_members",
+            kwargs={
+                "group_slug": self.slug,
+            },
+        )
+
+    def get_activities_url(self):
+        """
+        Return the activities URL to access the activities view of this group.
+
+        Returns
+        -------
+        str
+            The activities URL of the group.
+        """
+        return reverse(
+            "groups:group_activities",
+            kwargs={
+                "group_slug": self.slug,
+            },
+        )
+
+    def get_subgroups_url(self):
+        """
+        Return the subgroups URL to access the subgroups view of this group.
+
+        Returns
+        -------
+        str
+            The subgroups URL of the group.
+        """
+        return reverse(
+            "groups:group_subgroups",
             kwargs={
                 "group_slug": self.slug,
             },

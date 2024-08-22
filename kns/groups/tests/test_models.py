@@ -277,7 +277,7 @@ class TestGroupMethods(TestCase):
 
     def test_get_absolute_url(self):
         expected_url = reverse(
-            "groups:group_detail",
+            "groups:group_overview",
             kwargs={
                 "group_slug": self.group.slug,
             },
@@ -285,6 +285,45 @@ class TestGroupMethods(TestCase):
 
         self.assertEqual(
             self.group.get_absolute_url(),
+            expected_url,
+        )
+
+    def test_get_activities_url(self):
+        expected_url = reverse(
+            "groups:group_activities",
+            kwargs={
+                "group_slug": self.group.slug,
+            },
+        )
+
+        self.assertEqual(
+            self.group.get_activities_url(),
+            expected_url,
+        )
+
+    def test_get_members_url(self):
+        expected_url = reverse(
+            "groups:group_members",
+            kwargs={
+                "group_slug": self.group.slug,
+            },
+        )
+
+        self.assertEqual(
+            self.group.get_members_url(),
+            expected_url,
+        )
+
+    def test_get_subgroups_url(self):
+        expected_url = reverse(
+            "groups:group_subgroups",
+            kwargs={
+                "group_slug": self.group.slug,
+            },
+        )
+
+        self.assertEqual(
+            self.group.get_subgroups_url(),
             expected_url,
         )
 

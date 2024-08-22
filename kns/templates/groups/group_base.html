@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block base_content %}
+  <section class="container-default py-4 sm:py-6">
+    <div class="grid gap-4 grid-cols-1 sm:grid-cols-5 lg:grid-cols-4">
+      <div class="col-span-1 sm:col-span-2 lg:col-span-1">
+        <h1 class="text-4xl">Group card goes here</h1>
+      </div>
+
+      <div class="col-span-1 sm:col-span-3 lg:col-span-3 space-y-4">
+        {% include "groups/layout/group_tabs.html" %}
+
+        <div>
+          {% block group_base_content %}{% endblock group_base_content %}
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock base_content %}
