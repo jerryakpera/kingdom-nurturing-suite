@@ -446,3 +446,202 @@ class TestRegisterGroupView(TestCase):
 
         # Check the redirection to the existing group's detail page
         self.assertRedirects(response, self.group.get_absolute_url())
+
+
+class TestEditGroupView(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Create a user and their profile
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="password123",
+        )
+
+        # Create a group led by the user
+        self.group = Group.objects.create(
+            leader=self.user.profile,
+            name="Test Group",
+            slug="test-group",
+            location_city="Lagos",
+            location_country="NG",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        # Create another group led by the other user
+        self.other_group = Group.objects.create(
+            leader=self.other_user.profile,
+            name="Other Group",
+            slug="other-group",
+            location_city="Lagos",
+            location_country="NG",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+    def test_edit_group_view_authenticated(self):
+        """
+        Test the edit_group view for an authenticated user who is the group leader.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+        url = reverse(
+            "groups:edit_group",
+            kwargs={
+                "group_slug": self.group.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "groups/pages/edit_group.html",
+        )
+
+        # Ensure the form is present
+        self.assertIsInstance(
+            response.context["group_form"],
+            GroupForm,
+        )
+
+    def test_edit_group_view_non_leader(self):
+        """
+        Test that a user who is not the leader of the group cannot edit the group.
+        """
+        self.client.login(
+            email="otheruser@example.com",
+            password="password123",
+        )
+        url = reverse(
+            "groups:edit_group",
+            kwargs={"group_slug": self.group.slug},
+        )
+        response = self.client.get(url)
+
+        # Check if the response redirects to the group's overview page
+        self.assertRedirects(
+            response,
+            reverse(
+                "groups:group_overview",
+                kwargs={
+                    "group_slug": self.group.slug,
+                },
+            ),
+        )
+
+        # Ensure a warning message is displayed
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "You do not have permission to edit this group.",
+        )
+
+    def test_edit_group_view_unauthenticated(self):
+        """
+        Test that an unauthenticated user is redirected to the login page.
+        """
+        url = reverse(
+            "groups:edit_group",
+            kwargs={"group_slug": self.group.slug},
+        )
+        response = self.client.get(url)
+
+        # Check if the response redirects to the login page
+        self.assertRedirects(
+            response,
+            f"/accounts/login/?next={url}",
+        )
+
+    def test_edit_group_post_success(self):
+        """
+        Test successfully editing a group by the group leader.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        url = reverse(
+            "groups:edit_group",
+            kwargs={
+                "group_slug": self.group.slug,
+            },
+        )
+
+        data = {
+            "slug": self.group.slug,
+            "name": "Updated Group Name",
+            "location_city": "Lagos",
+            "location_country": "NG",
+            "description": test_constants.VALID_GROUP_DESCRIPTION,
+        }
+
+        response = self.client.post(url, data)
+
+        # Refresh the group from the database to check for updates
+        self.group.refresh_from_db()
+
+        # Assert the group's name and description have been updated
+        self.assertEqual(
+            self.group.name,
+            "Updated Group Name",
+        )
+
+        # Check if the response redirects to the group's overview page
+        self.assertRedirects(
+            response,
+            reverse(
+                "groups:group_overview",
+                kwargs={
+                    "group_slug": self.group.slug,
+                },
+            ),
+        )
+
+        # Ensure a success message is displayed
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "Group updated successfully!",
+        )
+
+    def test_edit_group_post_invalid(self):
+        """
+        Test submitting invalid data when editing a group.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+        url = reverse(
+            "groups:edit_group",
+            kwargs={"group_slug": self.group.slug},
+        )
+        data = {
+            "name": "",  # Invalid data: empty name
+            "description": "An updated description for the group.",
+            "slug": self.group.slug,
+        }
+        response = self.client.post(url, data)
+
+        # Check if the response status code is 200 OK (re-renders the form)
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the form is present with errors
+        self.assertIsInstance(
+            response.context["group_form"],
+            GroupForm,
+        )
+        self.assertTrue(response.context["group_form"].errors)

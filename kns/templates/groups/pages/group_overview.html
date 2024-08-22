@@ -7,6 +7,7 @@
 {% block group_base_content %}
   <section class="container-default py-4 md:py-8">
     <div class="mb-8 md:mb-12">
+      <a href="{% url "groups:edit_group" group_slug=group.slug %}">Edit group</a>
       <h1 class="text-center text-2xl font-bold text-black lg:text-3xl font-serif">
         {{ group.name }}
       </h1>

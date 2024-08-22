@@ -9,7 +9,6 @@ from django.urls import reverse
 
 from kns.groups.forms import GroupForm
 from kns.groups.models import Group, GroupMember
-from kns.profiles.decorators import profile_required
 
 
 @login_required
@@ -74,7 +73,6 @@ def group_overview(request, group_slug):
 
 
 @login_required
-@profile_required(redirect_url="/groups")
 def register_group(request):
     """
     View function to register a new group.
@@ -254,5 +252,80 @@ def group_subgroups(request, group_slug):
     return render(
         request=request,
         template_name="groups/pages/group_subgroups.html",
+        context=context,
+    )
+
+
+@login_required
+def edit_group(request, group_slug):
+    """
+    View function to edit an existing group.
+
+    Handles GET requests by displaying the group edit form pre-filled
+    with the group's current data and POST requests by validating and
+    saving the updated data.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    group_slug : str
+        The slug of the group to edit.
+
+    Returns
+    -------
+    HttpResponse:
+        On GET: The rendered template displaying the form to edit
+        the group.
+
+        On POST: Redirect to the group's overview page or re-render
+        the form with errors.
+    """
+    group = get_object_or_404(
+        Group,
+        slug=group_slug,
+    )
+
+    # Ensure the logged-in user is the group's leader
+    if request.user.profile != group.leader:
+        messages.warning(
+            request=request,
+            message="You do not have permission to edit this group.",
+        )
+        return redirect(
+            "groups:group_overview",
+            group_slug=group_slug,
+        )
+
+    if request.method == "POST":
+        group_form = GroupForm(
+            request.POST,
+            request.FILES,
+            instance=group,
+        )
+
+        if group_form.is_valid():
+            group_form.save()
+
+            messages.success(
+                request=request,
+                message="Group updated successfully!",
+            )
+
+            return redirect(
+                "groups:group_overview",
+                group_slug=group.slug,
+            )
+    else:
+        group_form = GroupForm(instance=group)
+
+    context = {
+        "group": group,
+        "group_form": group_form,
+    }
+
+    return render(
+        request=request,
+        template_name="groups/pages/edit_group.html",
         context=context,
     )
