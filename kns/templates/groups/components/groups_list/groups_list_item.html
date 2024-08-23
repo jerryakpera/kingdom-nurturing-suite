@@ -25,11 +25,15 @@
       </h6>
 
       <h3 class="font-serif text-lg font-bold text-knsDark-900 mb-2">
-        {{ group.name }}
+        <a href="{{ group.get_absolute_url }}">
+          {{ group.name }}
+        </a>
       </h3>
+
       <p class="leading-relaxed mb-3 text-sm">
         {{ group.description }}
       </p>
+
       <div class="flex items-center flex-wrap justify-between">
         <a class="w-28 h-8 text-xs font-medium text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSebg-knsSecondary-300 dark:bg-knsSecondary-600 dark:hover:bg-knsSecondary-700 dark:focus:ring-knsSebg-knsSecondary-800 gap-x-2 flex items-center justify-center cursor-pointer" href="{{ group.get_absolute_url }}">
           View group
