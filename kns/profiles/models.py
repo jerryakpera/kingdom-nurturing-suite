@@ -8,16 +8,20 @@ from cloudinary.models import CloudinaryField
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.urls import reverse
 from django_countries.fields import CountryField
 
-from kns.core.modelmixins import TimestampedModel
+from kns.core import modelmixins
 from kns.custom_user.models import User
 
-from .constants import GENDER_OPTIONS, PROFILE_ROLE_OPTIONS
+from . import constants
+from . import methods as model_methods
 
 
-class Profile(TimestampedModel, models.Model):
+class Profile(
+    modelmixins.TimestampedModel,
+    modelmixins.ModelWithLocation,
+    models.Model,
+):
     """
     Represents a user profile in the system.
     """
@@ -44,7 +48,7 @@ class Profile(TimestampedModel, models.Model):
 
     role = models.CharField(
         max_length=20,
-        choices=PROFILE_ROLE_OPTIONS,
+        choices=constants.PROFILE_ROLE_OPTIONS,
         default="member",
     )
 
@@ -64,7 +68,7 @@ class Profile(TimestampedModel, models.Model):
     )
     gender = models.CharField(
         max_length=6,
-        choices=GENDER_OPTIONS,
+        choices=constants.GENDER_OPTIONS,
         null=True,
         blank=True,
         default="male",
@@ -78,7 +82,7 @@ class Profile(TimestampedModel, models.Model):
     chat_is_disabled = models.BooleanField(
         default=False,
     )
-    email_notificaitons = models.BooleanField(
+    email_notifications = models.BooleanField(
         default=True,
     )
 
@@ -140,13 +144,6 @@ class Profile(TimestampedModel, models.Model):
         blank=True,
     )
 
-    chat_is_disabled = models.BooleanField(default=False)
-    email_notificaitons = models.BooleanField(default=True)
-
-    display_hints = models.BooleanField(default=True)
-    bio_details_is_visible = models.BooleanField(default=True)
-    contact_details_is_visible = models.BooleanField(default=True)
-
     email_token = models.CharField(
         max_length=250,
         null=True,
@@ -174,132 +171,162 @@ class Profile(TimestampedModel, models.Model):
         """
         Return the full name of the profile instance.
 
+        This method uses the `get_full_name` function from
+        `model_methods` to generate the full name.
+
         Returns
         -------
         str
-            Full name of the profile instance.
+            The full name of the profile instance.
         """
-        return f"{self.first_name} {self.last_name}"
+        return model_methods.get_full_name(self)
 
     def is_leading_group(self):
         """
-        Return if the profile instance is a leader of a group.
+        Check if the profile is leading a group.
+
+        This method uses the `is_leading_group` function from
+        `model_methods` to determine if the profile is leading any group.
 
         Returns
         -------
         bool
-            True/False if profile is leading group.
+            True if the profile is leading a group, False otherwise.
         """
-        try:
-            if self.group_led:
-                return True
-        except AttributeError:
-            return False
+        return model_methods.is_leading_group(self)
 
     def get_absolute_url(self):
         """
-        Return the absolute URL to access a detail view of this profile.
+        Get the absolute URL for the profile's detail view.
+
+        This method uses the `get_absolute_url` function from
+        `model_methods` to generate the URL for the profile's detail
+        view.
 
         Returns
         -------
         str
-            The absolute URL of the profile's detail view.
+            The absolute URL for the profile's detail view.
         """
-        return reverse(
-            "profiles:profile_detail",
-            kwargs={
-                "profile_slug": self.slug,
-            },
-        )
+        return model_methods.get_absolute_url(self)
 
     def get_involvements_url(self):
         """
-        Return the involvements URL to access a detail view of this profile.
+        Get the URL for the profile's involvements view.
+
+        This method uses the `get_involvements_url` function from
+        `model_methods` to generate the URL for the profile's
+        involvements view.
 
         Returns
         -------
         str
-            The involvements URL of the profile's detail view.
+            The URL for the profile's involvements view.
         """
-        return reverse(
-            "profiles:profile_involvements",
-            kwargs={
-                "profile_slug": self.slug,
-            },
-        )
+        return model_methods.get_involvements_url(self)
 
     def get_trainings_url(self):
         """
-        Return the trainings URL to access a detail view of this profile.
+        Get the URL for the profile's trainings view.
+
+        This method uses the `get_trainings_url` function from
+        `model_methods` to generate the URL for the profile's trainings
+        view.
 
         Returns
         -------
         str
-            The trainings URL of the profile's detail view.
+            The URL for the profile's trainings view.
         """
-        return reverse(
-            "profiles:profile_trainings",
-            kwargs={
-                "profile_slug": self.slug,
-            },
-        )
+        return model_methods.get_trainings_url(self)
 
     def get_activities_url(self):
         """
-        Return the activities URL to access a detail view of this profile.
+        Get the URL for the profile's activities view.
+
+        This method uses the `get_activities_url` function from
+        `model_methods` to generate the URL for the profile's activities
+        view.
 
         Returns
         -------
         str
-            The activities URL of the profile's detail view.
+            The URL for the profile's activities view.
         """
-        return reverse(
-            "profiles:profile_activities",
-            kwargs={
-                "profile_slug": self.slug,
-            },
-        )
+        return model_methods.get_activities_url(self)
 
     def get_settings_url(self):
         """
-        Return the settings URL to access a detail view of this profile.
+        Get the URL for the profile's settings view.
+
+        This method uses the `get_settings_url` function from
+        `model_methods` to generate the URL for the profile's settings
+        view.
 
         Returns
         -------
         str
-            The settings URL of the profile's detail view.
+            The URL for the profile's settings view.
         """
-
-        return reverse(
-            "profiles:profile_settings",
-            kwargs={
-                "profile_slug": self.slug,
-            },
-        )
+        return model_methods.get_settings_url(self)
 
     def get_role_display_str(self):
         """
-        Return the string display for this profile role.
+        Get the display string for the profile's role.
+
+        This method uses the `get_role_display_str` function from
+        `model_methods` to generate the display string for the profile's
+        role.
 
         Returns
         -------
         str
-            The str representation of the profiles role.
+            The display string for the profile's role.
         """
-        if self.role in ["leader", "member"]:
-            return self.role.title()
+        return model_methods.get_role_display_str(self)
 
-        return "External Person"
+    def is_eligible_to_register_group(self):
+        """
+        Determine if the profile is eligible to register a new group.
+
+        This method uses the `is_eligible_to_register_group` function
+        from `model_methods` to check if the profile meets all criteria
+        for registering a new group.
+
+        Returns
+        -------
+        bool
+            True if the profile is eligible to register a new group,
+            False otherwise.
+        """
+        return model_methods.is_eligible_to_register_group(self)
+
+    def is_profile_complete(self):
+        """
+        Check if the profile is fully completed.
+
+        This method uses the `is_profile_complete` function from
+        `model_methods` to determine if the profile is complete.
+
+        Returns
+        -------
+        bool
+            True if the profile is fully completed, False otherwise.
+        """
+        return model_methods.is_profile_complete(self)
 
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     """
-    Signal receiver that creates a Profile instance when a User instance is created.
+    Signal receiver that creates a Profile instance when a User instance
+    is created.
 
-    This function is triggered by the `post_save` signal from the `User` model.
-    It ensures that a corresponding `Profile` instance is created with the default
-    email if the user was just created (i.e., `created` is True).
+    This function is triggered by the `post_save` signal from the
+    `User` model.
+    It ensures that a corresponding `Profile` instance is created with
+    the default     email if the user was just created (i.e.,
+    `created` is True).
 
     Parameters
     ----------
@@ -312,7 +339,8 @@ def create_user_profile(sender, instance, created, **kwargs):
         (`True`) or an existing instance was updated (`False`).
     **kwargs
         Additional keyword arguments passed by the signal,
-        such as `update_fields` or `raw` (usually not used in this function).
+        such as `update_fields` or `raw` (usually not used in this
+        function).
     """
     if created:
         Profile.objects.create(

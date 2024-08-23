@@ -96,13 +96,18 @@ def register_group(request):
     """
     profile = request.user.profile
 
-    if profile.is_leading_group():
-        messages.warning(
-            request=request,
-            message="You are already leading a group and cannot register a new group.",
+    # Check if the profile is eligible to register a group
+    if not profile.is_eligible_to_register_group():
+        messages.error(
+            request,
+            (
+                "You are not eligible to register a group. "
+                "Please ensure your profile is complete and meets "
+                "all the necessary criteria."
+            ),
         )
 
-        return redirect(profile.group_led.get_absolute_url())
+        return redirect("groups:index")
 
     if request.method == "POST":
         group_form = GroupForm(

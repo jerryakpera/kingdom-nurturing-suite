@@ -291,6 +291,26 @@ class TestRegisterGroupView(TestCase):
         A logged-in user gets a valid response and sees the
         group registration form.
         """
+
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.role = "leader"
+        self.profile.gender = "male"
+        self.profile.date_of_birth = "1997-08-08"
+        self.profile.location_country = "NG"
+        self.profile.location_city = "NG"
+
+        self.user.verified = True
+        self.user.agreed_to_terms = True
+
+        self.user.save()
+        self.profile.save()
+
         response = self.client.get(self.register_group_url)
 
         self.assertEqual(response.status_code, 200)
@@ -313,6 +333,20 @@ class TestRegisterGroupView(TestCase):
             "location_city": "Lagos",
             "location_country": "NG",
         }
+
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.role = "leader"
+        self.profile.gender = "male"
+        self.profile.date_of_birth = "1997-08-08"
+        self.profile.location_country = "NG"
+        self.profile.location_city = "NG"
+
+        self.user.verified = True
+        self.user.agreed_to_terms = True
+
+        self.user.save()
+        self.profile.save()
 
         response = self.client.post(
             self.register_group_url,
@@ -354,12 +388,27 @@ class TestRegisterGroupView(TestCase):
             email="origin@user.com",
             password="password",
         )
+
         origin_group = Group.objects.create(
             leader=origin_user.profile,
             name="Origin group",
             slug="origin-group",
             description=test_constants.VALID_GROUP_DESCRIPTION,
         )
+
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.role = "leader"
+        self.profile.gender = "male"
+        self.profile.date_of_birth = "1997-08-08"
+        self.profile.location_country = "NG"
+        self.profile.location_city = "NG"
+
+        self.user.verified = True
+        self.user.agreed_to_terms = True
+
+        self.user.save()
+        self.profile.save()
 
         origin_group.add_member(self.profile)
 
@@ -399,6 +448,20 @@ class TestRegisterGroupView(TestCase):
             "location_country": "NG",
         }
 
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.role = "leader"
+        self.profile.gender = "male"
+        self.profile.date_of_birth = "1997-08-08"
+        self.profile.location_country = "NG"
+        self.profile.location_city = "NG"
+
+        self.user.verified = True
+        self.user.agreed_to_terms = True
+
+        self.user.save()
+        self.profile.save()
+
         response = self.client.post(
             self.register_group_url,
             data,
@@ -437,15 +500,26 @@ class TestRegisterGroupView(TestCase):
             description="An existing group description",
         )
 
-        # Add the profile as a leader
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.role = "leader"
+        self.profile.gender = "male"
+        self.profile.date_of_birth = "1997-08-08"
+        self.profile.location_country = "NG"
+        self.profile.location_city = "NG"
         self.profile.group_led = self.group
+
+        self.user.verified = True
+        self.user.agreed_to_terms = True
+
+        self.user.save()
         self.profile.save()
 
         # Attempt to access the group registration view
         response = self.client.get(self.register_group_url)
 
         # Check the redirection to the existing group's detail page
-        self.assertRedirects(response, self.group.get_absolute_url())
+        self.assertRedirects(response, reverse("groups:index"))
 
 
 class TestEditGroupView(TestCase):

@@ -1,6 +1,8 @@
 import pytest
 
 from kns.custom_user.models import User
+from kns.groups.models import Group
+from kns.groups.tests import test_constants
 from kns.profiles.models import Profile
 
 
@@ -106,3 +108,36 @@ def test_profile_str_method(user):
     profile.save()
 
     assert str(profile) == "John Doe"
+
+
+def test_profile_is_leading_group(user):
+    """
+    Test that the __str__ method returns the full name of the profile.
+    """
+    profile = Profile.objects.get(user=user)
+
+    profile.first_name = "John"
+    profile.last_name = "Doe"
+    profile.gender = "Male"
+    profile.date_of_birth = "1990-01-01"
+    profile.place_of_birth_country = "USA"
+    profile.place_of_birth_city = "New York"
+    profile.location_country = "USA"
+    profile.location_city = "New York"
+    profile.role = "leader"
+    profile.slug = "john-doe"
+
+    user.verified = True
+    user.agreed_to_terms = True
+
+    profile.save()
+    user.save()
+
+    Group.objects.create(
+        leader=profile,
+        name="Test Group",
+        slug="test-group",
+        description=test_constants.VALID_GROUP_DESCRIPTION,
+    )
+
+    assert profile.is_leading_group()

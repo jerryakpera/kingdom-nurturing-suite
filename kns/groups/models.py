@@ -260,11 +260,9 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         int:
             The total number of members with the role 'external_person'.
         """
-        external_persons_count = 0
-        for group_member in self.group_members():
-            if group_member.role == "external_person":
-                external_persons_count += 1
-        return external_persons_count
+        return self.members.filter(
+            profile__role="external_person",
+        ).count()
 
     def male_count(self):
         """
@@ -275,11 +273,9 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         int:
             The total number of male members.
         """
-        male_count = 0
-        for group_member in self.group_members():
-            if group_member.gender == "male":
-                male_count += 1
-        return male_count
+        return self.members.filter(
+            profile__gender="male",
+        ).count()
 
     def female_count(self):
         """
@@ -290,11 +286,7 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         int:
             The total number of female members.
         """
-        female_count = 0
-        for group_member in self.group_members():
-            if group_member.gender == "female":
-                female_count += 1
-        return female_count
+        return self.members.filter(profile__gender="female").count()
 
     def mentors_count(self):
         """
@@ -305,11 +297,7 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         int:
             The total number of mentors in the group.
         """
-        mentors_count = 0
-        for group_member in self.group_members():
-            if group_member.is_mentor:
-                mentors_count += 1
-        return mentors_count
+        return self.members.filter(profile__is_mentor=True).count()
 
     def skill_trainers_count(self):
         """
@@ -320,11 +308,9 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         int:
             The total number of skill trainers in the group.
         """
-        skill_trainers_count = 0
-        for group_member in self.group_members():
-            if group_member.is_skill_training_facilitator:
-                skill_trainers_count += 1
-        return skill_trainers_count
+        return self.members.filter(
+            profile__is_skill_training_facilitator=True,
+        ).count()
 
     def movement_trainers_count(self):
         """
@@ -335,11 +321,9 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         int:
             The total number of movement trainers in the group.
         """
-        movement_trainers_count = 0
-        for group_member in self.group_members():
-            if group_member.is_movement_training_facilitator:
-                movement_trainers_count += 1
-        return movement_trainers_count
+        return self.members.filter(
+            profile__is_movement_training_facilitator=True,
+        ).count()
 
     def most_common_role(self):
         """
