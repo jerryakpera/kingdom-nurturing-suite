@@ -5,5 +5,5 @@
 @tailwind utilities;
 
 .container-default {
-  @apply w-full mx-auto px-4 lg:px-12 xl:px-16;
+  @apply w-[96%] sm:w-11/12 md:w-11/12 xl:w-10/12 mx-auto;
 }
