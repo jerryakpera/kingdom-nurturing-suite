@@ -280,14 +280,7 @@ def verification_email(request, user_id):
     # Fetch the user by ID, or return a 404 if not found
     user = get_object_or_404(User, pk=user_id)
 
-    # Ensure the user is authenticated and allowed to perform this action
-    if request.user != user and not request.user.is_superuser:
-        messages.error(
-            request,
-            "You do not have permission to send this email.",
-        )
-
-        return redirect("accounts:index")
+    # TODO: Work on permissions for this view
 
     # Send the verification email
     try:
@@ -304,7 +297,7 @@ def verification_email(request, user_id):
         )
 
     # Redirect to a relevant page (e.g., user profile or dashboard)
-    return redirect("accounts:index")
+    return redirect(user.profile)
 
 
 @login_required

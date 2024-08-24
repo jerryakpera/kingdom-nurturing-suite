@@ -1,13 +1,8 @@
-import tempfile
-from unittest.mock import MagicMock, patch
-
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.custom_user.models import User
-from kns.groups.models import Group
 from kns.groups.tests.factories import GroupFactory, GroupMemberFactory
-from kns.profiles.models import Profile
 
 
 class TestGroupFactory(TestCase):
@@ -361,3 +356,31 @@ class TestGroupMethods(TestCase):
             self.group.location_display(),
             "None",
         )
+
+    def test_is_member(self):
+        """
+        Test if the is_member method correctly identifies members.
+        """
+        self.assertTrue(self.group.is_member(self.profile1))
+        self.assertTrue(self.group.is_member(self.profile2))
+
+    def test_add_member_existing(self):
+        """
+        Test adding an existing member to the group.
+        """
+        self.group.add_member(self.profile1)
+        self.assertEqual(self.group.members.count(), 3)
+
+    def test_add_member_new(self):
+        """
+        Test adding a new member to the group.
+        """
+        new_user = User.objects.create_user(
+            email="newmember@example.com",
+            password="password",
+        )
+        new_profile = new_user.profile
+
+        self.group.add_member(new_profile)
+        self.assertEqual(self.group.members.count(), 4)
+        self.assertTrue(self.group.is_member(new_profile))

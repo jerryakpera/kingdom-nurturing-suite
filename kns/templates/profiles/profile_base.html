@@ -2,6 +2,8 @@
 
 {% block base_content %}
   <section class="container-default py-4 sm:py-6">
+    {% include "profiles/components/banners/banners.html" %}
+
     <div class="grid gap-4 grid-cols-1 sm:grid-cols-5 lg:grid-cols-4">
       <div class="col-span-1 sm:col-span-2 lg:col-span-1">
         {% include "profiles/components/profile_card/profile_card.html" %}

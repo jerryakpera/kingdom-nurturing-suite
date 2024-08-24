@@ -326,7 +326,12 @@ class AuthenticationViewsTests(TestCase):
         # profile page
         self.assertRedirects(
             response,
-            reverse("accounts:index"),
+            reverse(
+                "profiles:profile_detail",
+                kwargs={
+                    "profile_slug": self.user.profile.slug,
+                },
+            ),
         )
 
         # Check that the email was sent
@@ -396,11 +401,24 @@ class VerificationEmailTests(TestCase):
         )
 
         # Call the verification_email view
-        url = reverse("accounts:verification_email", args=[self.user.pk])
+        url = reverse(
+            "accounts:verification_email",
+            args=[
+                self.user.pk,
+            ],
+        )
         response = self.client.get(url)
 
         # Check for error message in the response
-        self.assertRedirects(response, reverse("accounts:index"))
+        self.assertRedirects(
+            response,
+            reverse(
+                "profiles:profile_detail",
+                kwargs={
+                    "profile_slug": self.user.profile.slug,
+                },
+            ),
+        )
 
 
 class AgreeToTermsViewTests(TestCase):

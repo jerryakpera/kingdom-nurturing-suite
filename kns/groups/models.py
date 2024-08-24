@@ -339,6 +339,22 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         most_common = Counter(roles).most_common(1)[0][0]
         return most_common
 
+    def is_member(self, profile):
+        """
+        Check if a given profile is a member of the group.
+
+        Parameters
+        ----------
+        profile : Profile
+            The profile to check.
+
+        Returns
+        -------
+        bool
+            True if the profile is a member of the group, False otherwise.
+        """
+        return self.members.filter(profile=profile).exists()
+
 
 class GroupMember(TimestampedModel):
     """

@@ -1,0 +1,20 @@
+<div id="verified_banner" class="py-4 text-black bg-knsPrimary-300 border border-knsPrimary-200 rounded-md" role="alert">
+  <div class="container-default flex items-center justify-between">
+    <div class="flex items-center">
+      <iconify-icon icon="heroicons:exclaimation-circle-solid" class="text-xl"></iconify-icon>
+      <span class="sr-only">Info</span>
+
+      <div class="ms-3 text-sm font-medium">
+        {{ profile.get_full_name }} is yet to verify their email address.
+      </div>
+    </div>
+
+    {% if profile.role == 'member' or profile.role == 'external_person' %}
+      <a
+        href="{% url "accounts:verification_email" user_id=profile.user.id %}"
+        class="text-sm font-medium text-knsPrimary">
+        Resend verification email
+      </a>
+    {% endif %}
+  </div>
+</div>
