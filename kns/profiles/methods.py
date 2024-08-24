@@ -1,40 +1,13 @@
 """
-This module contains utility methods for managing and interacting with Profile objects.
-
-Methods
--------
-get_full_name(profile):
-    Return the full name of the profile instance.
-
-is_leading_group(profile):
-    Return if the profile instance is a leader of a group.
-
-get_absolute_url(profile):
-    Return the absolute URL to access a detail view of this profile.
-
-get_involvements_url(profile):
-    Return the involvements URL to access a detail view of this profile.
-
-get_trainings_url(profile):
-    Return the trainings URL to access a detail view of this profile.
-
-get_activities_url(profile):
-    Return the activities URL to access a detail view of this profile.
-
-get_settings_url(profile):
-    Return the settings URL to access a detail view of this profile.
-
-get_role_display_str(profile):
-    Return the string display for this profile role.
-
-is_eligible_to_register_group(profile):
-    Determine if the user is eligible to register a new group.
-
-is_profile_complete(profile):
-    Check if the user's profile is fully completed.
+This module contains utility methods for managing and interacting with
+Profile objects.
 """
 
+from datetime import date
+
 from django.urls import reverse
+
+from kns.core.models import Setting
 
 
 def get_full_name(profile):
@@ -280,3 +253,88 @@ def is_profile_complete(profile):
         return False
 
     return True
+
+
+def get_age(profile):
+    """
+    Calculate and return the profile's age based on date_of_birth.
+
+    Parameters
+    ----------
+    profile : Profile
+        Profile of the member to get the age.
+
+    Returns
+    -------
+    int
+        The age of the profile instance.
+    """
+    if profile.date_of_birth:
+        today = date.today()
+        return (
+            today.year
+            - profile.date_of_birth.year
+            - (
+                (today.month, today.day)
+                < (profile.date_of_birth.month, profile.date_of_birth.day)
+            )
+        )
+
+    return None
+
+
+def is_under_age(profile, adult_age):
+    """
+    Determine if the profile is under age based on the date_of_birth
+    and the adult_age setting.
+
+    Parameters
+    ----------
+    profile : Profile
+        The profile to check if under age.
+    adult_age : int
+        Age that is set as the adult age.
+
+    Returns
+    -------
+    bool
+        True if the user is under age and False if not.
+    """
+
+    if profile.date_of_birth:
+        today = date.today()
+        age = (
+            today.year
+            - profile.date_of_birth.year
+            - (
+                (today.month, today.day)
+                < (profile.date_of_birth.month, profile.date_of_birth.day)
+            )
+        )
+        return age < adult_age
+
+    return True
+
+
+def get_current_consent_form(profile):
+    """
+    Get the current consent form associated with the profile.
+
+    Parameters
+    ----------
+    profile : Profile
+        The profile to retrieve the consent from from.
+
+    Returns
+    -------
+    ConsentForm
+        The current consent form for the profile instance.
+    """
+    return (
+        profile.consent_form
+        if hasattr(
+            profile,
+            "consent_form",
+        )
+        else None
+    )

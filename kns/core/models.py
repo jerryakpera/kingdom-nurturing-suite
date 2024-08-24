@@ -210,7 +210,7 @@ class Setting(models.Model):
             Keyword arguments passed to the save method.
         """
         if Setting.objects.exists():
-            existing_setting = Setting.objects.first()
+            existing_setting = Setting.get_or_create_setting()
             self.pk = existing_setting.pk
         super().save(*args, **kwargs)
 

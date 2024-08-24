@@ -1,13 +1,16 @@
+from datetime import date
 from unittest.mock import Mock
 
 from django.test import TestCase
 from django.urls import reverse
 
+from kns.core.models import Setting
 from kns.custom_user.models import User
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
 
 from .. import methods
+from ..models import ConsentForm
 
 
 class ProfileMethodsTests(TestCase):
@@ -34,6 +37,8 @@ class ProfileMethodsTests(TestCase):
         self.profile.slug = "john-doe"
 
         self.profile.save()
+
+        self.settings = Setting.get_or_create_setting()
 
     def test_get_full_name(self):
         """Test that the full name is correctly returned."""
@@ -241,3 +246,77 @@ class ProfileMethodsTests(TestCase):
         """Test that a profile that hasn't agreed to terms is considered incomplete."""
         self.profile.user.agreed_to_terms = False
         self.assertFalse(methods.is_profile_complete(self.profile))
+
+    def test_get_age(self):
+        """Test that the age is correctly calculated based on the date
+        of birth."""
+        self.profile.date_of_birth = date(1990, 1, 1)
+        age = methods.get_age(self.profile)
+        self.assertEqual(age, date.today().year - 1990)
+
+    def test_get_age_none(self):
+        """Test that None is returned when date of birth is not set."""
+        self.profile.date_of_birth = None
+        age = methods.get_age(self.profile)
+        self.assertIsNone(age)
+
+    def test_is_under_age_true(self):
+        """Test that is_under_age returns True for a profile under 18
+        years old."""
+        self.profile.date_of_birth = date.today().replace(
+            year=date.today().year - 14,
+        )
+        self.profile.save()
+
+        self.assertTrue(
+            methods.is_under_age(
+                self.profile,
+                self.settings.adult_age,
+            )
+        )
+
+        self.profile.date_of_birth = None
+        self.profile.save()
+
+        self.assertTrue(
+            methods.is_under_age(
+                self.profile,
+                self.settings.adult_age,
+            )
+        )
+
+    def test_is_under_age_false(self):
+        """Test that is_under_age returns False for a profile 18
+        years or older."""
+        self.profile.date_of_birth = date.today().replace(
+            year=date.today().year - 18,
+        )
+        self.assertFalse(
+            methods.is_under_age(
+                self.profile,
+                self.settings.adult_age,
+            )
+        )
+
+    def test_get_current_consent_form_exists(self):
+        """Test that the current consent form is returned when it exists."""
+        # Create a ConsentForm instance associated with the profile
+        consent_form = ConsentForm.objects.create(
+            profile=self.profile,
+            submitted_by=self.profile,
+        )
+
+        # Assign the ConsentForm instance to the profile
+        self.profile.consent_form = consent_form
+
+        # Call the method to test
+        result = methods.get_current_consent_form(self.profile)
+
+        # Assert that the returned consent form is the one we created
+        self.assertEqual(result, consent_form)
+
+    def test_get_current_consent_form_none(self):
+        """Test that None is returned when there is no consent form."""
+        self.profile.consent_form = None
+        consent_form = methods.get_current_consent_form(self.profile)
+        self.assertIsNone(consent_form)

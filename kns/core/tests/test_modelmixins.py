@@ -9,7 +9,6 @@ class ExampleModel(TimestampedModel, models.Model):
 
 
 class TestTimestampedModelMixin:
-    @pytest.mark.django_db
     def test_timestamps_on_creation(self):
         """
         Test that `created_at` and `updated_at` are set correctly

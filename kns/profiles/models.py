@@ -8,9 +8,11 @@ from cloudinary.models import CloudinaryField
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 from django_countries.fields import CountryField
 
 from kns.core import modelmixins
+from kns.core.models import Setting
 from kns.custom_user.models import User
 
 from . import constants
@@ -315,6 +317,73 @@ class Profile(
         """
         return model_methods.is_profile_complete(self)
 
+    def get_age(self):
+        """
+        Calculate and return the profile's age based on date_of_birth.
+
+        Returns
+        -------
+        int
+            The age of the profile instance.
+        """
+        return model_methods.get_age(self)
+
+    def is_under_age(self):
+        """
+        Check if the profile is under the legal age.
+
+        Returns
+        -------
+        bool
+            True if the profile is under age, False otherwise.
+        """
+        settings = Setting.get_or_create_setting()
+
+        return model_methods.is_under_age(
+            self,
+            settings.adult_age,
+        )
+
+    def get_current_consent_form(self):
+        """
+        Get the current consent form associated with the profile.
+
+        Returns
+        -------
+        ConsentForm
+            The current consent form for the profile instance.
+        """
+        return model_methods.get_current_consent_form(self)
+
+    def needs_consent_form(self):
+        """
+        Determine if the profile needs a consent form.
+
+        Returns
+        -------
+        bool
+            True if the profile needs a consent form, False otherwise.
+        """
+        if not self.is_under_age():
+            return False
+
+        try:
+            # Check if a consent form exists and if it's not rejected
+            consent_form = self.consent_form
+
+            if consent_form.status == ConsentForm.PENDING:
+                return True
+
+            if consent_form.status == ConsentForm.REJECTED:
+                return True
+
+            if consent_form.status == ConsentForm.APPROVED:
+                return False
+
+        except ConsentForm.DoesNotExist:
+            # There is no consent form so return True
+            return True
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -347,3 +416,109 @@ def create_user_profile(sender, instance, created, **kwargs):
             user=instance,
             email=instance.email,
         )
+
+
+class ConsentForm(modelmixins.TimestampedModel, models.Model):
+    """
+    Represents a consent form associated with a Profile.
+
+    The `ConsentForm` model tracks consent forms that are submitted by
+    users, including their status (pending, approved, or rejected) and
+    details about who reviewed the form.
+    """
+
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+    STATUS_CHOICES = [
+        (PENDING, "Pending"),
+        (APPROVED, "Approved"),
+        (REJECTED, "Rejected"),
+    ]
+
+    profile = models.OneToOneField(
+        Profile,
+        related_name="consent_form",
+        on_delete=models.CASCADE,
+    )
+
+    consent_form = CloudinaryField(
+        null=True,
+        blank=True,
+        folder="kns/files/consent_forms/",
+    )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default=PENDING,
+    )
+
+    submitted_by = models.ForeignKey(
+        Profile,
+        related_name="consent_forms_submitted",
+        on_delete=models.CASCADE,
+    )
+
+    reviewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    reviewed_by = models.ForeignKey(
+        Profile,
+        related_name="reviewed_consent_forms",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    def __str__(self):
+        """
+        Return a string representation of the ConsentForm instance.
+
+        The string includes the profile associated with the consent form and
+        the current status of the consent form.
+
+        Returns
+        -------
+        str
+            A string representation of the ConsentForm instance, formatted
+            as "{profile} consent form - {status}" where {profile} is the
+            string representation of the associated Profile and {status} is
+            the display name of the consent form's status.
+        """
+        return f"{self.profile} consent form - {self.get_status_display()}"
+
+    def approve(self, reviewer):
+        """
+        Approve the consent form.
+
+        Parameters
+        ----------
+        reviewer : User
+            The user who reviewed and approved the consent form.
+        """
+        self.status = self.APPROVED
+
+        self.reviewed_at = timezone.now()
+        self.reviewed_by = reviewer
+
+        self.save()
+
+    def reject(self, reviewer):
+        """
+        Reject the consent form.
+
+        Parameters
+        ----------
+        reviewer : User
+            The user who reviewed and rejected the consent form.
+        """
+        self.status = self.REJECTED
+
+        self.reviewed_at = timezone.now()
+        self.reviewed_by = reviewer
+
+        self.save()
