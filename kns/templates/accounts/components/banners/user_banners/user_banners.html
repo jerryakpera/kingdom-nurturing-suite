@@ -1,0 +1,46 @@
+<div class="flex flex-col space-y-0.5">
+  {% comment %} User not verified banner {% endcomment %}
+  {% if not request.user.verified %}
+    <div id="verified_banner" class="py-4 text-black bg-knsPrimary-300 border border-knsPrimary-500" role="alert">
+      <div class="container-default flex items-center justify-between">
+        <div class="flex items-center">
+          <iconify-icon icon="heroicons:exclaimation-circle-solid" class="text-xl"></iconify-icon>
+          <span class="sr-only">Info</span>
+
+          <div class="ms-3 text-sm font-medium">
+            You have not verified your email address. To have full access to all features you must verify your email address.
+          </div>
+        </div>
+
+        <a
+          href="{% url "accounts:verification_email" user_id=request.user.id %}"
+          class="text-sm font-medium text-knsPrimary">
+          Resend verification email
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+  {% comment %} User not agreed to terms banner {% endcomment %}
+  {% if not request.user.agreed_to_terms %}
+    <div id="agreed_to_terms_banner" class="py-4 text-black bg-knsPrimary-300 border border-knsPrimary-500" role="alert">
+      <div class="container-default flex flex-col space-y-3">
+        <div class="flex items-start sm:items-center">
+          <iconify-icon icon="heroicons:exclaimation-circle-solid" class="text-xl"></iconify-icon>
+          <span class="sr-only">Info</span>
+
+          <div class="ms-3 text-sm font-medium">
+            You have not agreed to our Terms and Conditions. To have full access to all features you must agree to our terms and conditions.
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <a href="accounts:agree_to_terms" class="px-3 py-2 text-xs font-medium text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300">
+            Click to agree
+          </a>
+
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>

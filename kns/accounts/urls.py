@@ -25,4 +25,19 @@ urlpatterns = [
         views.change_password,
         name="change_password",
     ),
+    path(
+        "agree-to-terms/",
+        views.agree_to_terms,
+        name="agree_to_terms",
+    ),
+    path(
+        "send-verification-email/<int:user_id>",
+        views.verification_email,
+        name="verification_email",
+    ),
+    path(
+        "verify-email/<uidb64>/<token>/",
+        views.verify_email,
+        name="verify_email",
+    ),
 ]

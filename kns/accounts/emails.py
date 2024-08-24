@@ -3,7 +3,13 @@ Utility functions for sending emails related to user account management.
 """
 
 from django.conf import settings
+from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+
+from .utils import generate_verification_token
 
 
 def send_password_change_email(user_email):
@@ -26,4 +32,65 @@ def send_password_change_email(user_email):
     from_email = settings.DEFAULT_FROM_EMAIL
     recipient_list = [user_email]
 
-    send_mail(subject, message, from_email, recipient_list)
+    send_mail(
+        subject,
+        message,
+        from_email,
+        recipient_list,
+    )
+
+
+def send_verification_email(request, user):
+    """
+    Send a verification email to the user.
+
+    This function generates a unique token and a UID for the user,
+    constructs a verification link, and sends an HTML email to the user's
+    registered email address with a link to verify their account. The token
+    is also saved to the user's profile for later validation.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object, used to retrieve the current site domain.
+    user : User
+        The user object to whom the verification email is being sent.
+
+    Returns
+    -------
+    None
+        The function sends an email and updates the user's profile but does
+        not return any value.
+    """
+    subject = "Verify your email address"
+
+    # Get the current domain
+    current_site = get_current_site(request)
+
+    # Generate a UID and token for the user
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = generate_verification_token(user)
+
+    # Render the HTML email template
+    html_message = render_to_string(
+        "accounts/emails/verification_email.html",
+        {
+            "user": user,
+            "domain": current_site.domain,
+            "uid": uid,
+            "token": token,
+        },
+    )
+
+    # Send the email
+    send_mail(
+        subject=subject,
+        message="",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        html_message=html_message,
+    )
+
+    # Save the token to the user's profile (if you are storing it)
+    user.profile.email_token = token
+    user.profile.save()

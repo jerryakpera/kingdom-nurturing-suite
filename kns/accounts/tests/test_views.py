@@ -1,9 +1,14 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 
 from ..forms import ChangePasswordForm, LoginForm
+from ..utils import generate_verification_token
 
 User = get_user_model()
 
@@ -11,14 +16,29 @@ User = get_user_model()
 class AuthenticationViewsTests(TestCase):
     def setUp(self):
         self.client = Client()
+
         self.user = User.objects.create_user(
             email="testuser@example.com",
             password="oldpassword",
+            is_active=True,
         )
 
         self.client.login(
             email="testuser@example.com",
             password="oldpassword",
+        )
+
+        self.user.is_active = True
+        self.user.save()
+
+        self.token = generate_verification_token(self.user)
+        self.uidb64 = urlsafe_base64_encode(
+            force_bytes(self.user.pk),
+        )
+
+        self.url = reverse(
+            "accounts:verify_email",
+            args=[self.uidb64, self.token],
         )
 
     def test_index_view(self):
@@ -238,3 +258,170 @@ class AuthenticationViewsTests(TestCase):
             "Access denied. You do not have the necessary permissions.",
             form.errors["__all__"],
         )
+
+    def test_verify_email_success(self):
+        """
+        Test that the verify_email view successfully verifies the user's email
+        if the token is valid.
+        """
+        response = self.client.get(self.url)
+
+        # Refresh the user from the database to get the updated verified status
+        self.user.refresh_from_db()
+
+        self.assertTrue(self.user.verified)
+        self.assertRedirects(
+            response,
+            reverse("core:index"),
+        )
+
+    def test_verify_email_failure(self):
+        """
+        Test that the verify_email view shows an error if the token is
+        invalid.
+        """
+        # Generate an invalid token for the user
+        uidb64 = urlsafe_base64_encode(
+            force_bytes(self.user.pk),
+        )
+        invalid_token = "invalid-token"
+
+        # Call the verify_email view with the incorrect token
+        response = self.client.get(
+            reverse(
+                "accounts:verify_email",
+                kwargs={"uidb64": uidb64, "token": invalid_token},
+            )
+        )
+
+        # Refresh the user from the database to confirm their email is
+        # not verified
+        self.user.refresh_from_db()
+
+        self.assertFalse(self.user.verified)
+        self.assertTemplateUsed(
+            response,
+            "accounts/pages/verification_failed.html",
+        )
+        self.assertEqual(
+            list(response.context["messages"])[0].message,
+            "The verification link is invalid or has expired.",
+        )
+
+    def test_verification_email_view_success(self):
+        """
+        Test that the verification_email view sends a verification email
+        successfully.
+        """
+        # Call the verification_email view for the user
+        response = self.client.get(
+            reverse(
+                "accounts:verification_email",
+                args=[self.user.pk],
+            )
+        )
+
+        # Check if the user was redirected back to their dashboard or
+        # profile page
+        self.assertRedirects(
+            response,
+            reverse("accounts:index"),
+        )
+
+        # Check that the email was sent
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn(
+            "Verify your email address",
+            mail.outbox[0].subject,
+        )
+
+    def test_verification_email_view_permission_denied(self):
+        """
+        Test that the verification_email view denies access if the user
+        is not the same or a superuser.
+        """
+        # Log out the current user
+        self.client.logout()
+
+        # Create another user and login
+        User.objects.create_user(
+            email="otheruser@example.com",
+            password="password123",
+            verified=False,
+        )
+
+        self.client.login(
+            email="otheruser@example.com",
+            password="password123",
+        )
+
+        # Attempt to send a verification email for the original user
+        response = self.client.get(
+            reverse(
+                "accounts:verification_email",
+                args=[self.user.pk],
+            )
+        )
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_agree_to_terms_view(self):
+        """
+        Test that the agree_to_terms view renders the correct template
+        and has the correct context.
+        """
+        # Log in a user
+        self.client.login(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
+
+        # Call the agree_to_terms view
+        response = self.client.get(
+            reverse("accounts:agree_to_terms"),
+        )
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "accounts/pages/agree_to_terms.html",
+        )
+
+
+class VerificationEmailTests(TestCase):
+    def setUp(self):
+        """
+        Create a user for testing and set up any required data.
+        """
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
+        self.client.login(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
+
+    @patch("kns.accounts.views.send_verification_email")
+    def test_verification_email_failure(
+        self,
+        mock_send_verification_email,
+    ):
+        """
+        Test that the verification_email view handles exceptions from the
+        send_verification_email function and displays an error message.
+        """
+        # Configure the mock to raise an exception
+        mock_send_verification_email.side_effect = Exception(
+            "Test exception",
+        )
+
+        # Call the verification_email view
+        url = reverse("accounts:verification_email", args=[self.user.pk])
+        response = self.client.get(url)
+
+        # Check for error message in the response
+        self.assertRedirects(response, reverse("accounts:index"))
