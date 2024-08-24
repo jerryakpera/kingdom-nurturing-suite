@@ -8,7 +8,7 @@ python manage.py migrate
 python manage.py createsu
 
 # Initialize settings
-# python manage.py createsettings
+python manage.py createsettings
 
 # Generate data
 # python manage.py generatedata
