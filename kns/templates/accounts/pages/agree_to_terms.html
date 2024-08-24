@@ -1,12 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agree to terms</title>
-  </head>
-  <body>
-    <h2>Agree to terms</h2>
+{% extends "base.html" %}
 
-  </body>
-</html>
+{% block title %}
+  KNS | Agree to Terms and Conditions
+{% endblock title %}
+
+{% block base_content %}
+  <section class="text-gray-600 body-font">
+    <div class="container-default mx-auto flex flex-col justify-center py-8 sm:py-16 items-center">
+      <div class="w-full md:w-2/3 flex flex-col mb-16 items-center text-center">
+        <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
+          Agree to Terms and Conditions
+        </h1>
+        <p class="mb-8 leading-relaxed">
+          Before you proceed, please read our Terms and Conditions carefully. By agreeing to these terms, you acknowledge that you have read, understood, and accept the following terms outlined below.
+        </p>
+        <div class="flex w-full justify-center items-end">
+          <form method="POST" action="{% url 'accounts:agree_to_terms' %}">
+            {% csrf_token %}
+
+            <div class="flex items-center mb-4">
+              <input
+                required
+                type="checkbox"
+                id="agree_checkbox"
+                name="agree_checkbox"
+                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded"
+              >
+              <label for="agree_checkbox" class="ms-2 text-sm font-medium text-gray-900">
+                I Agree to the <a href="https://docs.google.com/document/d/15TzIigYjEXI8Bbg4R1LbIk-QhdOjFKAMcL6SvMa3MTU/edit?usp=sharing" target="__blank" class="text-knsSecondary-500 underline">Terms and Conditions</a>
+              </label>
+            </div>
+
+            <button type="submit" class="inline-flex text-white bg-knsSecondary-500 border-0 py-2 px-6 focus:outline-none hover:bg-knsSecondary-600 rounded text-lg">
+              I agree
+            </button>
+          </form>
+        </div>
+        <p class="text-sm mt-2 text-gray-500 mb-8 w-full">
+          If you have any questions about our Terms and Conditions, please contact us at <a href="mailto:support@example.com" class="text-knsSecondary-500">support@kingdomnurturing.com</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+{% endblock base_content %}

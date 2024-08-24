@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from kns.custom_user.models import User
 
@@ -322,6 +323,41 @@ def agree_to_terms(request):
         Redirects to a relevant page, typically the user's profile or dashboard,
         with a success or error message.
     """
+
+    if request.user.agreed_to_terms:
+        messages.success(
+            request,
+            "You have already agreed to the Terms and Conditions.",
+        )
+
+        return redirect(
+            request.user.profile.get_absolute_url(),
+        )
+
+    if request.method == "POST":
+        # Check if the form is submitted and the checkbox is checked
+        if "agree_checkbox" in request.POST:
+            # User agreed to the terms, handle the logic here
+            request.user.agreed_to_terms = True
+            request.user.save()
+
+            # Set a success message
+            messages.success(
+                request,
+                "You have successfully agreed to the Terms and Conditions.",
+            )
+
+            return redirect(
+                request.user.profile.get_absolute_url(),
+            )
+
+        # If the checkbox is not checked, set an error message
+        messages.error(
+            request,
+            "You must agree to the Terms and Conditions to proceed.",
+        )
+
+    # Render the template with the form
     return render(
         request=request,
         template_name="accounts/pages/agree_to_terms.html",

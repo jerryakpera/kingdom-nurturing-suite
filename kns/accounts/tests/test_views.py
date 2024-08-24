@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.messages import get_messages
 from django.core import mail
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -365,31 +366,6 @@ class AuthenticationViewsTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
 
-    def test_agree_to_terms_view(self):
-        """
-        Test that the agree_to_terms view renders the correct template
-        and has the correct context.
-        """
-        # Log in a user
-        self.client.login(
-            email="testuser@example.com",
-            password="oldpassword",
-        )
-
-        # Call the agree_to_terms view
-        response = self.client.get(
-            reverse("accounts:agree_to_terms"),
-        )
-
-        # Check if the response status code is 200 OK
-        self.assertEqual(response.status_code, 200)
-
-        # Check if the correct template is used
-        self.assertTemplateUsed(
-            response,
-            "accounts/pages/agree_to_terms.html",
-        )
-
 
 class VerificationEmailTests(TestCase):
     def setUp(self):
@@ -425,3 +401,136 @@ class VerificationEmailTests(TestCase):
 
         # Check for error message in the response
         self.assertRedirects(response, reverse("accounts:index"))
+
+
+class AgreeToTermsViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="oldpassword",
+            is_active=True,
+        )
+
+        self.client.login(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
+
+        self.url = reverse(
+            "accounts:agree_to_terms",
+        )
+
+    def test_agree_to_terms_view_redirect_when_already_agreed(self):
+        """
+        Test that an authenticated user who has already agreed to the
+        terms is redirected to their profile page with appropriate message.
+        """
+        # Log in the user
+        self.client.login(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
+
+        # Set agreed_to_terms to True
+        self.user.agreed_to_terms = True
+        self.user.save()
+
+        response = self.client.get(self.url)
+
+        # Check for redirection to profile page
+        self.assertRedirects(
+            response,
+            self.user.profile.get_absolute_url(),
+        )
+
+        # Access messages from response
+        messages = list(get_messages(response.wsgi_request))
+
+        # Assert that one message exists
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "You have already agreed to the Terms and Conditions.",
+        )
+
+    def test_agree_to_terms_view_post_success(self):
+        """
+        Test that an authenticated user can successfully agree to the
+        terms and be redirected to their profile page.
+        """
+        response = self.client.post(
+            self.url,
+            data={
+                "agree_checkbox": "on",
+            },
+        )
+
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.agreed_to_terms)
+
+        self.assertRedirects(
+            response,
+            self.user.profile.get_absolute_url(),
+        )
+
+        # Access messages from response
+        messages = list(get_messages(response.wsgi_request))
+
+        # Assert that one message exists
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "You have successfully agreed to the Terms and Conditions.",
+        )
+
+    def test_agree_to_terms_view_post_failure(self):
+        """
+        Test that an authenticated user who does not check the checkbox
+        receives an error message.
+        """
+        response = self.client.post(self.url, data={})
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(
+            response,
+            "You must agree to the Terms and Conditions to proceed.",
+        )
+
+    def test_agree_to_terms_view_unauthenticated(self):
+        """
+        Test that an unauthenticated user is redirected to the login
+        page when accessing the agree-to-terms view.
+        """
+        self.client.logout()
+
+        response = self.client.get(self.url)
+
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={self.url}",
+        )
+
+    def test_agree_to_terms_view_post_success_unexpected_form(self):
+        """
+        Test that if the form is submitted with unexpected data, it
+        still behaves as expected.
+        """
+        response = self.client.post(
+            self.url,
+            data={
+                "unexpected_field": "value",
+            },
+        )
+
+        self.user.refresh_from_db()
+
+        self.assertFalse(self.user.agreed_to_terms)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(
+            response,
+            "You must agree to the Terms and Conditions to proceed.",
+        )
