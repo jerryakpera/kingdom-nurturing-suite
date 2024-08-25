@@ -7,7 +7,23 @@
       <div class="ms-3 text-sm font-medium">
         The consent form you submitted has been reviewed and unfortunately, it has been rejected. Please review the rejection reasons and resubmit the form with the necessary corrections.
       </div>
+
     </div>
+
+    {% if profile.consent_form %}
+      <div class="space-y-3 ms-3 text-sm font-medium rounded-sm p-2 px-4 bg-knsLight text-black">
+        <div>
+          <h4 class="italics">Reason for rejection:</h4>
+          <p class="font-normal">
+            "{{ profile.consent_form.reject_reason }}"
+          </p>
+        </div>
+
+        <div class="flex justify-end text-sm">
+          {{ profile.consent_form.reviewed_at|date:"F j,Y" }}
+        </div>
+      </div>
+    {% endif %}
 
     <div class="flex flex-col space-y-2 xs:flex-row xs:space-y-0 xs:justify-end xs:space-x-2">
       <button
