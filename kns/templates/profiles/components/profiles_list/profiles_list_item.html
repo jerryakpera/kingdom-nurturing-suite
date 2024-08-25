@@ -2,17 +2,26 @@
 
 <div class="p-2">
   <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
-    {% if not profile.image %}
-      <img class="lg:h-48 md:h-36 w-full object-cover object-center" src="https://dummyimage.com/720x400" alt="blog">
-    {% else %}
-      <img
-        src="{{ profile.image.url }}"
-        alt="{{ profile.get_full_name }}"
-        class="lg:h-48 md:h-36 w-full object-cover object-center"
-      >
-    {% endif %}
+    <div class="relative">
+      {% if not profile.image %}
+        <img class="lg:h-48 md:h-36 w-full object-cover object-center" src="https://dummyimage.com/720x400" alt="blog">
+      {% else %}
+        <img
+          src="{{ profile.image.url }}"
+          alt="{{ profile.get_full_name }}"
+          class="lg:h-48 md:h-36 w-full object-cover object-center"
+        >
+      {% endif %}
+
+      <div class="absolute inset-0 flex items-end">
+        <div class="bg-white bg-opacity-60 text-white w-full">
+          {% include "profiles/components/profile_icons/profile_icons.html" %}
+        </div>
+      </div>
+    </div>
+
     <div class="p-2 md:p-4 flex flex-col space-y-2">
-      <h2 class="tracking-widest text-xs font-medium text-gray-400 mb-1 uppercase">
+      <h2 class="tracking-widest text-xs font-medium text-gray-700">
         {{ profile.get_role_display_str }}
 
         {% if profile.group_led %}

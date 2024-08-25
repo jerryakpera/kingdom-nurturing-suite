@@ -1,44 +1,40 @@
-<div class="w-full flex justify-around items-center border-b border-gray-300 pb-2">
-  <div
-    x-data="{ tooltip: false }"
-    x-on:mouseover="tooltip = true"
-    x-on:mouseleave="tooltip = false"
-  >
+<div class="w-full flex justify-around items-center pt-1.5">
+  <div>
     {% if profile.gender == 'female' %}
-      <iconify-icon icon="fa-solid:female" class="text-xl text-[#7B287D]"></iconify-icon>
+      <iconify-icon data-tooltip-target="gender-tooltip-{{ profile.id }}" icon="fa-solid:female" class="text-xl text-[#7B287D]"></iconify-icon>
     {% else %}
-      <iconify-icon icon="fa-solid:male" class="text-xl text-[#347FC4]"></iconify-icon>
+      <iconify-icon data-tooltip-target="gender-tooltip-{{ profile.id }}" icon="fa-solid:male" class="text-xl text-[#347FC4]"></iconify-icon>
     {% endif %}
 
     <!-- Tooltip -->
     <div
-      x-show="tooltip"
+      role="tooltip"
+      id="gender-tooltip-{{ profile.id }}"
       class="absolute bottom-full mb-2 w-max bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
     >
       {{ profile.gender.title }}
     </div>
   </div>
 
-  <div
-    x-data="{ tooltip: false }"
-    x-on:mouseover="tooltip = true"
-    x-on:mouseleave="tooltip = false"
-  >
+  <div>
     {% if profile.is_mentor %}
       <iconify-icon
         icon="hugeicons:mentor"
         class="text-2xl text-[#3185FC]"
+        data-tooltip-target="mentor-tooltip-{{ profile.id }}"
       ></iconify-icon>
     {% else %}
       <iconify-icon
         icon="hugeicons:mentor"
         class="text-2xl text-[#E54B4B]"
+        data-tooltip-target="mentor-tooltip-{{ profile.id }}"
       ></iconify-icon>
     {% endif %}
 
     <!-- Tooltip -->
     <div
-      x-show="tooltip"
+      role="tooltip"
+      id="mentor-tooltip-{{ profile.id }}"
       class="absolute bottom-full mb-2 w-max bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
     >
       {% if profile.is_mentor %}
@@ -49,27 +45,26 @@
     </div>
   </div>
 
-  <div
-    x-data="{ tooltip: false }"
-    x-on:mouseover="tooltip = true"
-    x-on:mouseleave="tooltip = false"
-  >
+  <div>
     {% if profile.movement_training_facilitator %}
       <iconify-icon
-        icon="icon-park-solid:circles-seven"
         class="text-xl text-[#3185FC]"
+        icon="icon-park-solid:circles-seven"
+        data-tooltip-target="mt-tooltip-{{ profile.id }}"
       ></iconify-icon>
     {% else %}
       <iconify-icon
-        icon="icon-park-solid:circles-seven"
         class="text-xl text-[#E54B4B]"
+        icon="icon-park-solid:circles-seven"
+        data-tooltip-target="mt-tooltip-{{ profile.id }}"
       ></iconify-icon>
     {% endif %}
 
     <!-- Tooltip -->
     <div
-      x-show="tooltip"
-      class="absolute bottom-full mb-2 w-max bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+      role="tooltip"
+      id="mt-tooltip-{{ profile.id }}"
+      class="absolute bottom-full mb-2 w-[250px] bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity text-center"
     >
       {% if profile.movement_training_facilitator %}
         Willing to facilitate movement trainings
@@ -79,27 +74,26 @@
     </div>
   </div>
 
-  <div
-    x-data="{ tooltip: false }"
-    x-on:mouseover="tooltip = true"
-    x-on:mouseleave="tooltip = false"
-  >
+  <div>
     {% if profile.skill_training_facilitator %}
       <iconify-icon
-        icon="healthicons:i-training-class"
         class="text-2xl text-[#3185FC]"
+        icon="healthicons:i-training-class"
+        data-tooltip-target="st-tooltip-{{ profile.id }}"
       ></iconify-icon>
     {% else %}
       <iconify-icon
-        icon="healthicons:i-training-class"
         class="text-2xl text-[#E54B4B]"
+        icon="healthicons:i-training-class"
+        data-tooltip-target="st-tooltip-{{ profile.id }}"
       ></iconify-icon>
     {% endif %}
 
     <!-- Tooltip -->
     <div
-      x-show="tooltip"
-      class="absolute bottom-full mb-2 w-max bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+      role="tooltip"
+      id="st-tooltip-{{ profile.id }}"
+      class="absolute bottom-full mb-2 w-[250px] text-center bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
     >
       {% if profile.skill_training_facilitator %}
         Willing to facilitate skill trainings
@@ -108,4 +102,35 @@
       {% endif %}
     </div>
   </div>
+
+  {% if profile.is_under_age %}
+    <div>
+      {% if not profile.needs_consent_form %}
+        <iconify-icon
+          class="text-2xl text-[#3185FC]"
+          icon="tabler:number-18-small"
+          data-tooltip-target="under-age-tooltip-{{ profile.id }}"
+        ></iconify-icon>
+      {% else %}
+        <iconify-icon
+          class="text-2xl text-[#E54B4B]"
+          icon="tabler:number-18-small"
+          data-tooltip-target="under-age-tooltip-{{ profile.id }}"
+        ></iconify-icon>
+      {% endif %}
+
+      <!-- Tooltip -->
+      <div
+        role="tooltip"
+        id="under-age-tooltip-{{ profile.id }}"
+        class="absolute bottom-full mb-2 w-max bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        {% if profile.needs_consent_form %}
+          Consent form not approved
+        {% else %}
+          Consent form approved
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
 </div>
