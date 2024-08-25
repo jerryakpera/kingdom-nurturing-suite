@@ -1,0 +1,23 @@
+<div id="verified_banner" class="py-4 text-black bg-red-200 border border-red-200 rounded-md" role="alert">
+  <div class="container-default flex flex-col space-y-4">
+    <div class="flex items-center">
+      <iconify-icon icon="heroicons:exclaimation-circle-solid" class="text-xl"></iconify-icon>
+      <span class="sr-only">Info</span>
+
+      <div class="ms-3 text-sm font-medium">
+        No consent form submitted
+      </div>
+    </div>
+
+    <div class="flex flex-col space-y-2 xs:flex-row xs:space-y-0 xs:justify-end xs:space-x-2">
+      <button
+        type="button"
+        class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      >
+        Submit consent form
+      </button>
+
+      {% include "./consent_form_modal.html" %}
+    </div>
+  </div>
+</div>

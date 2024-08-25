@@ -1,0 +1,11 @@
+{% if not profile.consent_form %}
+  {% include "./no_consent_form_banner.html" %}
+{% endif %}
+
+{% if profile.consent_form.status == 'pending' %}
+  {% include "./pending_consent_form_banner.html" %}
+{% endif %}
+
+{% if profile.consent_form.status == 'rejected' %}
+  {% include "./rejected_consent_form_banner.html" %}
+{% endif %}

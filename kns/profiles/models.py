@@ -5,6 +5,7 @@ Models for the profiles app.
 from uuid import uuid4
 
 from cloudinary.models import CloudinaryField
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -474,6 +475,15 @@ class ConsentForm(modelmixins.TimestampedModel, models.Model):
         blank=True,
     )
 
+    reject_reason = models.TextField(
+        null=True,
+        blank=True,
+        validators=[
+            MinLengthValidator(constants.REJECT_REASON_MIN_LENGTH),
+            MaxLengthValidator(constants.REJECT_REASON_MAX_LENGTH),
+        ],
+    )
+
     def __str__(self):
         """
         Return a string representation of the ConsentForm instance.
@@ -489,6 +499,7 @@ class ConsentForm(modelmixins.TimestampedModel, models.Model):
             string representation of the associated Profile and {status} is
             the display name of the consent form's status.
         """
+
         return f"{self.profile} consent form - {self.get_status_display()}"
 
     def approve(self, reviewer):

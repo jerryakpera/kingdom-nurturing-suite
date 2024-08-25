@@ -1,5 +1,9 @@
 {% extends "profiles/profile_base.html" %}
 
+{% block title %}
+  Profile | {{ profile.get_full_name }}
+{% endblock title %}
+
 {% block profile_base_content %}
   <h1>{{ profile.first_name }} {{ profile.last_name }} </h1>
 

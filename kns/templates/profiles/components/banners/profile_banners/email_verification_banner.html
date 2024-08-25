@@ -1,5 +1,5 @@
-<div id="verified_banner" class="py-4 text-black bg-knsPrimary-300 border border-knsPrimary-200 rounded-md" role="alert">
-  <div class="container-default flex items-center justify-between">
+<div id="verified_banner" class="py-4 text-black bg-amber-300 border border-amber-200 rounded-md" role="alert">
+  <div class="container-default flex flex-col space-y-4">
     <div class="flex items-center">
       <iconify-icon icon="heroicons:exclaimation-circle-solid" class="text-xl"></iconify-icon>
       <span class="sr-only">Info</span>
@@ -10,11 +10,13 @@
     </div>
 
     {% if profile.role == 'member' or profile.role == 'external_person' %}
-      <a
-        href="{% url "accounts:verification_email" user_id=profile.user.id %}"
-        class="text-sm font-medium text-knsPrimary">
-        Resend verification email
-      </a>
+      <div class="flex justify-end">
+        <a
+          href="{% url "accounts:verification_email" user_id=profile.user.id %}"
+          class="text-sm font-medium text-amber-900">
+          Resend verification email
+        </a>
+      </div>
     {% endif %}
   </div>
 </div>

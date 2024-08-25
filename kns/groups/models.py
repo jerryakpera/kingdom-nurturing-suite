@@ -6,7 +6,6 @@ from collections import Counter
 from uuid import uuid4
 
 from cloudinary.models import CloudinaryField
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.urls import reverse

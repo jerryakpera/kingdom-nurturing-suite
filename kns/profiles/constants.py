@@ -22,3 +22,6 @@ PROFILE_ROLE_OPTIONS = [
     ("leader", "Leader"),
     ("external_person", "External Person"),
 ]
+
+REJECT_REASON_MIN_LENGTH = 100
+REJECT_REASON_MAX_LENGTH = 500

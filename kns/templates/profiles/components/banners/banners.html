@@ -1,4 +1,8 @@
 <div class="flex flex-col space-y-0.5 mb-4">
+  {% if profile.needs_consent_form %}
+    {% include "profiles/components/banners/profile_banners/consent_banner/consent_form_banner.html" %}
+  {% endif %}
+
   {% if not profile.user.verified and profile != request.user.profile and is_member_of_user_group %}
     {% include "profiles/components/banners/profile_banners/email_verification_banner.html" %}
   {% endif %}
