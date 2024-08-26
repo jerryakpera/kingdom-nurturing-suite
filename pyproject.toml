@@ -43,6 +43,7 @@ exclude = [  # don't report on checks for these
   'apps$',                        # Exclude files named 'apps.py'
   'urls$',                        # Exclude files named 'urls.py'
   '.Meta$',                        # Exclude files named 'urls.py'
+  '.clean$',                        # Exclude files named 'urls.py'
   '\\.__repr__$',
   '\\.__str__$',
 ]

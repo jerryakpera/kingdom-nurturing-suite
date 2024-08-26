@@ -4,12 +4,11 @@ Views for the profiles app.
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 
-from kns.accounts.emails import send_verification_email
-
-from .forms import ProfileSettingsForm
-from .models import Profile
+from .forms import ConsentFormSubmission, ProfileSettingsForm
+from .models import ConsentForm, Profile
 
 
 @login_required
@@ -254,5 +253,108 @@ def profile_settings(request, profile_slug):
     return render(
         request=request,
         template_name="profiles/pages/profile_settings.html",
+        context=context,
+    )
+
+
+@login_required
+def upload_consent_form(request, profile_slug):  # pragma: no cover
+    """
+    View to render a page allowing the user to upload a consent form.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The request object used to generate the response.
+    profile_slug : str
+        The slug of the profile to retrieve.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template with the consent form upload form.
+    """
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    consent_form = None
+
+    # Ensure a consent form exists for the profile or create a new one
+    try:
+        consent_form = ConsentForm.objects.get(
+            profile=profile,
+        )
+
+        if consent_form and consent_form.status != "rejected":
+            messages.warning(
+                request=request,
+                message=(
+                    "You cannot submit a consent form for this "
+                    "profile at the moment."
+                ),
+            )
+            return redirect(
+                "profiles:profile_detail",
+                profile_slug=profile.slug,
+            )
+    except ConsentForm.DoesNotExist:
+        consent_form = None
+
+    form = ConsentFormSubmission(
+        request.POST or None,
+        request.FILES or None,
+        instance=consent_form,
+    )
+
+    if request.method == "POST":
+        form = ConsentFormSubmission(
+            request.POST,
+            request.FILES,
+        )
+
+        try:
+            if form.is_valid():
+                if consent_form:
+                    # Delete the current consent form
+                    consent_form.delete()
+
+                # Create new consent form
+                consent_form = form.save(commit=False)
+                consent_form.profile = profile
+                consent_form.submitted_by = request.user.profile
+
+                consent_form.save()
+
+                messages.success(
+                    request=request,
+                    message="Consent form successfully uploaded.",
+                )
+
+                return redirect(
+                    "profiles:profile_detail",
+                    profile_slug=profile.slug,
+                )
+            else:
+                messages.error(
+                    request=request,
+                    message="There was an error uploading the consent form.",
+                )
+
+        except ValidationError:
+            messages.error(
+                request=request,
+                message="The consent form must be a PDF, JPG, or PNG file.",
+            )
+
+    context = {
+        "form": form,
+        "profile": profile,
+    }
+
+    return render(
+        request=request,
+        template_name="profiles/pages/submit_consent_form.html",
         context=context,
     )

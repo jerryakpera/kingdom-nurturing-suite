@@ -1,0 +1,28 @@
+{% extends "profiles/profile_base.html" %}
+
+{% block title %}
+  Submit consent form | {{ profile.get_full_name }}
+{% endblock title %}
+
+{% block profile_base_content %}
+  <div>
+    <h2 class="text-xl font-semibold text-gray-900 sm:text-2xl">Consent form</h2>
+
+    <form
+      method="POST"
+      enctype="multipart/form-data"
+      action="{% url "profiles:upload_consent_form" profile_slug=profile.slug %}"
+    >
+      {% csrf_token %}
+
+      {% include "profiles/forms/upload_consent_form.html" %}
+
+      <div class="flex justify-start space-x-2 items-center mt-6">
+        <a href="{{ profile.get_absolute_url }}" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2">Cancel</a>
+
+        <button type="submit" class="text-white bg-knsSecondary-700 hover:bg-knsSecondary-800 focus:ring-4 focus:ring-knsSecondary-300 font-medium rounded-lg text-sm px-5 py-2">Save</button>
+
+      </div>
+    </form>
+  </div>
+{% endblock profile_base_content %}

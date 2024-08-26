@@ -11,6 +11,11 @@ urlpatterns = [
         name="profile_activities",
     ),
     path(
+        "<slug:profile_slug>/upload-consent",
+        views.upload_consent_form,
+        name="upload_consent_form",
+    ),
+    path(
         "<slug:profile_slug>/settings",
         views.profile_settings,
         name="profile_settings",

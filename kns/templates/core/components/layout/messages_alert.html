@@ -1,6 +1,6 @@
 {% if messages %}
   {% for message in messages %}
-    <div id="sticky-banner" tabindex="-1" class="z-50 w-full py-4 border-b shadow-md
+    <div id="sticky-banner-{{ forloop.counter }}" tabindex="-1" class="z-50 w-full py-4 border-b shadow-md
       {% if 'error' in message.tags %}border-red-400 bg-red-500 {% elif 'success' in message.tags %}border-green-400 bg-green-500 {% elif 'warning' in message.tags %}border-amber-400 bg-amber-500 {% elif 'info' in message.tags %}border-blue-400 bg-blue-500 {% else %}border-gray-400 bg-gray-500{% endif %}">
       <div class="container-default flex justify-between">
         <div class="flex items-center mx-auto">
@@ -16,7 +16,7 @@
           </p>
         </div>
         <div class="flex items-center">
-          <button data-dismiss-target="#sticky-banner" type="button" class="flex-shrink-0 inline-flex justify-center w-7 h-7 items-center text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5">
+          <button data-dismiss-target="#sticky-banner-{{ forloop.counter }}" type="button" class="flex-shrink-0 inline-flex justify-center w-7 h-7 items-center text-gray-400 hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5">
               <iconify-icon icon="material-symbols:close" class="text-black"></iconify-icon>
               <span class="sr-only">Close banner</span>
           </button>

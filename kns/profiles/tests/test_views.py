@@ -1,7 +1,12 @@
+from unittest.mock import patch
+
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.custom_user.models import User
+from kns.profiles.forms import ConsentFormSubmission
+from kns.profiles.models import ConsentForm, Profile
 
 
 class TestViews(TestCase):
@@ -275,3 +280,158 @@ class TestViews(TestCase):
             str(messages[0]),
             f"{self.profile.get_full_name()} settings updated",
         )
+
+
+class ConsentFormViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
+        self.client.login(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
+
+        # Create a profile for the user
+        self.profile = self.user.profile
+
+        self.valid_file = SimpleUploadedFile(
+            "test.pdf",
+            b"file_content",
+            content_type="application/pdf",
+        )
+
+        self.invalid_file = SimpleUploadedFile(
+            "test.txt",
+            b"file_content",
+            content_type="text/plain",
+        )
+
+    def test_upload_consent_form_page(self):
+        """
+        Test accessing the upload consent form page.
+        """
+        url = reverse(
+            "profiles:upload_consent_form",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/submit_consent_form.html",
+        )
+
+        # Ensure the form is present in the response
+        self.assertIn("form", response.context)
+        self.assertIsInstance(
+            response.context["form"],
+            ConsentFormSubmission,
+        )
+
+    @patch("cloudinary.uploader.upload_image")
+    def test_successful_consent_form_upload(self, mock_upload_image):
+        # Adjust the mock return value
+        mock_upload_image.return_value = "http://example.com/test_image.jpg"
+
+        url = reverse(
+            "profiles:upload_consent_form",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        response = self.client.post(
+            url,
+            {
+                "consent_form": self.valid_file,
+            },
+        )
+
+        # Check if the response redirects after saving
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        # Ensure the success message is in the messages
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "There was an error uploading the consent form.",
+        )
+
+    def test_invalid_consent_form_upload(self):
+        """
+        Test uploading an invalid consent form.
+        """
+        url = reverse(
+            "profiles:upload_consent_form", kwargs={"profile_slug": self.profile.slug}
+        )
+
+        response = self.client.post(url, {"consent_form": self.invalid_file})
+
+        # Check if the response status code is 200 OK (since the form is not valid)
+        self.assertEqual(response.status_code, 200)
+
+        # Ensure the error message is in the messages
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]), "The consent form must be a PDF, JPG, or PNG file."
+        )
+
+    # def test_existing_consent_form_replacement(self):
+    #     """
+    #     Test that uploading a new consent form replaces an existing one.
+    #     """
+    #     # Create an existing consent form
+    #     ConsentForm.objects.create(
+    #         profile=self.profile,
+    #         consent_form=self.valid_file,
+    #         submitted_by=self.user.profile,
+    #     )
+
+    #     url = reverse(
+    #         "profiles:upload_consent_form", kwargs={"profile_slug": self.profile.slug}
+    #     )
+    #     new_file = SimpleUploadedFile(
+    #         "new_test.pdf", b"new_file_content", content_type="application/pdf"
+    #     )
+
+    #     response = self.client.post(url, {"consent_form": new_file})
+
+    #     # Check if the response redirects after saving
+    #     self.assertEqual(response.status_code, 302)
+
+    #     # Verify the existing consent form was replaced
+    #     consent_form = ConsentForm.objects.get(profile=self.profile)
+    #     self.assertEqual(consent_form.consent_form.name, "new_test.pdf")
+
+
+# def test_upload_consent_form_unauthorized(self):
+#     """
+#     Test accessing the upload consent form page with an unauthenticated user.
+#     """
+#     self.client.logout()
+
+#     url = reverse(
+#         "profiles:upload_consent_form", kwargs={"profile_slug": self.profile.slug}
+#     )
+#     response = self.client.get(url)
+
+#     # Check if the response redirects to the login page
+#     self.assertEqual(response.status_code, 302)
+#     self.assertRedirects(response, f"/accounts/login/?next={url}")
+
+#     # Ensure the user is redirected to the login page

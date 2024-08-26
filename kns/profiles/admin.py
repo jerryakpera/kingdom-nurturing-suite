@@ -31,5 +31,8 @@ class ProfileAdmin(admin.ModelAdmin):
     inlines = [ConsentFormInline]
 
 
+# Register the ConsentForm model with the admin site
+admin.site.register(ConsentForm)
+
 # Register the ProfileAdmin with the admin site
 admin.site.register(Profile, ProfileAdmin)

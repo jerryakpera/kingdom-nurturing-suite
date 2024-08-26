@@ -447,6 +447,7 @@ class ConsentForm(modelmixins.TimestampedModel, models.Model):
     consent_form = CloudinaryField(
         null=True,
         blank=True,
+        resource_type="auto",
         folder="kns/files/consent_forms/",
     )
 

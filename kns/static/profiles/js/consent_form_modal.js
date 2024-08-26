@@ -5,9 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const $targetEl = document.getElementById('consent-form-modal');
 
   const options = {
-    placement: 'bottom-right',
+    placement: 'top-left',
     backdrop: 'dynamic',
-    backdropClasses: 'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40',
+    backdropClasses: 'bg-gray-900/90 fixed inset-0 z-40',
     closable: true,
   };
 
