@@ -13,7 +13,6 @@ from django.utils import timezone
 from django_countries.fields import CountryField
 
 from kns.core import modelmixins
-from kns.core.models import Setting
 from kns.custom_user.models import User
 
 from . import constants
@@ -98,6 +97,8 @@ class Profile(
     contact_details_is_visible = models.BooleanField(
         default=True,
     )
+    # TODO: Add setting to determine if the user receives
+    # email notifications
 
     place_of_birth_country = CountryField(
         null=True,
@@ -338,6 +339,8 @@ class Profile(
         bool
             True if the profile is under age, False otherwise.
         """
+        from kns.core.models import Setting
+
         settings = Setting.get_or_create_setting()
 
         return model_methods.is_under_age(
@@ -406,6 +409,65 @@ class Profile(
             True if the profile can become a member, False otherwise.
         """
         return model_methods.can_become_member_role(self)
+
+    def needs_approval_to_change_group_members_role(self):  # pragma: no cover
+        """
+        Determine if approval is required to change the role of a group member.
+
+        This method checks if the current member is the origin user (i.e., the
+        original leader of the group without a parent group). If they are,
+        no approval is required. Otherwise, it checks the settings to determine
+        if approval is required for role changes within the group.
+
+        Returns
+        -------
+        bool
+            True if approval is required to change the role; False otherwise.
+        """
+        from kns.core.models import Setting
+
+        settings = Setting.get_or_create_setting()
+
+        is_origin_user = not hasattr(
+            self.group_led,
+            "parent",
+        )
+
+        if is_origin_user:
+            return False
+
+        return settings.change_role_approval_required
+
+    def change_role_to_leader(self, leader):  # pragma: no cover
+        """
+        Change the role of a member to leader, with an optional approval process.
+
+        This method updates the role of the current member to "leader".
+        If approval is required, it creates an approval action instead of
+        directly changing the role.
+
+        Parameters
+        ----------
+        leader : Profile
+            The profile of the person initiating the role change.
+        """
+        from kns.core import constants as core_constants
+        from kns.core.models import MakeLeaderActionApproval
+
+        approval_required = leader.needs_approval_to_change_group_members_role()
+
+        if not approval_required:
+            # Update the profile role to leader
+            self.role = "leader"
+            self.save()
+        else:
+            # Create the approval action
+            MakeLeaderActionApproval.objects.create(
+                new_leader=self,
+                created_by=leader,
+                group_created_for=leader.group_in.group,
+                action_type=core_constants.CHANGE_ROLE_TO_LEADER_ACTION_TYPE,
+            )
 
 
 @receiver(post_save, sender=User)

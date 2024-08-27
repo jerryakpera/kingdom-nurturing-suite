@@ -63,6 +63,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "kns.core.context_processors.settings_context",
                 "kns.profiles.context_processors.profile_context",
                 "kns.groups.context_processors.group_context",
             ],

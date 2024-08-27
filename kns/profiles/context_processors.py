@@ -11,7 +11,7 @@ from .forms import ProfileSettingsForm
 from .models import Profile
 
 
-def profile_context(request):
+def profile_context(request):  # pragma: no cover
     """
     Context processor for a single profile.
 
@@ -45,7 +45,8 @@ def profile_context(request):
             # Check if the profile is a member of any of the request user's groups
             if request.user.is_authenticated:
                 is_member_of_user_group = GroupMember.objects.filter(
-                    profile=profile, group__leader=request.user.profile
+                    profile=profile,
+                    group__leader=request.user.profile,
                 ).exists()
 
         except Http404:

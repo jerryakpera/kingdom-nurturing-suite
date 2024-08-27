@@ -5,6 +5,7 @@ omit=
   manage.py
   */__init__.py
   */admin.py
+  */emails.py
   */urls.py
   */apps.py
   */tests/*

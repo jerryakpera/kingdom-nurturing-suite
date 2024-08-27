@@ -8,19 +8,31 @@
   </button>
 
   <!-- Dropdown menu -->
-  <div id="dropdownDots" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
-    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="profileMenuDropdown">
+  <div id="dropdownDots" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+    <ul class="py-2 text-sm text-gray-700" aria-labelledby="profileMenuDropdown">
       <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Edit bio details</a>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Edit bio details</a>
       </li>
 
       <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Earnings</a>
       </li>
     </ul>
     <div class="py-1">
-      <a href="{% url "profiles:profile_settings" profile_slug=profile.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Settings</a>
+      <a
+        href="{% url "profiles:profile_settings" profile_slug=profile.slug %}"
+        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
+        Settings
+      </a>
 
-      <a href="{% url "profiles:make_leader" profile_slug=profile.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Make leader</a>
+      {% if profile.can_become_leader_role and is_member_of_user_group %}
+        <a
+          href="{% url "profiles:make_leader" profile_slug=profile.slug %}"
+          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Make leader
+        </a>
+      {% endif %}
     </div>
   </div>

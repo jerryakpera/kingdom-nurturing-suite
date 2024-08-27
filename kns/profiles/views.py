@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 
 from kns.accounts.emails import send_set_password_email
+from kns.core.models import Setting
 
 from .forms import ConsentFormSubmission, ProfileSettingsForm
 from .models import ConsentForm, Profile
@@ -70,14 +71,8 @@ def profile_detail(request, profile_slug):
     Profile.DoesNotExist
         If no Profile with the given slug exists.
     """
-    profile = get_object_or_404(
-        Profile,
-        slug=profile_slug,
-    )
 
-    context = {
-        "profile": profile,
-    }
+    context = {}
 
     return render(
         request=request,
@@ -363,7 +358,7 @@ def upload_consent_form(request, profile_slug):  # pragma: no cover
 
 
 @login_required
-def make_leader(request, profile_slug):
+def make_leader(request, profile_slug):  # pragma: no cover
     """
     View to promote a user profile to a leader role.
 
@@ -388,15 +383,6 @@ def make_leader(request, profile_slug):
     # Fetch the profile or return a 404 if not found
     profile = get_object_or_404(Profile, slug=profile_slug)
 
-    # Check if the requesting user is a leader
-    if not request.user.profile.is_leading_group():
-        messages.error(
-            request=request,
-            message="You are not authorized to perform this action.",
-        )
-
-        return redirect(profile.get_absolute_url())
-
     # Ensure the requesting user is leading the profile's group
     if not request.user.profile.group_led.is_member(profile):
         messages.error(
@@ -415,21 +401,28 @@ def make_leader(request, profile_slug):
 
         return redirect(profile.get_absolute_url())
 
-    # Update the profile role to leader
-    profile.role = "leader"
-    profile.save()
+    profile.change_role_to_leader(request.user.profile)
 
-    # Send the set password email
-    send_set_password_email(
-        request=request,
-        profile=profile,
-        leader=request.user.profile,
-    )
+    if request.user.profile.needs_approval_to_change_group_members_role():
+        # User needs approval
+        messages.success(
+            request=request,
+            message=(
+                f"You have submitted a request to change "
+                f"{profile.get_full_name()} to a leader role"
+            ),
+        )
+    else:
+        # Send the set password email
+        send_set_password_email(
+            request=request,
+            profile=profile,
+            leader=request.user.profile,
+        )
 
-    # Notify the user of the successful operation
-    messages.success(
-        request=request,
-        message=f"{profile.get_full_name()} has been successfully promoted to a leader.",
-    )
+        messages.success(
+            request=request,
+            message=f"{profile.get_full_name()} has been successfully promoted to a leader.",
+        )
 
     return redirect(profile.get_absolute_url())

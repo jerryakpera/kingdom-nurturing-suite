@@ -21,7 +21,9 @@
         </div>
       </div>
 
-      {% include "profiles/components/profile_card/profile_card_menu.html" %}
+      {% if is_member_of_user_group or profile == request.user.profile %}
+        {% include "profiles/components/profile_card/profile_card_menu.html" %}
+      {% endif %}
     </div>
 
     <div class="mb-0.5 flex items-center gap-2">

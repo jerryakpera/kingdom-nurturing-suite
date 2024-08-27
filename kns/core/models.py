@@ -2,10 +2,17 @@
 Models for the core app.
 """
 
+from datetime import timedelta
+
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
+from django.utils import timezone
+
+from kns.groups.models import Group
+from kns.profiles.models import Profile
 
 from . import constants
+from .modelmixins import TimestampedModel
 
 
 class FAQ(models.Model):
@@ -86,47 +93,47 @@ class Setting(models.Model):
         verbose_name="Default Contact Visibility",
         help_text="Determines if the contact information is visible by default.",
     )
-    change_role_permission_required = models.BooleanField(
+    change_role_approval_required = models.BooleanField(
         default=constants.CHANGE_ROLE_PERMISSION_REQUIRED,
         choices=constants.BOOLEAN_CHOICES,
         verbose_name="Change Role Permission Required",
-        help_text="Specifies if permission is required to change a user's role.",
+        help_text="Specifies if approval is required to change a user's role.",
     )
-    publish_event_permission_required = models.BooleanField(
+    publish_event_approval_required = models.BooleanField(
         default=constants.PUBLISH_EVENT_PERMISSION_REQUIRED,
         choices=constants.BOOLEAN_CHOICES,
         verbose_name="Publish Event Permission Required",
-        help_text="Specifies if permission is required to publish an event.",
+        help_text="Specifies if approval is required to publish an event.",
     )
-    start_mentorship_permission_required = models.BooleanField(
+    start_mentorship_approval_required = models.BooleanField(
         default=constants.START_MENTORSHIP_PERMISSION_REQUIRED,
         choices=constants.BOOLEAN_CHOICES,
         verbose_name="Start Mentorship Permission Required",
-        help_text="Specifies if permission is required to start a mentorship.",
+        help_text="Specifies if approval is required to start a mentorship.",
     )
-    add_group_member_permission_required = models.BooleanField(
+    add_group_member_approval_required = models.BooleanField(
         default=constants.ADD_GROUP_MEMBER_PERMISSION_REQUIRED,
         choices=constants.BOOLEAN_CHOICES,
         verbose_name="Add Group Member Permission Required",
-        help_text="Specifies if permission is required to add a member to a group.",
+        help_text="Specifies if approval is required to add a member to a group.",
     )
-    publish_testimony_permission_required = models.BooleanField(
+    publish_testimony_approval_required = models.BooleanField(
         default=constants.PUBLISH_TESTIMONY_PERMISSION_REQUIRED,
         choices=constants.BOOLEAN_CHOICES,
         verbose_name="Publish Testimony Permission Required",
-        help_text="Specifies if permission is required to publish a testimony.",
+        help_text="Specifies if approval is required to publish a testimony.",
     )
-    publish_good_practice_permission_required = models.BooleanField(
+    publish_good_practice_approval_required = models.BooleanField(
         default=constants.PUBLISH_GOOD_PRACTICE_PERMISSION_REQUIRED,
         choices=constants.BOOLEAN_CHOICES,
         verbose_name="Publish Good Practice Permission Required",
-        help_text="Specifies if permission is required to publish a good practice.",
+        help_text="Specifies if approval is required to publish a good practice.",
     )
-    publish_prayer_request_permission_required = models.BooleanField(
+    publish_prayer_request_approval_required = models.BooleanField(
         default=constants.PUBLISH_PRAYER_REQUEST_PERMISSION_REQUIRED,
         choices=constants.BOOLEAN_CHOICES,
         verbose_name="Publish Prayer Request Permission Required",
-        help_text="Specifies if permission is required to publish a prayer request.",
+        help_text="Specifies if approval is required to publish a prayer request.",
     )
     minimum_mentorship_duration_in_weeks = models.PositiveIntegerField(
         default=4,
@@ -252,3 +259,173 @@ class Setting(models.Model):
 
         Provides human-readable names for the model and its plural form.
         """
+
+
+class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
+    """
+    Model representing an action that requires approval from a leader.
+    """
+
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("approved", "Approved"),
+        ("rejected", "Rejected"),
+        ("expired", "Expired"),
+    ]
+
+    ACTION_TYPE_CHOICES = [
+        (
+            constants.CHANGE_ROLE_TO_LEADER_ACTION_TYPE,
+            "Change role to leader",
+        ),
+    ]
+
+    created_by = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="initiated_approvals",
+    )
+
+    group_created_for = models.ForeignKey(
+        Group,
+        on_delete=models.CASCADE,
+        related_name="approval_requests",
+    )
+
+    action_type = models.CharField(
+        max_length=50,
+        choices=ACTION_TYPE_CHOICES,
+        default="change_role_to_leader",
+    )
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default="pending",
+    )
+
+    approved_by = models.ForeignKey(
+        Profile,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_actions",
+    )
+
+    # 1. Implement timeouts for approvals
+    timeout_duration = models.DurationField(
+        default=timedelta(days=7),
+    )
+
+    def approve(self, leader):
+        """
+        Approve the action request.
+
+        Parameters
+        ----------
+        leader : Profile
+            The leader that will approve the action.
+        """
+        # Ensure that actions cannot be approved multiple times
+        # Set the approved_by field to the profile that approved the
+        # request
+
+    def reject(self, leader):
+        """
+        Reject the action request.
+
+        Parameters
+        ----------
+        leader : Profile
+            The leader that will reject the action.
+        """
+        # Ensure that actions cannot be approved or rejected multiple
+        # times.
+        # Notify the initiator about the rejection
+
+    def check_timeout(self):  # pragma: no cover
+        """
+        Check if the approval request has timed out.
+        """
+        if (
+            self.status == "pending"
+            and (self.created_at + self.timeout_duration) < timezone.now()
+        ):
+            self.status = "expired"
+
+            self.save()
+            self.notify_approval()
+
+
+class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
+    """
+    Specialized action approval for making a profile a leader.
+    """
+
+    new_leader = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="make_leader_action_approvals",
+    )
+
+    def notify_leader(self):
+        """
+        Notify the new leader of the approval request.
+
+        This method sends a notification to the individual who is being
+        considered for a leader role, informing them of the pending
+        approval request.
+        """
+        # Implement notification logic specific to making someone a leader
+        pass
+
+    def notify_approval(self):
+        """
+        Notify relevant parties of the approval status change, including the new leader.
+
+        This method extends the base `notify_approval` to include additional
+        logic specific to leader appointments. It ensures that all relevant
+        parties, including the newly appointed leader, are notified of the
+        change in approval status.
+        """
+        super().notify_approval()
+        # Add any additional notification logic for leader appointments
+
+    def save(self, *args, **kwargs):
+        """
+        Override the save method to notify the leader upon creation and check for timeouts.
+
+        This method checks if the instance is new. If so, it triggers the
+        notification to the new leader. If the instance already exists,
+        it checks for any timeout conditions after saving.
+
+        Parameters
+        ----------
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments.
+        """
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+
+        if is_new:
+            self.notify_leader()
+        else:
+            self.check_timeout()
+
+    def __str__(self):
+        """
+        Return a human-readable string representation of the approval action.
+
+        This method returns a string combining the action type and the full
+        name of the new leader, providing a clear and concise representation
+        of the action for display purposes.
+
+        Returns
+        -------
+        str
+            A string representing the action type and the new leader's
+            full name.
+        """
+        return f"{self.get_action_type_display()} ({self.new_leader.get_full_name()})"
