@@ -1,12 +1,13 @@
 from unittest.mock import patch
 
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.messages import get_messages
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.custom_user.models import User
-from kns.profiles.forms import ConsentFormSubmission
-from kns.profiles.models import ConsentForm, Profile
+from kns.groups.models import Group
+from kns.groups.tests import test_constants as group_test_consants
+from kns.profiles.models import Profile
 
 
 class TestViews(TestCase):
@@ -279,4 +280,160 @@ class TestViews(TestCase):
         self.assertEqual(
             str(messages[0]),
             f"{self.profile.get_full_name()} settings updated",
+        )
+
+
+class MakeLeaderViewTests(TestCase):
+    def setUp(self):
+        """
+        Set up the test users, profiles, and groups.
+        """
+        self.leader_user = User.objects.create_user(
+            email="leader@example.com",
+            password="password123",
+        )
+        self.member_user = User.objects.create_user(
+            email="member@example.com",
+            password="password123",
+        )
+        self.other_user = User.objects.create_user(
+            email="other@example.com",
+            password="password123",
+        )
+
+        self.leader_profile = self.leader_user.profile
+        self.member_profile = self.member_user.profile
+        self.other_profile = self.other_user.profile
+
+        self.member_profile.first_name = "John"
+        self.member_profile.last_name = "Doe"
+        self.member_profile.gender = "Male"
+        self.member_profile.date_of_birth = "1990-01-01"
+        self.member_profile.place_of_birth_country = "USA"
+        self.member_profile.place_of_birth_city = "New York"
+        self.member_profile.location_country = "USA"
+        self.member_profile.location_city = "New York"
+        self.member_profile.slug = "john-doe"
+        self.member_profile.save()
+
+        self.member_user.verified = True
+        self.member_user.agreed_to_terms = True
+        self.member_user.save()
+
+        # Create a group
+        self.group = Group.objects.create(
+            name="Test Group",
+            slug="test-group",
+            leader=self.leader_profile,
+            description=group_test_consants.VALID_GROUP_DESCRIPTION,
+        )
+        self.group.add_member(self.member_profile)
+
+        self.url = reverse(
+            "profiles:make_leader",
+            args=[self.member_profile.slug],
+        )
+
+    def test_make_leader_success(self):
+        """
+        Test that a leader can successfully promote a group member to a leader.
+        """
+        self.client.login(
+            email="leader@example.com",
+            password="password123",
+        )
+
+        response = self.client.get(self.url)
+
+        self.member_profile.refresh_from_db()
+        self.assertEqual(self.member_profile.role, "leader")
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            "John Doe has been successfully promoted to a leader.",
+        )
+
+        self.assertRedirects(response, self.member_profile.get_absolute_url())
+
+    def test_make_leader_not_leading_group(self):
+        """
+        Test that a user who is not leading the group cannot promote someone to leader.
+        """
+        self.client.login(
+            email="other@example.com",
+            password="password123",
+        )
+
+        response = self.client.post(self.url)
+
+        self.member_profile.refresh_from_db()
+        self.assertEqual(
+            self.member_profile.role,
+            "member",
+        )
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            "You are not authorized to perform this action.",
+        )
+
+        self.assertRedirects(response, self.member_profile.get_absolute_url())
+
+    def test_make_leader_not_group_member(self):
+        """
+        Test that a leader cannot promote someone who is not a member
+        of their group.
+        """
+        self.client.login(email="leader@example.com", password="password123")
+
+        other_profile_url = reverse(
+            "profiles:make_leader", args=[self.other_profile.slug]
+        )
+        response = self.client.post(other_profile_url)
+
+        self.other_profile.refresh_from_db()
+        self.assertEqual(self.other_profile.role, "member")
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            f"You must be the leader of "
+            f"{self.other_profile.get_full_name()} to perform this action.",
+        )
+
+        self.assertRedirects(response, self.other_profile.get_absolute_url())
+
+    def test_make_leader_ineligible_profile(self):
+        """
+        Test that an ineligible profile cannot be promoted to leader.
+        """
+        self.client.login(
+            email="leader@example.com",
+            password="password123",
+        )
+
+        with patch.object(
+            Profile,
+            "can_become_leader_role",
+            return_value=False,
+        ):
+            response = self.client.post(self.url)
+
+        self.member_profile.refresh_from_db()
+        self.assertEqual(
+            self.member_profile.role,
+            "member",
+        )
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            f"{self.member_profile.get_full_name()} is not eligible to become a leader.",
+        )
+
+        self.assertRedirects(
+            response,
+            self.member_profile.get_absolute_url(),
         )

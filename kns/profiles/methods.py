@@ -338,3 +338,29 @@ def get_current_consent_form(profile):
         )
         else None
     )
+
+
+def can_become_leader_role(profile):
+    """
+    Determine if the profile can become a leader.
+
+    Parameters
+    ----------
+    profile : Profile
+        The profile to check if under age.
+
+    Returns
+    -------
+    bool
+        True if the profile can become a leader and False if not.
+    """
+    if not profile.is_profile_complete():
+        return False
+
+    if profile.role == "leader":
+        return False
+
+    if profile.needs_consent_form():
+        return False
+
+    return True

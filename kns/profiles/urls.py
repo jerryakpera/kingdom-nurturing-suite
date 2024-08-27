@@ -6,6 +6,11 @@ app_name = "profiles"
 
 urlpatterns = [
     path(
+        "<slug:profile_slug>/make-leader",
+        views.make_leader,
+        name="make_leader",
+    ),
+    path(
         "<slug:profile_slug>/activities",
         views.profile_activities,
         name="profile_activities",

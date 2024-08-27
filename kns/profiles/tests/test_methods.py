@@ -320,3 +320,36 @@ class ProfileMethodsTests(TestCase):
         self.profile.consent_form = None
         consent_form = methods.get_current_consent_form(self.profile)
         self.assertIsNone(consent_form)
+
+    def test_can_become_leader_role_false_due_to_incomplete_profile(self):
+        """Test that a profile cannot become a leader if the
+        profile is incomplete."""
+        self.profile.is_profile_complete = Mock(
+            return_value=False,
+        )
+        self.assertFalse(methods.can_become_leader_role(self.profile))
+
+    def test_can_become_leader_role_false_due_to_already_being_leader(self):
+        """Test that a profile cannot become a leader if the profile
+        already has the leader role."""
+        self.profile.is_profile_complete = Mock(
+            return_value=True,
+        )
+        self.profile.role = "leader"
+        self.assertFalse(methods.can_become_leader_role(self.profile))
+
+    def test_can_become_leader_role_false_due_to_needing_consent_form(self):
+        """Test that a profile cannot become a leader if the profile
+        needs a consent form."""
+        self.profile.is_profile_complete = Mock(return_value=True)
+        self.profile.role = "member"
+        self.profile.needs_consent_form = Mock(return_value=True)
+        self.assertFalse(methods.can_become_leader_role(self.profile))
+
+    def test_can_become_leader_role_true(self):
+        """Test that a profile can become a leader if all conditions
+        are met."""
+        self.profile.is_profile_complete = Mock(return_value=True)
+        self.profile.role = "member"
+        self.profile.needs_consent_form = Mock(return_value=False)
+        self.assertTrue(methods.can_become_leader_role(self.profile))

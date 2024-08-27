@@ -385,6 +385,17 @@ class Profile(
             # There is no consent form so return True
             return True
 
+    def can_become_leader_role(self):
+        """
+        Determine if the profile can become a leader role.
+
+        Returns
+        -------
+        bool
+            True if the profile can become a leader, False otherwise.
+        """
+        return model_methods.can_become_leader_role(self)
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
