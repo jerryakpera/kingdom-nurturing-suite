@@ -7,8 +7,6 @@ from datetime import date
 
 from django.urls import reverse
 
-from kns.core.models import Setting
-
 
 def get_full_name(profile):
     """
@@ -361,6 +359,35 @@ def can_become_leader_role(profile):
         return False
 
     if profile.needs_consent_form():
+        return False
+
+    return True
+
+
+def can_become_member_role(profile):
+    """
+    Determine if the profile can become a member.
+
+    Parameters
+    ----------
+    profile : Profile
+        The profile to check if under age.
+
+    Returns
+    -------
+    bool
+        True if the profile can become a member and False if not.
+    """
+    if not profile.is_profile_complete():
+        return False
+
+    if profile.role == "member":
+        return False
+
+    if profile.needs_consent_form():
+        return False
+
+    if profile.is_leading_group():
         return False
 
     return True

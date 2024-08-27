@@ -396,6 +396,17 @@ class Profile(
         """
         return model_methods.can_become_leader_role(self)
 
+    def can_become_member_role(self):
+        """
+        Determine if the profile can become a member role.
+
+        Returns
+        -------
+        bool
+            True if the profile can become a member, False otherwise.
+        """
+        return model_methods.can_become_member_role(self)
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

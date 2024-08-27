@@ -1,5 +1,4 @@
 from datetime import date, timedelta
-from unittest.mock import patch
 
 import pytest
 from django.db import IntegrityError
@@ -65,36 +64,36 @@ class TestProfileModel(TestCase):
 
         assert self.profile.get_role_display_str() == "External Person"
 
-    # def test_profile_is_leading_group(self):
-    #     """
-    #     Test that the is_leading_group method correctly identifies if
-    #     the profile is leading a group.
-    #     """
-    #     self.profile.first_name = "John"
-    #     self.profile.last_name = "Doe"
-    #     self.profile.gender = "Male"
-    #     self.profile.date_of_birth = "1990-01-01"
-    #     self.profile.place_of_birth_country = "USA"
-    #     self.profile.place_of_birth_city = "New York"
-    #     self.profile.location_country = "USA"
-    #     self.profile.location_city = "New York"
-    #     self.profile.role = "leader"
-    #     self.profile.slug = "john-doe"
+    def test_profile_is_leading_group(self):
+        """
+        Test that the is_leading_group method correctly identifies if
+        the profile is leading a group.
+        """
+        self.profile.first_name = "John"
+        self.profile.last_name = "Doe"
+        self.profile.gender = "Male"
+        self.profile.date_of_birth = "1990-01-01"
+        self.profile.place_of_birth_country = "USA"
+        self.profile.place_of_birth_city = "New York"
+        self.profile.location_country = "USA"
+        self.profile.location_city = "New York"
+        self.profile.role = "leader"
+        self.profile.slug = "john-doe"
 
-    #     self.user.verified = True
-    #     self.user.agreed_to_terms = True
+        self.user.verified = True
+        self.user.agreed_to_terms = True
 
-    #     self.profile.save()
-    #     self.user.save()
+        self.profile.save()
+        self.user.save()
 
-    #     Group.objects.create(
-    #         leader=self.profile,
-    #         name="Test Group",
-    #         slug="test-group",
-    #         description=test_constants.VALID_GROUP_DESCRIPTION,
-    #     )
+        Group.objects.create(
+            leader=self.profile,
+            name="Test Group",
+            slug="test-group",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
 
-    #     assert self.profile.is_leading_group()
+        assert self.profile.is_leading_group()
 
     def test_profile_get_age(self):
         """
@@ -237,36 +236,6 @@ class TestProfileModel(TestCase):
 
         assert str(self.profile) == "John Doe"
 
-    def test_profile_is_leading_group(self):
-        """
-        Test that the __str__ method returns the full name of the profile.
-        """
-        self.profile.first_name = "John"
-        self.profile.last_name = "Doe"
-        self.profile.gender = "Male"
-        self.profile.date_of_birth = "1990-01-01"
-        self.profile.place_of_birth_country = "USA"
-        self.profile.place_of_birth_city = "New York"
-        self.profile.location_country = "USA"
-        self.profile.location_city = "New York"
-        self.profile.role = "leader"
-        self.profile.slug = "john-doe"
-
-        self.user.verified = True
-        self.user.agreed_to_terms = True
-
-        self.profile.save()
-        self.user.save()
-
-        Group.objects.create(
-            leader=self.profile,
-            name="Test Group",
-            slug="test-group",
-            description=test_constants.VALID_GROUP_DESCRIPTION,
-        )
-
-        assert self.profile.is_leading_group()
-
     def test_get_absolute_url(self):
         expected_url = reverse(
             "profiles:profile_detail",
@@ -332,7 +301,6 @@ class TestProfileModel(TestCase):
             expected_url,
         )
 
-    # Add more tests as needed, for example:
     def test_is_eligible_to_register_group(self):
         # Set up necessary data and mock methods as needed
         self.profile.is_mentor = True
@@ -352,6 +320,57 @@ class TestProfileModel(TestCase):
         self.profile.save()
 
         self.assertFalse(self.profile.is_profile_complete())
+
+    def test_can_become_member_role_true(self):
+        """
+        Test that the can_become_member_role method returns True when the
+        profile is eligible to become a member.
+        """
+        self.profile.first_name = "John"
+        self.profile.last_name = "Doe"
+        self.profile.gender = "Male"
+        self.profile.date_of_birth = date(1990, 1, 1)
+        self.profile.place_of_birth_country = "USA"
+        self.profile.place_of_birth_city = "New York"
+        self.profile.location_country = "USA"
+        self.profile.location_city = "New York"
+        self.profile.role = "leader"
+        self.profile.slug = "john-doe"
+
+        self.profile.save()
+
+        self.profile.user.verified = True
+        self.profile.user.agreed_to_terms = True
+
+        assert self.profile.can_become_member_role() is True
+
+    def test_can_become_member_role_unverified(self):
+        """
+        Test that the can_become_member_role method returns False when the
+        profile is not verified.
+        """
+        # Set up the profile with unverified status
+        self.profile.is_verified = False
+        self.profile.is_under_age = False
+        self.profile.is_banned = False
+
+        self.profile.save()
+
+        assert self.profile.can_become_member_role() is False
+
+    def test_can_become_member_role_under_age(self):
+        """
+        Test that the can_become_member_role method returns False when the
+        profile is under age.
+        """
+        # Set up the profile as under age
+        self.profile.is_verified = True
+        self.profile.is_under_age = True
+        self.profile.is_banned = False
+
+        self.profile.save()
+
+        assert self.profile.can_become_member_role() is False
 
 
 class TestConsentFormModel:

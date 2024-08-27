@@ -7,7 +7,7 @@ from django.urls import reverse
 from kns.core.models import Setting
 from kns.custom_user.models import User
 from kns.groups.models import Group
-from kns.groups.tests import test_constants
+from kns.groups.tests import factories, test_constants
 
 from .. import methods
 from ..models import ConsentForm
@@ -353,3 +353,92 @@ class ProfileMethodsTests(TestCase):
         self.profile.role = "member"
         self.profile.needs_consent_form = Mock(return_value=False)
         self.assertTrue(methods.can_become_leader_role(self.profile))
+
+    def test_can_become_member_role_false_due_to_incomplete_profile(self):
+        """
+        Test that a profile cannot become a member if the profile
+        is incomplete.
+        """
+
+        self.profile.is_profile_complete = Mock(return_value=False)
+
+        self.profile.role = "leader"
+        self.profile.needs_consent_form = Mock(return_value=False)
+
+        self.assertFalse(methods.can_become_member_role(self.profile))
+
+    def test_can_become_member_role_false_due_to_already_being_member(self):
+        """
+        Test that a profile cannot become a member if the profile
+        is already a member.
+        """
+
+        self.profile.is_profile_complete = Mock(return_value=True)
+
+        self.profile.role = "member"
+        self.profile.needs_consent_form = Mock(return_value=False)
+
+        self.assertFalse(methods.can_become_member_role(self.profile))
+
+    def test_can_become_member_role_false_due_to_needing_consent_form(self):
+        """
+        Test that a profile cannot become a member if the profile
+        needs a consent form.
+        """
+
+        self.profile.is_profile_complete = Mock(return_value=True)
+
+        self.profile.role = "leader"
+        self.profile.needs_consent_form = Mock(return_value=True)
+
+        self.assertFalse(methods.can_become_member_role(self.profile))
+
+    def test_can_become_member_role_false_due_to_leading_group(self):
+        """
+        Test that a profile cannot become a member if the profile is
+        leading a group.
+        """
+        self.profile.is_profile_complete = Mock(return_value=True)
+
+        self.profile.role = "leader"
+
+        factories.GroupFactory(
+            name="Bible Study Group",
+            location_country="Nigeria",
+            location_city="Lagos",
+            leader=self.profile,
+        )
+
+        self.profile.needs_consent_form = Mock(return_value=False)
+
+        self.profile.is_leading_group = Mock(return_value=True)
+        self.assertFalse(methods.can_become_member_role(self.profile))
+
+    def test_can_become_member_role_true(self):
+        """
+        Test that a profile can become a member if all conditions
+        are met.
+        """
+
+        self.profile.is_profile_complete = Mock(return_value=True)
+
+        self.profile.role = "leader"
+        self.profile.needs_consent_form = Mock(return_value=False)
+
+        self.profile.is_leading_group = Mock(return_value=False)
+
+        group_leader_user = User.objects.create(
+            email="groupleader@example.com",
+            password="password",
+        )
+
+        group = factories.GroupFactory(
+            name="Bible Study Group",
+            location_country="Nigeria",
+            location_city="Lagos",
+            leader=group_leader_user.profile,
+        )
+
+        group.add_member(self.profile)
+
+        self.assertTrue(methods.can_become_member_role(self.profile))
