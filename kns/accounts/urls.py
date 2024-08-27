@@ -26,6 +26,11 @@ urlpatterns = [
         name="change_password",
     ),
     path(
+        "set-password/<uidb64>/<token>/",
+        views.set_password,
+        name="set_password",
+    ),
+    path(
         "agree-to-terms/",
         views.agree_to_terms,
         name="agree_to_terms",

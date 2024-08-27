@@ -10,13 +10,13 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 
 from kns.custom_user.models import User
+from kns.profiles.models import Profile
 
 from .decorators import guest_required
 from .emails import send_password_change_email, send_verification_email
-from .forms import ChangePasswordForm, LoginForm
+from .forms import ChangePasswordForm, LoginForm, SetPasswordForm
 from .utils import decode_uid, verify_token
 
 
@@ -230,7 +230,7 @@ def verify_email(request, uidb64, token):
         verification failure.
     """
     uid = decode_uid(uidb64)
-    user = User.objects.get(pk=uid)
+    user = get_object_or_404(User, pk=uid)
 
     if user and verify_token(user, token):
         user.verified = True
@@ -355,3 +355,107 @@ def agree_to_terms(request):
         request=request,
         template_name="accounts/pages/agree_to_terms.html",
     )
+
+
+def set_password(request, uidb64, token):
+    """
+    Handle the process of setting a new password for the user.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    uidb64 : str
+        The base64 encoded user ID.
+    token : str
+        The token generated to verify the user.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the set password form or redirects with a
+        success or error message.
+    """
+
+    set_password_form = SetPasswordForm(request.POST or None)
+
+    uid = decode_uid(uidb64)
+    user = get_object_or_404(User, pk=uid)
+
+    profile = user.profile
+
+    # Check if the user already has a password set
+    if user.has_usable_password():
+        messages.info(
+            request=request,
+            message=(
+                "You already have a password set. "
+                "Please log in using your existing password."
+            ),
+        )
+
+        return redirect("accounts:login")
+
+    if user and verify_token(user, token):
+        if request.method == "POST":
+            if set_password_form.is_valid():
+                new_password = set_password_form.cleaned_data.get(
+                    "new_password",
+                )
+
+                user = User.objects.get(
+                    email=profile.email,
+                )
+
+                user.set_password(new_password)
+                user.save()
+
+                profile.save()
+
+                messages.success(
+                    request,
+                    (
+                        "Your password has been set. Use your newly set "
+                        "password to login to KNT"
+                    ),
+                )
+
+                return redirect("accounts:login")
+            else:
+                # Extract form errors and create a user-friendly message
+                errors = set_password_form.errors.as_text()
+
+                messages.error(request, f"Password reset failed. {errors}")
+
+        context = {
+            "token": token,
+            "uidb64": uidb64,
+            "set_password_form": set_password_form,
+        }
+
+        return render(
+            request=request,
+            template_name="accounts/pages/set_password.html",
+            context=context,
+        )
+
+    else:
+        messages.warning(
+            request=request,
+            message=(
+                "The link you are using has expired."
+                "Please request a new link from your leader."
+            ),
+        )
+
+        context = {
+            "token": token,
+            "uidb64": uidb64,
+            "set_password_form": set_password_form,
+        }
+
+        return render(
+            request=request,
+            template_name="accounts/pages/set_password.html",
+            context=context,
+        )

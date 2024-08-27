@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import make_password
 from django.contrib.messages import get_messages
 from django.core import mail
 from django.test import Client, TestCase
@@ -8,7 +9,7 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from ..forms import ChangePasswordForm, LoginForm
+from ..forms import ChangePasswordForm, LoginForm, SetPasswordForm
 from ..utils import generate_verification_token
 
 User = get_user_model()
@@ -551,4 +552,162 @@ class AgreeToTermsViewTests(TestCase):
         self.assertContains(
             response,
             "You must agree to the Terms and Conditions to proceed.",
+        )
+
+
+class SetPasswordViewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="oldpassword",
+            is_active=True,
+        )
+
+        self.member_user = User.objects.create_user(
+            email="memberuser@example.com",
+        )
+
+        self.token = generate_verification_token(self.member_user)
+        self.uidb64 = urlsafe_base64_encode(
+            force_bytes(self.member_user.pk),
+        )
+
+        self.url = reverse(
+            "accounts:set_password",
+            args=[self.uidb64, self.token],
+        )
+
+    def test_set_password_success(self):
+        """
+        Test that the set_password view successfully sets
+        a new password.
+        """
+
+        response = self.client.post(
+            self.url,
+            data={
+                "new_password": "Newpassword@123",
+                "confirm_password": "Newpassword@123",
+            },
+        )
+
+        self.assertFalse(self.member_user.has_usable_password())
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("accounts:login"))
+
+        self.member_user.refresh_from_db()
+        self.assertTrue(self.member_user.check_password("Newpassword@123"))
+
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                "Your password has been set. "
+                "Use your newly set password to login to KNT"
+            ),
+        )
+
+    def test_set_password_invalid_token(self):
+        """
+        Test that the set_password view handles an invalid
+        token correctly.
+        """
+        invalid_token = "invalid-token"
+        url = reverse(
+            "accounts:set_password",
+            args=[self.uidb64, invalid_token],
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "accounts/pages/set_password.html",
+        )
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                "The link you are using has expired."
+                "Please request a new link from your leader."
+            ),
+        )
+
+    def test_set_password_already_set(self):
+        """
+        Test that the set_password view handles the case where the
+        user already has a password set.
+        """
+        self.member_user.set_password("Newpassword@123")
+        self.member_user.save()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("accounts:login"))
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                "You already have a password set. "
+                "Please log in using your existing password."
+            ),
+        )
+
+    def test_set_password_profile_not_found(self):
+        """
+        Test that the set_password view handles the case where the user
+        profile is not found.
+        """
+        # Create an invalid UID to trigger a profile not found scenario
+        invalid_uidb64 = urlsafe_base64_encode(force_bytes(99999))
+        url = reverse(
+            "accounts:set_password",
+            args=[invalid_uidb64, self.token],
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed(
+            response,
+            "404.html",
+        )
+
+    def test_set_password_post_form_invalid(self):
+        """
+        Test that the set_password view handles invalid form data.
+        """
+        response = self.client.post(
+            self.url,
+            data={
+                "new_password": "short",
+                "confirm_password": "short",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "accounts/pages/set_password.html",
+        )
+
+        form = response.context.get("set_password_form")
+
+        self.assertFalse(form.is_valid())
+        self.assertIsInstance(form, SetPasswordForm)
+
+        self.assertIn(
+            "Your password must be at least 8 characters",
+            form.errors["new_password"],
         )
