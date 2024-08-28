@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from formtools.wizard.views import SessionWizardView
 
-from kns.accounts.emails import send_set_password_email
+from kns.accounts import emails as account_emails
 from kns.core.utils import log_this
 from kns.custom_user.models import User
 
@@ -113,6 +113,7 @@ class NewMemberView(SessionWizardView):  # pragma: no cover
             user = User.objects.create(
                 email=new_profile_data.get("email"),
             )
+
             # Create the profile associated with the user
             profile, profile_created = Profile.objects.get_or_create(
                 user=user, defaults=new_profile_data
@@ -127,15 +128,17 @@ class NewMemberView(SessionWizardView):  # pragma: no cover
             # Add the new member to the users group
             self.request.user.profile.group_led.add_member(profile)
 
-            if profile.role in ["member", "external_person"]:
-                # TODO: send_welcome_email(self.request, profile, self.request.user.profile)
-                pass
+            account_emails.send_welcome_email(
+                request=self.request,
+                profile=profile,
+                leader=self.request.user.profile,
+            )
 
             if profile.role == "leader":
-                # TODO: send_welcome_password_email(
-                #     self.request, profile, self.request.user.profile
-                # )
-                pass
+                account_emails.send_set_password_email(
+                    request=self.request,
+                    profile=profile,
+                )
 
             messages.success(
                 request=self.request,
@@ -148,7 +151,8 @@ class NewMemberView(SessionWizardView):  # pragma: no cover
 
             return redirect(profile)
 
-        except Exception:
+        except Exception as e:
+            log_this(e)
             messages.error(
                 request=self.request,
                 message=(
@@ -610,10 +614,9 @@ def make_leader(request, profile_slug):  # pragma: no cover
         )
     else:
         # Send the set password email
-        send_set_password_email(
+        account_emails.send_set_password_email(
             request=request,
             profile=profile,
-            leader=request.user.profile,
         )
 
         messages.success(

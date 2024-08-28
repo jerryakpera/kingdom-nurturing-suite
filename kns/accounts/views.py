@@ -11,8 +11,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
+from kns.core.utils import log_this
 from kns.custom_user.models import User
-from kns.profiles.models import Profile
 
 from .decorators import guest_required
 from .emails import send_password_change_email, send_verification_email
@@ -385,7 +385,7 @@ def set_password(request, uidb64, token):
     profile = user.profile
 
     # Check if the user already has a password set
-    if user.has_usable_password():
+    if user.has_usable_password() and user.password:
         messages.info(
             request=request,
             message=(

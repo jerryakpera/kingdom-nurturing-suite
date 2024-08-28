@@ -96,7 +96,7 @@ def send_verification_email(request, user):
     user.profile.save()
 
 
-def send_set_password_email(request, profile, leader):
+def send_set_password_email(request, profile):
     """
     Send an email to the user to set their password.
 
@@ -111,8 +111,6 @@ def send_set_password_email(request, profile, leader):
         The HTTP request object, used to retrieve the current site domain.
     profile : Profile
         The profile object of the user who needs to set a password.
-    leader : User
-        The leader who initiated the set password process.
 
     Returns
     -------
@@ -120,7 +118,7 @@ def send_set_password_email(request, profile, leader):
         The function sends an email and updates the profile but does
         not return any value.
     """
-    subject = "Create your KNS password"
+    subject = "Set your KNS password"
 
     # Get the current domain
     current_site = get_current_site(request)
@@ -132,6 +130,58 @@ def send_set_password_email(request, profile, leader):
     # Render the HTML email template
     html_message = render_to_string(
         "accounts/emails/set_password_email.html",
+        {
+            "profile": profile,
+            "domain": current_site.domain,
+            "uid": uid,
+            "token": token,
+        },
+    )
+
+    # Send the email
+    send_mail(
+        subject=subject,
+        message="",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[profile.email],
+        html_message=html_message,
+    )
+
+    # Save the token to the profile
+    profile.email_token = token
+    profile.save()
+
+
+def send_welcome_email(request, profile, leader):
+    """
+    Send a welcome email to a newly registered profile.
+
+    This function generates a unique token and UID for the profile,
+    constructs a verification link, and sends an HTML email to the profile's
+    registered email address. The token is also saved to the profile for
+    later validation.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object, used to retrieve the current site domain.
+    profile : Profile
+        The profile object of the user who has registered.
+    leader : User
+        The leader who initiated the profile creation.
+    """
+    subject = "Verify your email address"
+
+    # Get the current domain
+    current_site = get_current_site(request)
+
+    # Generate a UID and token for the profile
+    uid = urlsafe_base64_encode(force_bytes(profile.pk))
+    token = generate_verification_token(profile.user)
+
+    # Render the HTML email template
+    html_message = render_to_string(
+        "accounts/emails/welcome_email.html",
         {
             "profile": profile,
             "leader": leader,

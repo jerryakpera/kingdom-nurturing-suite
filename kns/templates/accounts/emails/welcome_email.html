@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Set Your KNS Password</title>
+    <title>Welcome to KNS</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -59,20 +59,24 @@
   <body>
     <div class="container">
       <div class="header">
-        <h1>Set Your KNS Password</h1>
+        <h1>Welcome to KNS, {{ profile.user.first_name }}!</h1>
       </div>
       <div class="content">
         <p>Hi {{ profile.user.first_name }},</p>
 
-        <p>Please click the button below to set a password for your KNS account:</p>
+        <p>{{leader.get_full_name}} recently added you to their KNS Group. To get started, please verify your email address by clicking the button below:</p>
+
+        {% if profile.role == 'leader' %}
+          <p>You will receive an email shortly with a link to set a password for your KNS account.</p>
+        {% endif %}
 
         <p style="text-align: center;">
-            <a href="http://{{ domain }}/accounts/set-password/{{ uid }}/{{ token }}/" class="btn">Set Password</a>
+          <a href="http://{{ domain }}/accounts/verify-email/{{ uid }}/{{ token }}/" class="btn">Verify Email</a>
         </p>
 
-        <p>If you did not request this, please ignore this email.</p>
+        <p>If you have any questions or need assistance, feel free to contact us.</p>
 
-        <p>Thank you!</p>
+        <p>Welcome aboard!</p>
       </div>
       <div class="footer">
         <p>&copy; {{ current_year }} KNS. All rights reserved.</p>
