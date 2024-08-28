@@ -7,8 +7,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from kns.core.utils import log_this
 from kns.groups.forms import GroupForm
 from kns.groups.models import Group, GroupMember
+from kns.profiles.models import Profile
 
 
 @login_required
@@ -184,8 +186,12 @@ def group_members(request, group_slug):
         slug=group_slug,
     )
 
+    group_members_ids = [member.id for member in group.group_members()]
+    members = Profile.objects.filter(pk__in=group_members_ids)
+
     context = {
         "group": group,
+        "members": members,
     }
 
     return render(
