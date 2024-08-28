@@ -265,3 +265,144 @@ class TestViews(TestCase):
             str(messages[0]),
             f"{self.profile.get_full_name()} settings updated",
         )
+
+    def test_edit_bio_details_get(self):
+        """
+        Test the edit_bio_details view renders the form correctly.
+        """
+        url = reverse(
+            "profiles:edit_bio_details",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/edit_bio_details.html",
+        )
+
+        # Ensure the form is present in the context
+        self.assertIn(
+            "bio_details_form",
+            response.context,
+        )
+
+    def test_edit_bio_details_view_not_found(self):
+        """
+        Test the edit_bio_details view with a non-existent profile slug.
+        """
+        url = reverse(
+            "profiles:edit_bio_details",
+            kwargs={
+                "profile_slug": "non-existent",
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 404 Not Found
+        self.assertEqual(response.status_code, 404)
+
+    def test_edit_bio_details_post_valid(self):
+        """
+        Test posting valid data to edit_bio_details view updates the profile.
+        """
+        url = reverse(
+            "profiles:edit_bio_details",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        data = {
+            "first_name": "Updated",
+            "last_name": "User",
+            "gender": "male",
+            "date_of_birth": "2000-01-01",
+            "place_of_birth_country": "NG",
+            "place_of_birth_city": "City",
+        }
+        response = self.client.post(
+            url,
+            data=data,
+        )
+
+        # Refresh the profile from the database
+        self.profile.refresh_from_db()
+
+        # Check if the profile was updated
+        self.assertEqual(self.profile.first_name, "Updated")
+        self.assertEqual(self.profile.last_name, "User")
+        self.assertEqual(self.profile.gender, "male")
+        self.assertEqual(str(self.profile.date_of_birth), "2000-01-01")
+        self.assertEqual(self.profile.place_of_birth_country, "NG")
+        self.assertEqual(self.profile.place_of_birth_city, "City")
+
+        # Check if the response redirects after saving
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            self.profile.get_absolute_url(),
+        )
+
+        # Ensure the success message is in the messages
+        messages = list(
+            response.wsgi_request._messages,
+        )
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "Profile updated",
+        )
+
+    def test_edit_bio_details_post_invalid(self):
+        """
+        Test posting invalid data to edit_bio_details view does not update the profile.
+        """
+        url = reverse(
+            "profiles:edit_bio_details",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        data = {
+            "first_name": "",  # Invalid as it is required
+            "last_name": "User",
+        }
+        response = self.client.post(url, data=data)
+
+        # The profile should not be updated
+        self.profile.refresh_from_db()
+        self.assertNotEqual(self.profile.first_name, "")
+        self.assertEqual(self.profile.first_name, "Test")
+
+        # Check if the response does not redirect
+        self.assertEqual(response.status_code, 200)
+
+        # Extract the form from the response context
+        form = response.context.get("bio_details_form")
+
+        # Ensure the form contains errors
+        self.assertIsNotNone(
+            form,
+            "Form is not present in the response context",
+        )
+        self.assertTrue(
+            form.errors,
+            "Form should contain errors",
+        )
+
+        self.assertIn(
+            "first_name",
+            form.errors,
+            "First name field should have errors",
+        )
+        self.assertIn(
+            "This field is required.",
+            form.errors["first_name"],
+            "Expected error message not found",
+        )

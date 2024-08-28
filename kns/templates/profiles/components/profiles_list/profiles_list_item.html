@@ -4,11 +4,15 @@
   <div class="h-full border-2 border-gray-200 border-opacity-60 rounded-lg overflow-hidden">
     <div class="relative">
       {% if not profile.image %}
-        <img class="lg:h-56 h-48 md:h-40 w-full object-cover object-center" src="https://dummyimage.com/720x400" alt="blog">
+        <img
+          src="https://dummyimage.com/720x400"
+          alt="{{ profile.get_full_name }} profile picture"
+          class="lg:h-56 h-48 md:h-40 w-full object-cover object-center"
+        >
       {% else %}
         <img
           src="{{ profile.image.url }}"
-          alt="{{ profile.get_full_name }}"
+          alt="{{ profile.get_full_name }} profile picture"
           class="lg:h-56 h-48 md:h-40 w-full object-cover object-center"
         >
       {% endif %}

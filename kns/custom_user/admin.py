@@ -23,7 +23,10 @@ class CustomUserAdmin(BaseUserAdmin):
     )
 
     # If you want to include these fields in the list display in the admin panel
-    # list_display = BaseUserAdmin.list_display + ('verified', 'is_visitor', 'agreed_to_terms')
+    list_display = BaseUserAdmin.list_display + (
+        "verified",
+        "agreed_to_terms",
+    )
 
 
 # Register the User model with the custom admin class

@@ -625,3 +625,58 @@ def make_leader(request, profile_slug):  # pragma: no cover
         )
 
     return redirect(profile.get_absolute_url())
+
+
+@login_required
+def edit_bio_details(request, profile_slug):
+    """
+    Edit the bio details of a user profile.
+
+    This view allows updating the bio details of a profile. It processes
+    both GET and POST requests. If the request is POST and the form is valid,
+    the profile is updated, and a success message is displayed.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to edit.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the edit bio details template or redirects to the profile
+        detail page with a success message if the form is valid.
+    """
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    bio_details_form = profile_forms.BioDetailsForm(
+        request.POST or None,
+        instance=profile,
+    )
+
+    context = {
+        "can_edit_profile": False,
+        "bio_details_form": bio_details_form,
+    }
+
+    if request.method == "POST":
+        if bio_details_form.is_valid():
+            bio_details_form.save()
+
+            messages.success(
+                request=request,
+                message="Profile updated",
+            )
+
+            return redirect(profile)
+
+    return render(
+        request=request,
+        template_name="profiles/pages/edit_bio_details.html",
+        context=context,
+    )

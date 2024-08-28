@@ -11,6 +11,11 @@ urlpatterns = [
         name="register_member",
     ),
     path(
+        "<slug:profile_slug>/edit/bio-details",
+        views.edit_bio_details,
+        name="edit_bio_details",
+    ),
+    path(
         "<slug:profile_slug>/make-leader-page",
         views.make_leader_page,
         name="make_leader_page",

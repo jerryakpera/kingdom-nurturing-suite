@@ -1,0 +1,45 @@
+{% with form=bio_details_form %}
+  {% include 'core/components/forms/form_error.html' %}
+{% endwith %}
+
+<div class="flex flex-col sm:flex-row gap-2">
+  <div class="sm:w-1/2">
+    {% with field=bio_details_form.first_name %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+
+  <div class="sm:w-1/2">
+    {% with field=bio_details_form.last_name %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+<div class="flex flex-col sm:flex-row gap-2">
+  <div class="sm:w-1/2">
+    {% with field=bio_details_form.gender %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+
+  <div class="sm:w-1/2">
+    {% with field=bio_details_form.date_of_birth %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+<div class="flex flex-col sm:flex-row gap-2">
+  <div class="sm:w-1/2">
+    {% with field=bio_details_form.place_of_birth_country %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+
+  <div class="sm:w-1/2">
+    {% with field=bio_details_form.place_of_birth_city %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+</div>
