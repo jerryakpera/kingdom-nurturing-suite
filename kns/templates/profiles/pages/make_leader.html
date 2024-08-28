@@ -1,0 +1,114 @@
+{% extends "profiles/profile_base.html" %}
+
+{% block title %}
+  {{ profile.get_full_name }} | Make leader
+{% endblock title %}
+
+{% block profile_base_content %}
+  <section class="space-y-6">
+    <a
+      type="button"
+      href="{% url "profiles:make_leader" profile_slug=profile.slug %}"
+      class="text-white bg-knsSecondary hover:bg-knsSecondary-600 focus:ring-4 focus:ring-knsSecondary-400 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none"
+    >
+      Make {{ profile.get_full_name }} a member
+    </a>
+
+    <div>
+      <h1 class="text-lg font-bold underline text-gray-800">Changing a User's Role to Leader</h1>
+      <p>
+        This guide explains the process for promoting a user to the leader role within a group. The promotion process
+        involves verifying permissions, checking eligibility, and optionally requiring approval before the role change
+        is finalized. If approval is required, a request is submitted for further action.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <h3 class="text-md font-semibold">Step 1: Verifying Permissions</h3>
+        <p>
+          The first step in promoting a user to a leader role is to verify that the current user (the one initiating the
+          promotion) has the necessary permissions. This is done by ensuring the user is a leader of the group to which
+          the target user belongs.
+        </p>
+      </div>
+      <div class="p-4 bg-gray-100 border-l-4 border-blue-500 mb-6">
+        <p class="text-gray-700">
+          <strong>Note:</strong> If the requesting user is not the leader of the target user's group, the action will
+          be blocked and an error message will be displayed.
+        </p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <h3 class="text-md font-semibold">Step 2: Checking Eligibility</h3>
+        <p>
+          After verifying permissions, the next step is to check if the target user is eligible to become a leader. This
+          includes ensuring that the user meets any specific criteria defined within the application (e.g., the user may
+          need to have certain roles or experience).
+        </p>
+      </div>
+      <div class="bg-gray-100 border-l-4 border-green-500 p-4">
+        <p class="text-gray-700">
+          <strong>Eligibility Check:</strong> If the user is not eligible, the promotion process will be halted, and
+          an error message will be shown.
+        </p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <h3 class="text-md font-semibold">Step 3: Role Change or Approval Request</h3>
+        <p class="mb-4">
+          If the target user is eligible, the system checks whether approval is required to change their role to leader.
+          If approval is not required, the role change is applied immediately, and the user is notified via email.
+        </p>
+      </div>
+
+      <div class="bg-gray-100 border-l-4 border-yellow-500 p-4">
+        <p class="text-gray-700">
+          <strong>Approval Required:</strong> If approval is required, an approval request is created and submitted
+          for further review. The user will be promoted to leader only after the approval is granted.
+        </p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <h3 class="text-md font-semibold">Step 4: Sending Notification</h3>
+        <p>
+          Once the user's role is successfully changed to leader (either directly or after approval), a notification is
+          sent to the user. This notification typically includes instructions for setting a password and accessing their
+          new leader privileges.
+        </p>
+      </div>
+
+      <div class="bg-gray-100 border-l-4 border-purple-500 p-4">
+        <p class="text-gray-700">
+          <strong>Notification:</strong> The notification is crucial for ensuring that the user is aware of their
+          new role and can take any necessary actions.
+        </p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <h3 class="text-md font-semibold">Conclusion</h3>
+        <p>
+          The process of changing a user's role to leader involves several checks and may require approval depending on
+          the application's settings. By following these steps, you can ensure that the promotion process is handled
+          securely and efficiently.
+        </p>
+      </div>
+
+      <div class="bg-blue-100 border-l-4 border-blue-500 p-4">
+        <p class="text-gray-700">
+          <strong>Reminder:</strong> Always ensure that the necessary permissions and eligibility criteria are met
+          before attempting to change a user's role to leader.
+        </p>
+      </div>
+    </div>
+
+  </section>
+{% endblock profile_base_content %}

@@ -266,6 +266,9 @@ class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
     Model representing an action that requires approval from a leader.
     """
 
+    class Meta:
+        abstract = True
+
     STATUS_CHOICES = [
         ("pending", "Pending"),
         ("approved", "Approved"),
@@ -282,12 +285,16 @@ class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
 
     created_by = models.ForeignKey(
         Profile,
+        null=True,
+        blank=True,
         on_delete=models.CASCADE,
         related_name="initiated_approvals",
     )
 
     group_created_for = models.ForeignKey(
         Group,
+        null=True,
+        blank=True,
         on_delete=models.CASCADE,
         related_name="approval_requests",
     )
@@ -306,9 +313,9 @@ class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
 
     approved_by = models.ForeignKey(
         Profile,
-        on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        on_delete=models.SET_NULL,
         related_name="approved_actions",
     )
 
@@ -393,11 +400,13 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
 
     def save(self, *args, **kwargs):
         """
-        Override the save method to notify the leader upon creation and check for timeouts.
+        Override the save method to prevent duplicate pending approvals
+        and notify the leader upon creation.
 
-        This method checks if the instance is new. If so, it triggers the
-        notification to the new leader. If the instance already exists,
-        it checks for any timeout conditions after saving.
+        This method checks if there is already a pending approval request
+        for the same leader. If so, it avoids creating a new approval
+        request. If the instance is new, it triggers the notification to the
+        new leader.
 
         Parameters
         ----------
@@ -406,10 +415,18 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
         **kwargs
             Arbitrary keyword arguments.
         """
-        is_new = self.pk is None
+        if not self.pk:  # Only check for duplicates if this is a new instance
+            if MakeLeaderActionApproval.objects.filter(
+                new_leader=self.new_leader,
+                status="pending",
+            ).exists():
+                raise ValidationError(
+                    "There is already a pending make leader approval request for this profile."
+                )
+
         super().save(*args, **kwargs)
 
-        if is_new:
+        if self.pk is None:
             self.notify_leader()
         else:
             self.check_timeout()

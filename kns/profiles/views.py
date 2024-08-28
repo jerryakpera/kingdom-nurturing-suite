@@ -358,6 +358,56 @@ def upload_consent_form(request, profile_slug):  # pragma: no cover
 
 
 @login_required
+def make_leader_page(request, profile_slug):  # pragma: no cover
+    """
+    View to promote a user profile to a leader role.
+
+    This view checks if the requesting user has the necessary permissions
+    to promote another user to a leader role within a group. If the checks
+    pass, the target profile's role is updated to 'leader', and an email is
+    sent to the user to set their password.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to retrieve and promote.
+
+    Returns
+    -------
+    HttpResponse
+        Redirects to the profile detail page with a success or error message.
+    """
+
+    # Fetch the profile or return a 404 if not found
+    profile = get_object_or_404(Profile, slug=profile_slug)
+
+    # Ensure the requesting user is leading the profile's group
+    if not request.user.profile.group_led.is_member(profile):
+        messages.error(
+            request=request,
+            message=f"You must be the leader of {profile.get_full_name()} to perform this action.",
+        )
+
+        return redirect(profile.get_absolute_url())
+
+    # Verify that the profile can be made into a leader
+    if not profile.can_become_leader_role():
+        messages.error(
+            request=request,
+            message=f"{profile.get_full_name()} is not eligible to become a leader.",
+        )
+
+        return redirect(profile.get_absolute_url())
+
+    return render(
+        request=request,
+        template_name="profiles/pages/make_leader.html",
+    )
+
+
+@login_required
 def make_leader(request, profile_slug):  # pragma: no cover
     """
     View to promote a user profile to a leader role.

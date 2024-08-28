@@ -28,7 +28,7 @@
 
       {% if profile.can_become_leader_role and is_member_of_user_group %}
         <a
-          href="{% url "profiles:make_leader" profile_slug=profile.slug %}"
+          href="{% url "profiles:make_leader_page" profile_slug=profile.slug %}"
           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
         >
           Make leader
