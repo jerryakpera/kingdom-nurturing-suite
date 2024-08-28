@@ -27,6 +27,7 @@ THIRD_PARTY_APPS = [
     "django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig",
     "kns.custom_user.apps.CustomUserConfig",
     "cloudinary",
+    "formtools",
     "django_countries",
 ]
 

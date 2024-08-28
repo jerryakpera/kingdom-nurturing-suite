@@ -2,16 +2,15 @@
 Util functions for the `profiles` app.
 """
 
+from datetime import timedelta
+
 from django.urls import resolve
+from django.utils import timezone
 
 
 def get_profile_slug(request):
     """
     Extract the profile slug from the given HTTP request.
-
-    This utility function is used to retrieve the slug of a profile from the
-    URL path of the request. It specifically checks if the request path starts
-    with "/profiles/" and, if so, resolves the path to extract the slug.
 
     Parameters
     ----------
@@ -31,3 +30,27 @@ def get_profile_slug(request):
         slug = match.kwargs.get("profile_slug", "")
 
     return slug
+
+
+def calculate_max_dob(age):
+    """
+    Calculate the maximum date of birth based on the provided age.
+
+    Parameters
+    ----------
+    age : int
+        The age of the person for whom the maximum date of birth is being
+        calculated.
+
+    Returns
+    -------
+    str
+        The maximum date of birth formatted as a string in the format
+        "YYYY-MM-DD".
+    """
+    current_date = timezone.now().date()
+    max_dob = current_date - timedelta(days=(age * 365))
+
+    formatted_max_dob = max_dob.strftime("%Y-%m-%d")
+
+    return formatted_max_dob

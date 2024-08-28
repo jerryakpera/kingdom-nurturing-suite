@@ -2,11 +2,537 @@
 Forms for the `profiles` app.
 """
 
+from datetime import date, timedelta
+
 from cloudinary.forms import CloudinaryFileField
 from django import forms
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+from django_countries.fields import CountryField
+from django_countries.widgets import CountrySelectWidget
 
+from kns.core.models import Setting
+
+from . import constants as profile_constants
+from . import utils as profile_utils
 from .models import ConsentForm, Profile
+
+
+class BioDetailsForm(forms.ModelForm):
+    """
+    A form for collecting basic bio details of a user profile.
+
+    This form allows users to input their first name, last name, gender, date of birth,
+    place of birth (country and city).
+
+    Parameters
+    ----------
+    *args : tuple
+        Positional arguments passed to the parent class.
+    **kwargs : dict
+        Keyword arguments passed to the parent class.
+    """
+
+    class Meta:
+        model = Profile
+        fields = (
+            "first_name",
+            "last_name",
+            "gender",
+            "date_of_birth",
+            "place_of_birth_country",
+            "place_of_birth_city",
+        )
+
+    first_name = forms.CharField(
+        strip=False,
+        required=True,
+        label="First name",
+        widget=forms.TextInput(
+            attrs={
+                "autofocus": True,
+                "id": "first_name",
+                "name": "first_name",
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    last_name = forms.CharField(
+        strip=False,
+        required=True,
+        label="Last name",
+        widget=forms.TextInput(
+            attrs={
+                "id": "last_name",
+                "name": "last_name",
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    gender = forms.ChoiceField(
+        required=True,
+        label="Gender",
+        widget=forms.Select(
+            attrs={
+                "id": "gender",
+                "name": "gender",
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    date_of_birth = forms.DateField(
+        label="Date of birth",
+        widget=forms.DateInput(
+            attrs={
+                "type": "date",
+                "autocomplete": "off",
+                "id": "date_of_birth",
+                "name": "date_of_birth",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    place_of_birth_country = CountryField().formfield(
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "autocomplete": "off",
+                "id": "place_of_birth_country",
+                "name": "place_of_birth_country",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    place_of_birth_city = forms.CharField(
+        required=False,
+        label="Place of birth (city)",
+        widget=forms.TextInput(
+            attrs={
+                "autocomplete": "off",
+                "id": "place_of_birth_city",
+                "name": "place_of_birth_city",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    def clean_date_of_birth(self):
+        """
+        Validate the date of birth to ensure the user meets the minimum age requirement.
+
+        Returns
+        -------
+        date
+            The validated date of birth.
+
+        Raises
+        ------
+        ValidationError
+            If the date of birth does not meet the minimum age requirement.
+        """
+        date_of_birth = self.cleaned_data.get("date_of_birth")
+        min_registration_age = Setting.get_or_create_setting().min_registration_age
+
+        if date_of_birth:
+            min_allowed_date = date.today() - timedelta(
+                days=(min_registration_age * 365),
+            )
+            if date_of_birth > min_allowed_date:
+                raise forms.ValidationError(
+                    f"Must be at least {min_registration_age} years old to register."
+                )
+        return date_of_birth
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the form with gender choices and date of birth restrictions.
+
+        Parameters
+        ----------
+        *args : tuple
+            Positional arguments passed to the parent class.
+        **kwargs : dict
+            Keyword arguments passed to the parent class.
+        """
+        super(BioDetailsForm, self).__init__(*args, **kwargs)
+        self.fields["gender"].choices = profile_constants.GENDER_OPTIONS
+
+        min_registration_age = Setting.get_or_create_setting().min_registration_age
+
+        max_date_of_birth = profile_utils.calculate_max_dob(min_registration_age)
+
+        self.fields["date_of_birth"].widget.attrs["max"] = max_date_of_birth
+
+
+class ProfileInvolvementForm(forms.ModelForm):
+    """
+    A form for specifying the user's involvement in various training and mentoring roles.
+
+    This form allows users to indicate their willingness to be a movement training facilitator,
+    skill training facilitator, or mentor, and to provide reasons if they are not willing or able
+    to fulfill these roles.
+
+    Parameters
+    ----------
+    *args : tuple
+        Positional arguments passed to the parent class.
+    **kwargs : dict
+        Keyword arguments passed to the parent class.
+    """
+
+    class Meta:
+        model = Profile
+        fields = [
+            "is_movement_training_facilitator",
+            "reason_is_not_movement_training_facilitator",
+            "is_skill_training_facilitator",
+            "reason_is_not_skill_training_facilitator",
+            "is_mentor",
+            "reason_is_not_mentor",
+        ]
+
+        help_texts = {
+            "is_mentor": "Willing to facilitate mentor others?",
+            "is_skill_training_facilitator": "Willing to facilitate skill trainings?",
+            "is_movement_training_facilitator": "Willing to facilitate movement trainings?",
+        }
+
+    reason_is_not_movement_training_facilitator = forms.CharField(
+        required=False,
+        label="If not willing/able, what is the reason",
+        widget=forms.Textarea(
+            attrs={
+                "rows": 2,
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+                "id": "reason_is_not_movement_training_facilitator",
+                "name": "reason_is_not_movement_training_facilitator",
+            }
+        ),
+    )
+
+    reason_is_not_skill_training_facilitator = forms.CharField(
+        required=False,
+        label="If not willing/able, what is the reason",
+        widget=forms.Textarea(
+            attrs={
+                "rows": 2,
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+                "id": "reason_is_not_skill_training_facilitator",
+                "name": "reason_is_not_skill_training_facilitator",
+            }
+        ),
+    )
+
+    reason_is_not_mentor = forms.CharField(
+        required=False,
+        label="If not willing/able, what is the reason",
+        widget=forms.Textarea(
+            attrs={
+                "rows": 2,
+                "autocomplete": "off",
+                "id": "reason_is_not_mentor",
+                "name": "reason_is_not_mentor",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    def clean(self):
+        """
+        Validate the form to ensure that reasons are provided if the user is not willing
+        or able to fulfill certain roles.
+
+        Returns
+        -------
+        dict
+            The cleaned data from the form.
+
+        Raises
+        ------
+        ValidationError
+            If required reasons are not provided.
+        """
+        cleaned_data = super().clean()
+        is_movement_training_facilitator = cleaned_data.get(
+            "is_movement_training_facilitator"
+        )
+        reason_is_not_movement_training_facilitator = cleaned_data.get(
+            "reason_is_not_movement_training_facilitator"
+        )
+
+        is_skill_training_facilitator = cleaned_data.get(
+            "is_skill_training_facilitator"
+        )
+        reason_is_not_skill_training_facilitator = cleaned_data.get(
+            "reason_is_not_skill_training_facilitator"
+        )
+
+        is_mentor = cleaned_data.get("is_mentor")
+        reason_is_not_mentor = cleaned_data.get("reason_is_not_mentor")
+
+        if (
+            not is_movement_training_facilitator
+            and not reason_is_not_movement_training_facilitator
+        ):
+            self.add_error(
+                "reason_is_not_movement_training_facilitator", "This field is required."
+            )
+
+        if (
+            not is_skill_training_facilitator
+            and not reason_is_not_skill_training_facilitator
+        ):
+            self.add_error(
+                "reason_is_not_skill_training_facilitator", "This field is required."
+            )
+
+        if not is_mentor and not reason_is_not_mentor:
+            self.add_error("reason_is_not_mentor", "This field is required.")
+
+        return cleaned_data
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["is_movement_training_facilitator"].widget.attrs[
+            "id"
+        ] = "is_movement_training_facilitator"
+        self.fields["is_skill_training_facilitator"].widget.attrs[
+            "id"
+        ] = "is_skill_training_facilitator"
+        self.fields["is_mentor"].widget.attrs["id"] = "is_mentor"
+
+
+class ContactDetailsForm(forms.ModelForm):
+    """
+    A form for entering contact information for a user profile.
+
+    This form allows users to input their address, phone number, and email address.
+
+    Parameters
+    ----------
+    *args : tuple
+        Positional arguments passed to the parent class.
+    **kwargs : dict
+        Keyword arguments passed to the parent class.
+    """
+
+    location_country = CountryField().formfield(
+        required=False,
+        widget=CountrySelectWidget(
+            attrs={
+                "autocomplete": "off",
+                "id": "location_country",
+                "name": "location_country",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    location_city = forms.CharField(
+        required=False,
+        label="Location (city)",
+        widget=forms.TextInput(
+            attrs={
+                "autocomplete": "off",
+                "id": "location_city",
+                "name": "location_city",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    phone_prefix = forms.CharField(
+        required=False,
+        label=_("Phone code"),
+        widget=forms.TextInput(
+            attrs={
+                "readonly": True,
+                "id": "phone_prefix",
+                "autocomplete": "off",
+                "name": "phone_prefix",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    phone = forms.CharField(
+        required=False,
+        label=_("Phone"),
+        widget=forms.TextInput(
+            attrs={
+                "id": "phone",
+                "name": "phone",
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    email = forms.EmailField(
+        label="Email",
+        required=True,
+        widget=forms.EmailInput(
+            attrs={
+                "autocomplete": "off",
+                "id": "email",
+                "name": "email",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    class Meta:
+        model = Profile
+        fields = [
+            "phone",
+            "email",
+            "phone_prefix",
+            "location_city",
+            "location_country",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the form with the option to show or hide the email field.
+
+        Parameters
+        ----------
+        *args : tuple
+            Positional arguments passed to the parent class.
+        **kwargs : dict
+            Keyword arguments passed to the parent class.
+            Includes `show_email`, a boolean flag to enable or disable
+            the email field.
+        """
+        show_email = kwargs.pop("show_email", True)
+
+        super(ContactDetailsForm, self).__init__(*args, **kwargs)
+
+        if not show_email:
+            # Disable the field and mark it as not required
+            self.fields["email"].widget.attrs["disabled"] = True
+            self.fields["email"].required = False
+
+    def clean_email(self):
+        """
+        Validate the email field, returning None if the email field is
+        not required and empty.
+
+        Returns
+        -------
+        str or None
+            The cleaned email address or None if the field is not
+            required and no email is provided.
+        """
+        email = self.cleaned_data["email"]
+        if not email and not self.fields["email"].required:
+            return None
+        return email
+
+
+class ProfileRoleForm(forms.ModelForm):
+    """
+    A form for selecting a role for a profile.
+
+    This form uses a ChoiceField to allow users to select a role from
+    predefined options.
+    It is associated with the `Profile` model and only includes the `role` field.
+
+    Attributes:
+        role (forms.ChoiceField): A dropdown field for selecting a role.
+        The choices are defined in `profile_constants.PROFILE_ROLE_OPTIONS`.
+    """
+
+    role = forms.ChoiceField(
+        label="Role",
+        required=True,
+        choices=profile_constants.PROFILE_ROLE_OPTIONS,
+        widget=forms.Select(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            },
+        ),
+    )
+
+    class Meta:
+        """
+        Meta options for the ProfileRoleForm.
+
+        Specifies the model to be used with this form and the fields to include.
+        """
+
+        model = Profile
+        fields = ["role"]
 
 
 class ProfileSettingsForm(forms.ModelForm):

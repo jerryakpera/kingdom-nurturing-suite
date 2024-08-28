@@ -6,6 +6,11 @@ app_name = "profiles"
 
 urlpatterns = [
     path(
+        "new/",
+        view=views.NewMemberView.as_view(),
+        name="register_member",
+    ),
+    path(
         "<slug:profile_slug>/make-leader-page",
         views.make_leader_page,
         name="make_leader_page",

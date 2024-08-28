@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block title %}
+  Register group member
+{% endblock title %}
+
+{% block base_content %}
+  <section class="container-default">
+    <div class="grid grid-cols-1 sm:grid-cols-4">
+      <div class="col-span-1 sm:col-span-1 p-2">
+        {% include "profiles/components/register_member/register_member_sidebar.html" %}
+      </div>
+      <div class="col-span-1 sm:col-span-3 p-2">
+        <h3 class="font-serif font-semibold">
+          Add a new member to your group
+        </h3>
+        <form action="" method="post">
+          {% csrf_token %}
+
+          {{ wizard.management_form }}
+
+          {% if form.errors %}
+            <div class="alert bg-red-100 text-red-700 p-2 rounded-md text-sm font-semibold">
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  {{ error }}
+                {% endfor %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if wizard.form.forms %}
+            {{ wizard.form.management_form }}
+            {% for form in wizard.form.forms %}
+              {% for field in form %}
+                <div class="mb-3">
+                  {% include "core/components/forms/form_field.html" %}
+                </div>
+              {% endfor %}
+            {% endfor %}
+          {% else %}
+            {% for field in wizard.form %}
+              <div class="mb-3">
+                {% include "core/components/forms/form_field.html" %}
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <div class="flex justify-between items-center">
+            <button
+              type="button"
+              onclick="window.history.back();"
+              class="cursor-pointer focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5"
+            >
+              Cancel
+            </button>
+
+            <div>
+              <button
+                type="submit"
+                name="wizard_goto_step"
+                value="{{ wizard.steps.prev }}"
+                class="cursor-pointer py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 "
+              >
+                Back
+              </button>
+
+              <input
+                type="submit"
+                class="cursor-pointer text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
+                value="{% if wizard.steps.next %}Next {% else %}Submit{% endif %}"
+              />
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script src="{% static "profiles/js/involvements.js" %}"></script>
+{% endblock base_content %}

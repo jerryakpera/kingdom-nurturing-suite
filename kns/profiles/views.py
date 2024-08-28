@@ -6,12 +6,158 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
+from formtools.wizard.views import SessionWizardView
 
 from kns.accounts.emails import send_set_password_email
-from kns.core.models import Setting
+from kns.core.utils import log_this
+from kns.custom_user.models import User
 
-from .forms import ConsentFormSubmission, ProfileSettingsForm
+from . import constants as profile_constants
+from . import forms as profile_forms
 from .models import ConsentForm, Profile
+
+
+class NewMemberView(SessionWizardView):  # pragma: no cover
+    """
+    View for handling the registration of new members through a multi-step form.
+
+    This view uses a wizard pattern to collect and process information about new members.
+    The process includes multiple forms that gather various details about the member,
+    and upon completion, creates a new user and profile, assigns them to a group, and
+    optionally sends welcome emails.
+
+    Attributes
+    ----------
+    template_name : str
+        The template used to render the registration form.
+    form_list : list
+        A list of form classes used in the registration wizard.
+
+    Methods
+    -------
+    get_context_data(**kwargs)
+        Provides additional context data for rendering the template,
+        including form steps and the current step index.
+    done(form_list, **kwargs)
+        Handles the final step of the wizard. Creates a user and profile
+        based on the collected data, assigns the member to a group, and
+        manages email notifications.
+    """
+
+    template_name = "profiles/pages/register_member.html"
+    form_list = [
+        profile_forms.BioDetailsForm,
+        profile_forms.ContactDetailsForm,
+        profile_forms.ProfileInvolvementForm,
+        profile_forms.ProfileRoleForm,
+    ]
+
+    def get_context_data(self, **kwargs):
+        """
+        Add additional context data for rendering the registration template.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Additional keyword arguments to pass to the parent context method.
+
+        Returns
+        -------
+        dict
+            The updated context data including form steps and the current step index.
+        """
+        context = super().get_context_data(**kwargs)
+        # Add any additional context data here
+
+        context["form_steps"] = profile_constants.REGISTER_MEMBER_FORM_STEPS
+        context["current_step_index"] = self.steps.current
+
+        return context
+
+    def done(self, form_list, **kwargs):
+        """
+        Handle the final step of the registration wizard. Creates a
+        new user and profile based on the cleaned data from the forms,
+        assigns the member to the user's group, and manages email
+        notifications.
+
+        Parameters
+        ----------
+        form_list : list
+            A list of form instances containing the cleaned data from
+            each step of the wizard.
+        **kwargs : dict
+            Additional keyword arguments.
+
+        Returns
+        -------
+        HttpResponse
+            Redirects to the profile page upon successful registration
+            or reloads the registration page if errors occur.
+        """
+        new_profile_data = {}
+        for form in form_list:
+            if form.is_valid():
+                new_profile_data.update(form.cleaned_data)
+            else:
+                return render(
+                    self.request,
+                    self.template_name,
+                    {
+                        "form_list": form_list,
+                        "wizard_form_data": self.get_all_cleaned_data(),
+                    },
+                )
+
+        try:
+            user = User.objects.create(
+                email=new_profile_data.get("email"),
+            )
+            # Create the profile associated with the user
+            profile, profile_created = Profile.objects.get_or_create(
+                user=user, defaults=new_profile_data
+            )
+
+            if not profile_created:
+                # Update profile data if the profile already exists
+                for attr, value in new_profile_data.items():
+                    setattr(profile, attr, value)
+                profile.save()
+
+            # Add the new member to the users group
+            self.request.user.profile.group_led.add_member(profile)
+
+            if profile.role in ["member", "external_person"]:
+                # TODO: send_welcome_email(self.request, profile, self.request.user.profile)
+                pass
+
+            if profile.role == "leader":
+                # TODO: send_welcome_password_email(
+                #     self.request, profile, self.request.user.profile
+                # )
+                pass
+
+            messages.success(
+                request=self.request,
+                message=(
+                    f"Congratulations, {profile.get_full_name()} is now "
+                    "a member of your group. We have sent them an email "
+                    "with instructions on how to get started."
+                ),
+            )
+
+            return redirect(profile)
+
+        except Exception:
+            messages.error(
+                request=self.request,
+                message=(
+                    "An error occurred while trying to create and "
+                    "register the member. Please try again."
+                ),
+            )
+
+            return redirect("profiles:register_member")
 
 
 @login_required
@@ -226,7 +372,7 @@ def profile_settings(request, profile_slug):
         slug=profile_slug,
     )
 
-    profile_settings_form = ProfileSettingsForm(
+    profile_settings_form = profile_forms.ProfileSettingsForm(
         request.POST or None,
         instance=profile,
     )
@@ -299,14 +445,14 @@ def upload_consent_form(request, profile_slug):  # pragma: no cover
     except ConsentForm.DoesNotExist:
         consent_form = None
 
-    form = ConsentFormSubmission(
+    form = profile_forms.ConsentFormSubmission(
         request.POST or None,
         request.FILES or None,
         instance=consent_form,
     )
 
     if request.method == "POST":
-        form = ConsentFormSubmission(
+        form = profile_forms.ConsentFormSubmission(
             request.POST,
             request.FILES,
         )

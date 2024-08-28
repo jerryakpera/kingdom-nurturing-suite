@@ -1,12 +1,11 @@
 from unittest.mock import patch
 
-from django.contrib.messages import get_messages
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.custom_user.models import User
 from kns.groups.models import Group
-from kns.groups.tests import test_constants as group_test_consants
+from kns.groups.tests import test_constants
 from kns.profiles.models import Profile
 
 
