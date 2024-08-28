@@ -680,3 +680,59 @@ def edit_bio_details(request, profile_slug):
         template_name="profiles/pages/edit_bio_details.html",
         context=context,
     )
+
+
+@login_required
+def edit_contact_details(request, profile_slug):
+    """
+    Edit the contact details of a user profile.
+
+    This view allows updating the contact details of a profile. It processes
+    both GET and POST requests. If the request is POST and the form is valid,
+    the profile is updated, and a success message is displayed.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to edit.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the edit contact details template or redirects to the profile
+        detail page with a success message if the form is valid.
+    """
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    contact_details_form = profile_forms.ContactDetailsForm(
+        request.POST or None,
+        instance=profile,
+        show_email=False,
+    )
+
+    context = {
+        "can_edit_profile": False,
+        "contact_details_form": contact_details_form,
+    }
+
+    if request.method == "POST":
+        if contact_details_form.is_valid():
+            contact_details_form.save()
+
+            messages.success(
+                request=request,
+                message="Profile contact details updated.",
+            )
+
+            return redirect(profile)
+
+    return render(
+        request=request,
+        template_name="profiles/pages/edit_contact_details.html",
+        context=context,
+    )

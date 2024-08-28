@@ -20,6 +20,15 @@
       </li>
 
       <li>
+        <a
+          href="{% url "profiles:edit_contact_details" profile_slug=profile.slug %}"
+          class="block px-4 py-2 hover:bg-gray-100"
+        >
+          Edit contact details
+        </a>
+      </li>
+
+      <li>
         <a href="#" class="block px-4 py-2 hover:bg-gray-100">Earnings</a>
       </li>
     </ul>

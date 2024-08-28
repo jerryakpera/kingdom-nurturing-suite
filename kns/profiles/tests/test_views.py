@@ -1,12 +1,7 @@
-from unittest.mock import patch
-
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.custom_user.models import User
-from kns.groups.models import Group
-from kns.groups.tests import test_constants
-from kns.profiles.models import Profile
 
 
 class TestViews(TestCase):
@@ -405,4 +400,164 @@ class TestViews(TestCase):
             "This field is required.",
             form.errors["first_name"],
             "Expected error message not found",
+        )
+
+    def test_edit_contact_details_get(self):
+        """
+        Test the edit_contact_details view renders the form correctly.
+        """
+        url = reverse(
+            "profiles:edit_contact_details",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/edit_contact_details.html",
+        )
+
+        # Ensure the form is present in the context
+        self.assertIn(
+            "contact_details_form",
+            response.context,
+        )
+
+    def test_edit_contact_details_view_not_found(self):
+        """
+        Test the edit_contact_details view with a non-existent profile slug.
+        """
+        url = reverse(
+            "profiles:edit_contact_details",
+            kwargs={
+                "profile_slug": "non-existent",
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 404 Not Found
+        self.assertEqual(response.status_code, 404)
+
+    def test_edit_contact_details_post_valid(self):
+        """
+        Test posting valid data to edit_contact_details view updates the profile.
+        """
+        url = reverse(
+            "profiles:edit_contact_details",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        data = {
+            "phone_prefix": "+1",
+            "phone": "1234567890",
+            "email": "newemail@example.com",
+            "location_city": "New City",
+            "location_country": "US",
+        }
+        response = self.client.post(
+            url,
+            data=data,
+        )
+
+        # Refresh the profile from the database
+        self.profile.refresh_from_db()
+
+        # Check if the profile was updated
+        self.assertEqual(
+            self.profile.email,
+            "newemail@example.com",
+        )
+        self.assertEqual(
+            self.profile.phone_prefix,
+            "+1",
+        )
+        self.assertEqual(
+            self.profile.phone,
+            "1234567890",
+        )
+        self.assertEqual(
+            self.profile.location_city,
+            "New City",
+        )
+        self.assertEqual(
+            self.profile.location_country,
+            "US",
+        )
+
+        # Check if the response redirects after saving
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            self.profile.get_absolute_url(),
+        )
+
+        # Ensure the success message is in the messages
+        messages = list(
+            response.wsgi_request._messages,
+        )
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "Profile contact details updated.",
+        )
+
+    def test_edit_contact_details_post_invalid(self):
+        """
+        Test posting invalid data to edit_contact_details view does not update the profile.
+        """
+        url = reverse(
+            "profiles:edit_contact_details",
+            kwargs={"profile_slug": self.profile.slug},
+        )
+        data = {
+            "phone_prefix": "",
+            "phone": "",
+            "email": "invalid-email",
+            "location_city": "",
+            "location_country": "",
+        }
+        response = self.client.post(url, data=data)
+
+        # Refresh the profile from the database
+        self.profile.refresh_from_db()
+
+        # Check if the profile details remain unchanged
+        self.assertEqual(self.profile.email, "testuser@example.com")
+        self.assertEqual(self.profile.phone_prefix or "", "")
+        self.assertEqual(self.profile.phone or "", "")
+        self.assertEqual(self.profile.location_city or "", "")
+        self.assertEqual(self.profile.location_country or "", "")
+
+        # Check if the response does not redirect
+        self.assertEqual(response.status_code, 200)
+
+        # Extract the form from the response context
+        form = response.context.get("contact_details_form")
+
+        # Ensure the form contains errors
+        self.assertIsNotNone(form, "Form is not present in the response context")
+        self.assertTrue(form.errors, "Form should contain errors")
+
+        # Check specific errors
+        self.assertIn(
+            "phone_prefix", form.errors, "Phone prefix field should have errors"
+        )
+        self.assertIn(
+            "This field is required.",
+            form.errors["phone_prefix"],
+            "Expected error message not found for phone_prefix",
+        )
+
+        self.assertIn("email", form.errors, "Email field should have errors")
+        self.assertIn(
+            "Enter a valid email address.",
+            form.errors["email"],
+            "Expected error message not found for email",
         )

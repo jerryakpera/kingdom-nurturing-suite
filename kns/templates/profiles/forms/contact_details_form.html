@@ -1,0 +1,39 @@
+{% load static %}
+
+{% with form=contact_details_form %}
+  {% include 'core/components/forms/form_error.html' %}
+{% endwith %}
+
+<div class="grid gap-4 md:grid-cols-2">
+  <div class="col-span-1">
+    {% with field=contact_details_form.location_country %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+
+  <div class="col-span-1">
+    {% with field=contact_details_form.location_city %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+{% with field=contact_details_form.email %}
+  {% include "core/components/forms/form_field.html" %}
+{% endwith %}
+
+<div class="grid gap-4 md:grid-cols-2">
+  <div class="col-span-1">
+    {% with field=contact_details_form.phone_prefix %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+
+  <div class="col-span-1">
+    {% with field=contact_details_form.phone %}
+      {% include "core/components/forms/form_field.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+<script src="{% static "profiles/js/phone_prefix.js" %}"></script>

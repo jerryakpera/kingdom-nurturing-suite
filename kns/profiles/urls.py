@@ -11,6 +11,11 @@ urlpatterns = [
         name="register_member",
     ),
     path(
+        "<slug:profile_slug>/edit/contact-details",
+        views.edit_contact_details,
+        name="edit_contact_details",
+    ),
+    path(
         "<slug:profile_slug>/edit/bio-details",
         views.edit_bio_details,
         name="edit_bio_details",

@@ -352,8 +352,6 @@ class ContactDetailsForm(forms.ModelForm):
     """
     A form for entering contact information for a user profile.
 
-    This form allows users to input their address, phone number, and email address.
-
     Parameters
     ----------
     *args : tuple
@@ -463,12 +461,12 @@ class ContactDetailsForm(forms.ModelForm):
 
         Parameters
         ----------
-        *args : tuple
-            Positional arguments passed to the parent class.
-        **kwargs : dict
-            Keyword arguments passed to the parent class.
-            Includes `show_email`, a boolean flag to enable or disable
-            the email field.
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments. Can include:
+            - show_email (bool): If True (default), the email field is shown.
+            If False, the email field is hidden and marked as not required.
         """
         show_email = kwargs.pop("show_email", True)
 
@@ -481,19 +479,40 @@ class ContactDetailsForm(forms.ModelForm):
 
     def clean_email(self):
         """
-        Validate the email field, returning None if the email field is
-        not required and empty.
+        Validate the email field.
 
         Returns
         -------
         str or None
-            The cleaned email address or None if the field is not
-            required and no email is provided.
+            The cleaned email if valid or None if the email is not required and empty.
         """
-        email = self.cleaned_data["email"]
+        email = self.cleaned_data.get("email")
+
         if not email and not self.fields["email"].required:
             return None
+
         return email
+
+    def clean_phone_prefix(self):
+        """
+        Validate the phone_prefix field.
+
+        Returns
+        -------
+        str
+            The cleaned phone_prefix if valid.
+
+        Raises
+        ------
+        forms.ValidationError
+            If phone_prefix is missing.
+        """
+        phone_prefix = self.cleaned_data.get("phone_prefix")
+
+        if not phone_prefix:
+            raise forms.ValidationError("This field is required.")
+
+        return phone_prefix
 
 
 class ProfileRoleForm(forms.ModelForm):
