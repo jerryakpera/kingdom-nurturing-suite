@@ -10,7 +10,16 @@
 
     <div class="border border-gray-200 shadow-sm rounded-md p-3 flex flex-col sm:flex-row gap-x-2">
       <div class="w-full space-y-3">
-        <h3 class="text-lg font-bold uppercase border-b border-gray-400 mb-4">Involvements</h3>
+        <div class="flex justify-between items-center border-b border-gray-400 pb-2">
+          <h3 class="text-lg font-bold uppercase">Involvements</h3>
+
+          <a
+            href="{% url "profiles:edit_involvement_details" profile_slug=profile.slug %}"
+            class="px-2 py-1.5 items-center text-xs sm:text-sm text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300"
+          >
+            Edit
+          </a>
+        </div>
 
         <div
           class="p-2 rounded-md border space-y-2 {% if profile.is_movement_training_facilitator %}border-green-300 {% endif %} {% if not profile.is_movement_training_facilitator %}border-red-300{% endif %}">
@@ -65,11 +74,17 @@
               <iconify-icon icon="mdi:thumbs-down" class="text-md text-red-600"></iconify-icon>
             {% endif %}
             {% if profile.is_mentor %}Willing {% else %}Not willing{% endif %}
-             to facilitate mentor others.
+             to mentor others
           </div>
-          <p class="text-black text-sm font-semibold">
-            {{ profile.get_full_name }} is available to mentor others
-          </p>
+          {% if profile.is_mentor %}
+            <p class="text-black text-sm">
+              {{ profile.get_full_name }} is available to mentor others
+            </p>
+          {% else %}
+            <p class="text-black text-sm">
+              {{ profile.reason_is_not_mentor }}
+            </p>
+          {% endif %}
         </div>
       </div>
 
