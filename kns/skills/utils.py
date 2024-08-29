@@ -22,8 +22,13 @@ def populate_skills(skills_data):
     """
 
     for skill_data in skills_data:
-        Skill.objects.create(
+        skill_exists = Skill.objects.filter(
             title=skill_data["title"],
-            content=skill_data["content"],
-            author=Profile.objects.first(),
-        )
+        ).exists()
+
+        if not skill_exists:
+            Skill.objects.create(
+                title=skill_data["title"],
+                content=skill_data["content"],
+                author=Profile.objects.first(),
+            )
