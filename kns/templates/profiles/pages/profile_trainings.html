@@ -1,5 +1,130 @@
 {% extends "profiles/profile_base.html" %}
 
+{% block title %}
+  {{ profile.get_full_name }} | Trainings
+{% endblock title %}
+
 {% block profile_base_content %}
-  <h1>Profile Trainings</h1>
+  <section class="space-y-6">
+    <h1 class="text-4xl font-bold">Vocations</h1>
+
+    <div class="border border-gray-200 shadow-sm rounded-md p-3 flex flex-col sm:flex-row gap-x-2">
+      <div class="w-full space-y-3">
+        <h3 class="text-lg font-bold uppercase border-b border-gray-400 mb-4">Involvements</h3>
+
+        <div
+          class="p-2 rounded-md border space-y-2 {% if profile.is_movement_training_facilitator %}border-green-300 {% endif %} {% if not profile.is_movement_training_facilitator %}border-red-300{% endif %}">
+          <div class="text-md font-semibold flex gap-x-2 items-center">
+            {% if profile.is_movement_training_facilitator %}
+              <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
+            {% else %}
+              <iconify-icon icon="mdi:thumbs-down" class="text-md text-red-600"></iconify-icon>
+            {% endif %}
+            {% if profile.is_movement_training_facilitator %}Willing {% else %}Not willing{% endif %}
+             to facilitate movement trainings
+          </div>
+          {% if profile.is_movement_training_facilitator %}
+            <p class="text-black text-sm">
+              {{ profile.get_full_name }} is available to facilitate movement trainings
+            </p>
+          {% else %}
+            <p class="text-black text-sm">
+              {{ profile.reason_is_not_movement_training_facilitator }}
+            </p>
+          {% endif %}
+        </div>
+
+        <div
+          class="p-2 rounded-md border space-y-2 {% if profile.is_skill_training_facilitator %}border-green-300 {% endif %} {% if not profile.is_skill_training_facilitator %}border-red-300{% endif %}">
+          <div class="text-md font-semibold flex gap-x-2 items-center">
+            {% if profile.is_skill_training_facilitator %}
+              <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
+            {% else %}
+              <iconify-icon icon="mdi:thumbs-down" class="text-md text-red-600"></iconify-icon>
+            {% endif %}
+            {% if profile.is_skill_training_facilitator %}Willing {% else %}Not willing{% endif %}
+             to facilitate skill trainings
+          </div>
+          {% if profile.is_skill_training_facilitator %}
+            <p class="text-black text-sm">
+              {{ profile.get_full_name }} is available to facilitate skill trainings
+            </p>
+          {% else %}
+            <p class="text-black text-sm">
+              {{ profile.reason_is_not_skill_training_facilitator }}
+            </p>
+          {% endif %}
+        </div>
+
+        <div
+          class="p-2 rounded-md border space-y-2 {% if profile.is_mentor %}border-green-300 {% endif %} {% if not profile.is_mentor %}border-red-300{% endif %}">
+          <div class="text-md font-semibold flex gap-x-2 items-center">
+            {% if profile.is_mentor %}
+              <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
+            {% else %}
+              <iconify-icon icon="mdi:thumbs-down" class="text-md text-red-600"></iconify-icon>
+            {% endif %}
+            {% if profile.is_mentor %}Willing {% else %}Not willing{% endif %}
+             to facilitate mentor others.
+          </div>
+          <p class="text-black text-sm font-semibold">
+            {{ profile.get_full_name }} is available to mentor others
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="border border-gray-200 shadow-sm rounded-md p-3 flex flex-col gap-y-4 xs:gap-y-0 sm:gap-y-4 xs:flex-row sm:flex-col md:flex-row sm:gap-x-2">
+      <div class="w-full pr-4">
+        <h3 class="text-lg font-bold uppercase border-b border-gray-400 mb-4">Skills</h3>
+        <div class="flex flex-col space-y-6">
+          {% for profile_skill in profile.skills.all %}
+            {% with skill=profile_skill.skill %}
+              <div>
+                <h6 class="font-semibold text-md">
+                  {{ skill }}
+                </h6>
+                <p>
+                  {{ skill.content|truncatechars:75 }}
+                  <a
+                    href="#"
+                    class="text-md font-semibold text-knsSecondary-700 hover:text-knsSecondary-800"
+                  >
+                    Read more
+                  </a>
+                </p>
+              </div>
+            {% endwith %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="w-full pr-4">
+        <h3 class="text-lg font-bold uppercase border-b border-gray-400 mb-4">Interests</h3>
+        <div class="flex flex-col space-y-6">
+          {% for profile_interest in profile.interests.all %}
+            {% with interest=profile_interest.interest %}
+              <div>
+                <h6 class="font-semibold text-md">
+                  {{ interest }}
+                </h6>
+                <p>
+                  {{ interest.content|truncatechars:75 }}
+                  <a
+                    href="#"
+                    class="text-md font-semibold text-knsSecondary-700 hover:text-knsSecondary-800"
+                  >
+                    Read more
+                  </a>
+                </p>
+              </div>
+            {% endwith %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <h1 class="text-4xl font-bold">Mentorship</h1>
+  </section>
 {% endblock profile_base_content %}
