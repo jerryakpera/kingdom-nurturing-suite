@@ -561,3 +561,141 @@ class TestViews(TestCase):
             form.errors["email"],
             "Expected error message not found for email",
         )
+
+    def test_edit_involvement_details_get(self):
+        """
+        Test the edit_involvement_details view renders the form correctly.
+        """
+        url = reverse(
+            "profiles:edit_involvement_details",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/edit_involvement_details.html",
+        )
+
+        # Ensure the form is present in the context
+        self.assertIn("involvement_form", response.context)
+
+    def test_edit_involvement_details_view_not_found(self):
+        """
+        Test the edit_involvement_details view with a non-existent profile slug.
+        """
+        url = reverse(
+            "profiles:edit_involvement_details",
+            kwargs={
+                "profile_slug": "non-existent",
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 404 Not Found
+        self.assertEqual(response.status_code, 404)
+
+    def test_edit_involvement_details_post_valid(self):
+        """
+        Test posting valid data to edit_involvement_details view updates the profile.
+        """
+        url = reverse(
+            "profiles:edit_involvement_details",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        data = {
+            "is_mentor": True,
+            "reason_is_not_mentor": "Valid reason",
+            "is_movement_training_facilitator": True,
+            "reason_is_not_movement_training_facilitator": "Valid reason",
+            "is_skill_training_facilitator": True,
+            "reason_is_not_skill_training_facilitator": "Valid reason",
+        }
+
+        # Post the data to the view
+        response = self.client.post(url, data=data)
+
+        # Refresh the profile from the database
+        self.profile.refresh_from_db()
+
+        # Debug: Print the current value of is_mentor to verify the change
+        print("is_mentor after post:", self.profile.is_mentor)
+
+        # Check if the profile involvement details were updated
+        self.assertTrue(
+            self.profile.is_mentor,
+            "Profile is_mentor field should be updated",
+        )
+
+        # Check if the response redirects after saving
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(
+            response,
+            self.profile.get_absolute_url(),
+        )
+
+        # Ensure the success message is in the messages
+        messages_list = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages_list), 1)
+        self.assertEqual(
+            str(messages_list[0]),
+            "Profile involvement details updated",
+        )
+
+    def test_edit_involvement_details_post_invalid(self):
+        """
+        Test posting invalid data to edit_involvement_details view does not update the profile.
+        """
+        url = reverse(
+            "profiles:edit_involvement_details",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        data = {
+            "is_mentor": "",  # Invalid as it's required by the form
+        }
+        response = self.client.post(url, data=data)
+
+        # The profile should not be updated
+        self.profile.refresh_from_db()
+        self.assertNotEqual(
+            self.profile.is_mentor,
+            "",
+        )
+
+        # Check if the response does not redirect
+        self.assertEqual(response.status_code, 200)
+
+        # Extract the form from the response context
+        form = response.context.get("involvement_form")
+
+        # Ensure the form contains errors
+        self.assertIsNotNone(
+            form,
+            "Form is not present in the response context",
+        )
+        self.assertTrue(
+            form.errors,
+            "Form should contain errors",
+        )
+
+        # Check for errors in the correct field
+        self.assertIn(
+            "reason_is_not_mentor",
+            form.errors,
+            "reason_is_not_mentor field should have errors",
+        )
+        self.assertIn(
+            "This field is required.",
+            form.errors["reason_is_not_mentor"],
+            "Expected error message not found",
+        )

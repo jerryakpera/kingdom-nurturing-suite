@@ -1,0 +1,45 @@
+{% load static %}
+
+{% with form=involvement_form %}
+  {% include 'core/components/forms/form_error.html' %}
+{% endwith %}
+
+<div class="space-y-6">
+  <div>
+    {% with field=involvement_form.is_movement_training_facilitator %}
+      {% include "core/components/forms/form_checkbox.html" %}
+    {% endwith %}
+
+    <div class="mt-2">
+      {% with field=involvement_form.reason_is_not_movement_training_facilitator %}
+        {% include "core/components/forms/form_field.html" %}
+      {% endwith %}
+    </div>
+  </div>
+
+  <div>
+    {% with field=involvement_form.is_skill_training_facilitator %}
+      {% include "core/components/forms/form_checkbox.html" %}
+    {% endwith %}
+
+    <div class="mt-2">
+      {% with field=involvement_form.reason_is_not_skill_training_facilitator %}
+        {% include "core/components/forms/form_field.html" %}
+      {% endwith %}
+    </div>
+  </div>
+
+  <div>
+    {% with field=involvement_form.is_mentor %}
+      {% include "core/components/forms/form_checkbox.html" %}
+    {% endwith %}
+
+    <div class="mt-2">
+      {% with field=involvement_form.reason_is_not_mentor %}
+        {% include "core/components/forms/form_field.html" %}
+      {% endwith %}
+    </div>
+  </div>
+</div>
+
+<script src="{% static "profiles/js/involvements.js" %}"></script>
