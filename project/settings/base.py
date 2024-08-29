@@ -29,6 +29,7 @@ THIRD_PARTY_APPS = [
     "cloudinary",
     "formtools",
     "django_countries",
+    "tinymce",
 ]
 
 LOCAL_APPS = [
@@ -36,6 +37,7 @@ LOCAL_APPS = [
     "kns.core",
     "kns.profiles",
     "kns.groups",
+    "kns.skills",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

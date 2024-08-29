@@ -23,6 +23,7 @@ django==5.1
     #   django-admin-honeypot-updated-2021
     #   django-formtools
     #   django-js-asset
+    #   django-tinymce
     #   django-use-email-as-username
 django-admin-honeypot-updated-2021==1.2.0
     # via -r requirements.in
@@ -35,6 +36,8 @@ django-ipware==7.0.1
 django-js-asset==2.2.0
     # via django-mptt
 django-mptt==0.16.0
+    # via -r requirements.in
+django-tinymce==4.1.0
     # via -r requirements.in
 django-use-email-as-username==1.4.0
     # via -r requirements.in

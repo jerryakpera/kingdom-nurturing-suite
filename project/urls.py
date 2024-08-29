@@ -3,15 +3,15 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
-from kns.core.views import index
-
 urlpatterns = [
+    path("tinymce/", include("tinymce.urls")),
     path("", include("kns.core.urls")),
     path("admin/", include("admin_honeypot.urls")),
     path("control-panel/", admin.site.urls),
     path("accounts/", include("kns.accounts.urls")),
     path("profiles/", include("kns.profiles.urls")),
     path("groups/", include("kns.groups.urls")),
+    path("skills/", include("kns.skills.urls")),
     # Password reset urls
     path(
         "reset_password/",
@@ -44,7 +44,6 @@ urlpatterns = [
 ]
 
 handler404 = "kns.core.views.error_404"
-# handler500 = "core.suite.views.error_500"
 
 if settings.DEBUG:
     # If in production
