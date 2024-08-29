@@ -14,5 +14,5 @@ python manage.py createsu
 # Initialize settings
 python manage.py createsettings
 
-# Generate data
-# python manage.py generate_prod_data
+# Populate database
+python manage.py populate_db
