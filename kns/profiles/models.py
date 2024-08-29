@@ -533,6 +533,8 @@ class Profile(
 
         return location_str
 
+    # def can_edit
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

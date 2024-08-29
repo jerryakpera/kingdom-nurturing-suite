@@ -1,8 +1,10 @@
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.test import RequestFactory, TestCase
+from django.utils import timezone
 
-from kns.profiles.utils import get_profile_slug
+from kns.profiles.utils import calculate_max_dob, get_profile_slug, name_with_apostrophe
 
 
 class TestGetProfileSlug(TestCase):
@@ -53,3 +55,34 @@ class TestGetProfileSlug(TestCase):
         slug = get_profile_slug(request)
 
         self.assertEqual(slug, "")
+
+
+class TestCalculateMaxDob(TestCase):
+    def test_calculate_max_dob(self):
+        """
+        Test that calculate_max_dob returns the correct date for a given age.
+        """
+        # Assume today's date is 2024-08-29
+        age = 30
+        expected_max_dob = (
+            timezone.now().date() - timedelta(days=(age * 365))
+        ).strftime("%Y-%m-%d")
+        self.assertEqual(calculate_max_dob(age), expected_max_dob)
+
+
+class TestNameWithApostrophe(TestCase):
+    def test_name_with_apostrophe_ends_with_s(self):
+        """
+        Test that name_with_apostrophe adds just an apostrophe if the name ends with 's'.
+        """
+        name = "James"
+        result = name_with_apostrophe(name)
+        self.assertEqual(result, "James'")
+
+    def test_name_with_apostrophe_does_not_end_with_s(self):
+        """
+        Test that name_with_apostrophe adds 's if the name does not end with 's'.
+        """
+        name = "John"
+        result = name_with_apostrophe(name)
+        self.assertEqual(result, "John's")

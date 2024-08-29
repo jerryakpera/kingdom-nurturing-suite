@@ -4,6 +4,8 @@ Custom tags for the `profiles` app.
 
 from django import template
 
+from kns.core.utils import log_this
+
 register = template.Library()
 
 
@@ -34,3 +36,42 @@ def get_nth_element(lst, index):
         return lst[int(index)]
     except (IndexError, ValueError, TypeError):
         return None
+
+
+@register.filter
+def can_edit_profile(user, profile):
+    """
+    Determine if the given user can edit the specified profile.
+
+    This custom template filter checks if the `user` has the permission to edit the `profile`.
+    The user can edit the profile if:
+    - The profile belongs to the user.
+    - The profile does not belong to a leader with a usable password.
+    - The user is a member of the group led by the profile's group.
+
+    Parameters
+    ----------
+    user : User
+        The user whose permissions are being checked.
+    profile : Profile
+        The profile to be checked for edit permissions.
+
+    Returns
+    -------
+    bool
+        `True` if the user can edit the profile, `False` otherwise.
+    """
+    if profile == user.profile:
+        return True
+
+    if (
+        profile.role == "leader"
+        and profile.user.has_usable_password
+        and profile.user.password
+    ):
+        return False
+
+    if not hasattr(user.profile, "group_led"):  # pragma: no cover
+        return False
+
+    return user.profile.group_led.is_member(profile)

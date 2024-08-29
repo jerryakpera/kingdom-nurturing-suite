@@ -16,6 +16,11 @@ urlpatterns = [
         name="edit_profile_picture",
     ),
     path(
+        "<slug:profile_slug>/edit/skills",
+        views.edit_profile_skills,
+        name="edit_profile_skills",
+    ),
+    path(
         "<slug:profile_slug>/edit/involvement-details",
         views.edit_involvement_details,
         name="edit_involvement_details",

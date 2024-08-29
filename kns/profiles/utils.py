@@ -54,3 +54,26 @@ def calculate_max_dob(age):
     formatted_max_dob = max_dob.strftime("%Y-%m-%d")
 
     return formatted_max_dob
+
+
+def name_with_apostrophe(name):
+    """
+    Add an apostrophe to a name to form a possessive version.
+
+    This function appends an apostrophe to the given name. If the name ends with
+    an "s", it simply adds an apostrophe. Otherwise, it adds "'s" to the name.
+
+    Parameters
+    ----------
+    name : str
+        The name to which the possessive apostrophe is to be added.
+
+    Returns
+    -------
+    str
+        The name with an appended possessive apostrophe.
+    """
+    if name[-1] == "s":
+        return name + "'"
+    else:
+        return name + "'s"

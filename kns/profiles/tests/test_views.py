@@ -1,7 +1,9 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 
+from kns.core.models import Setting
 from kns.custom_user.models import User
+from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 
 
 class TestViews(TestCase):
@@ -27,6 +29,8 @@ class TestViews(TestCase):
         self.profile.last_name = "User"
 
         self.profile.save()
+
+        self.settings = Setting.get_or_create_setting()
 
     def test_index_view(self):
         """
@@ -699,3 +703,202 @@ class TestViews(TestCase):
             form.errors["reason_is_not_mentor"],
             "Expected error message not found",
         )
+
+    def test_edit_profile_skills_get(self):
+        """
+        Test the edit_profile_skills view renders the form correctly.
+        """
+        url = reverse(
+            "profiles:edit_profile_skills",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/edit_profile_skills.html",
+        )
+
+        # Ensure the form is present in the context
+        self.assertIn(
+            "profile_skills_form",
+            response.context,
+        )
+
+    def test_edit_profile_skills_post_valid(self):
+        """
+        Test posting valid data to edit_profile_skills view updates
+        the profile's skills and interests.
+        """
+        skill1 = Skill.objects.create(
+            title="Python",
+            content="This is a sample content",
+            author=self.profile,
+        )
+        skill2 = Skill.objects.create(
+            title="Django",
+            content="This is a sample content",
+            author=self.profile,
+        )
+        skill3 = Skill.objects.create(
+            title="Web Development",
+            content="This is a sample content",
+            author=self.profile,
+        )
+        skill4 = Skill.objects.create(
+            title="Data Science",
+            content="This is a sample content",
+            author=self.profile,
+        )
+
+        url = reverse(
+            "profiles:edit_profile_skills",
+            kwargs={"profile_slug": self.profile.slug},
+        )
+
+        data = {
+            "skills": [skill1.id, skill2.id],
+            "interests": [skill3.id, skill4.id],
+        }
+
+        response = self.client.post(url, data=data)
+
+        # Refresh the profile from the database
+        self.profile.refresh_from_db()
+
+        # Check if the profile's skills and interests were updated
+        self.assertEqual(
+            ProfileSkill.objects.filter(
+                profile=self.profile,
+            ).count(),
+            2,
+        )
+        self.assertEqual(
+            ProfileInterest.objects.filter(
+                profile=self.profile,
+            ).count(),
+            2,
+        )
+
+        self.assertTrue(
+            ProfileSkill.objects.filter(
+                profile=self.profile,
+                skill=skill1,
+            ).exists()
+        )
+        self.assertTrue(
+            ProfileSkill.objects.filter(
+                profile=self.profile,
+                skill=skill2,
+            ).exists()
+        )
+        self.assertTrue(
+            ProfileInterest.objects.filter(
+                profile=self.profile, interest=skill3
+            ).exists()
+        )
+        self.assertTrue(
+            ProfileInterest.objects.filter(
+                profile=self.profile, interest=skill4
+            ).exists()
+        )
+
+        # Check if the response redirects after saving
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, self.profile.get_absolute_url())
+
+        # Ensure the success message is in the messages
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            f"{self.profile.get_full_name()}'s profile updated.",
+        )
+
+    # def test_edit_profile_skills_post_invalid(self):
+    #     """
+    #     Test posting invalid data to edit_profile_skills view does not
+    #     update the profile.
+    #     """
+    #     skill1 = Skill.objects.create(
+    #         title="Python",
+    #         content="This is a sample content",
+    #         author=self.profile,
+    #     )
+    #     interest1 = Skill.objects.create(
+    #         title="Django",
+    #         content="This is a sample content",
+    #         author=self.profile,
+    #     )
+
+    #     # Add initial valid data
+    #     ProfileSkill.objects.create(
+    #         profile=self.profile,
+    #         skill=skill1,
+    #     )
+    #     ProfileInterest.objects.create(
+    #         profile=self.profile,
+    #         interest=interest1,
+    #     )
+
+    #     url = reverse(
+    #         "profiles:edit_profile_skills",
+    #         kwargs={
+    #             "profile_slug": self.profile.slug,
+    #         },
+    #     )
+    #     data = {
+    #         "skills": [],  # Invalid as no skills are provided
+    #         "interests": [],  # Invalid as no interests are provided
+    #     }
+    #     response = self.client.post(url, data=data)
+
+    #     # The profile's skills and interests should not be updated (i.e., deleted)
+    #     self.profile.refresh_from_db()
+
+    #     self.assertEqual(
+    #         ProfileSkill.objects.filter(
+    #             profile=self.profile,
+    #         ).count(),
+    #         1,
+    #     )
+    #     self.assertEqual(
+    #         ProfileInterest.objects.filter(
+    #             profile=self.profile,
+    #         ).count(),
+    #         1,
+    #     )
+
+    #     # Check if the response does not redirect
+    #     self.assertEqual(response.status_code, 200)
+
+    #     # Extract the form from the response context
+    #     form = response.context.get("profile_skills_form")
+
+    #     # Ensure the form contains errors
+    #     self.assertIsNotNone(
+    #         form,
+    #         "Form is not present in the response context",
+    #     )
+    #     # self.assertTrue(
+    #     #     form.errors,
+    #     #     "Form should contain errors",
+    #     # )
+
+    #     self.assertIn(
+    #         "skills",
+    #         form.errors,
+    #         "Skills field should have errors",
+    #     )
+    #     self.assertIn(
+    #         "interests",
+    #         form.errors,
+    #         "Interests field should have errors",
+    #     )

@@ -11,10 +11,12 @@ from formtools.wizard.views import SessionWizardView
 from kns.accounts import emails as account_emails
 from kns.core.utils import log_this
 from kns.custom_user.models import User
+from kns.skills.models import ProfileInterest, ProfileSkill
 
 from . import constants as profile_constants
 from . import forms as profile_forms
 from .models import ConsentForm, Profile
+from .utils import name_with_apostrophe
 
 
 class NewMemberView(SessionWizardView):  # pragma: no cover
@@ -837,5 +839,100 @@ def edit_profile_picture(request, profile_slug):  # pragma: no cover
         "profiles/pages/edit_profile_picture.html",
         {
             "profile_picture_form": profile_picture_form,
+        },
+    )
+
+
+@login_required
+def edit_profile_skills(request, profile_slug):
+    """
+    Edit the skills details of a user profile.
+
+    This view allows updating the skills details of a profile. It processes
+    both GET and POST requests. If the request is POST and the form is valid,
+    the profile is updated, and a success message is displayed.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to edit.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the edit skills details template or redirects to the profile
+        detail page with a success message if the form is valid.
+    """
+    profile = Profile.objects.get(slug=profile_slug)
+
+    # Get skills and interests associated with the profile
+    profile_skills = profile.skills.values_list(
+        "skill",
+        flat=True,
+    )
+    profile_interests = profile.interests.values_list(
+        "interest",
+        flat=True,
+    )
+
+    # Initialize the form with initial values
+    initial_data = {
+        "skills": profile_skills,
+        "interests": profile_interests,
+    }
+
+    profile_skills_form = profile_forms.ProfileSkillsForm(
+        request.POST or None,
+        initial=initial_data,
+    )
+
+    if request.method == "POST":
+        if profile_skills_form.is_valid():
+            # Delete all profile skills and interests before saving
+            ProfileSkill.objects.filter(profile=profile).delete()
+            ProfileInterest.objects.filter(profile=profile).delete()
+
+            skills = profile_skills_form.cleaned_data.get("skills")
+            interests = profile_skills_form.cleaned_data.get("interests")
+
+            for skill in skills:
+                profile_skill_exists = ProfileSkill.objects.filter(
+                    profile=profile,
+                    skill=skill,
+                )
+
+                if profile_skill_exists.count() == 0:
+                    profile_skill = ProfileSkill.objects.create(
+                        profile=profile, skill=skill
+                    )
+                    profile_skill.save()
+
+            for interest in interests:
+                profile_interest_exists = ProfileInterest.objects.filter(
+                    profile=profile,
+                    interest=interest,
+                )
+
+                if profile_interest_exists.count() == 0:
+                    profile_interest = ProfileInterest.objects.create(
+                        profile=profile,
+                        interest=interest,
+                    )
+                    profile_interest.save()
+
+            messages.success(
+                request,
+                f"{name_with_apostrophe(profile.get_full_name())} profile updated.",
+            )
+
+            return redirect(profile)
+
+    return render(
+        request,
+        "profiles/pages/edit_profile_skills.html",
+        {
+            "profile_skills_form": profile_skills_form,
         },
     )
