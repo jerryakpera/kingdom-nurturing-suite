@@ -685,3 +685,20 @@ class ConsentFormSubmission(forms.ModelForm):
                 )
 
         return file
+
+
+class ProfilePictureForm(forms.ModelForm):  # pragma: no cover
+    """
+    A form for updating a profiles picture.
+    """
+
+    class Meta:
+        model = Profile
+        fields = [
+            "image",
+        ]
+
+    image = CloudinaryFileField(
+        required=False,
+        options={"folder": "kns/images/profiles/"},
+    )

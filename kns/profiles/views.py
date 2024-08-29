@@ -788,3 +788,54 @@ def edit_involvement_details(request, profile_slug):
         template_name="profiles/pages/edit_involvement_details.html",
         context=context,
     )
+
+
+@login_required
+def edit_profile_picture(request, profile_slug):  # pragma: no cover
+    """
+    Edit the picture of a user profile.
+
+    This view allows updating the picture of a profile. It processes
+    both GET and POST requests. If the request is POST and the form is valid,
+    the profile is updated, and a success message is displayed.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to edit.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the edit picture template or redirects to the profile
+        detail page with a success message if the form is valid.
+    """
+    profile = Profile.objects.get(slug=profile_slug)
+
+    profile_picture_form = profile_forms.ProfilePictureForm(
+        request.POST or None,
+    )
+
+    if request.method == "POST":
+        if profile_picture_form.is_valid():
+            for image in request.FILES.getlist("image"):
+                profile.image = image
+
+            profile.save()
+
+            messages.success(
+                request=request,
+                message="Profile's picture updated",
+            )
+
+            return redirect(profile)
+
+    return render(
+        request,
+        "profiles/pages/edit_profile_picture.html",
+        {
+            "profile_picture_form": profile_picture_form,
+        },
+    )
