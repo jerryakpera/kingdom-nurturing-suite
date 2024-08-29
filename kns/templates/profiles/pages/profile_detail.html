@@ -5,32 +5,9 @@
 {% endblock title %}
 
 {% block profile_base_content %}
-  <h1>{{ profile.first_name }} {{ profile.last_name }} </h1>
-
-  <div>
-    Full name:
+  <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
     <div>
-      {{ profile.first_name }} {{ profile.last_name }}
+      <div>Location</div>
     </div>
-  </div>
-
-  <hr>
-
-  <div>
-    Gender:
-    <div>
-      {{ profile.gender.title }}
-    </div>
-  </div>
-
-  <hr>
-
-  <div>
-    Date of birth:
-    <div>
-      {{ profile.date_of_birth }}
-    </div>
-  </div>
-
-  <hr>
+  </section>
 {% endblock profile_base_content %}

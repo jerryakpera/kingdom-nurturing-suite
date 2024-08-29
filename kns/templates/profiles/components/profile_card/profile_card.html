@@ -9,7 +9,7 @@
         <div class="text-sm text-gray-500">
           {{ profile.get_role_display_str }}
           {% if profile.group_led %}
-            ,
+            -
             <a
               title="Edit bio details"
               href="{{ profile.group_led.get_absolute_url }}"
@@ -41,5 +41,66 @@
 
   <div class="p-4 pb-0 space-y-4">
     {% include "profiles/components/profile_icons/profile_icons.html" %}
+  </div>
+
+  <div class="px-4 mt-4 space-y-4">
+    {% if profile.contact_details_is_visible %}
+      <div>
+        <div class="text-xs text-gray-500 uppercase font-semibold">Email</div>
+        <div>
+          {{ profile.email }}
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs text-gray-500 uppercase font-semibold">Phone</div>
+        <div>
+          {{ profile.phone_prefix }}{{ profile.phone }}
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs text-gray-500 uppercase font-semibold">Location</div>
+        <div class="flex gap-x-1.5 items-center">
+          <img
+            src="{{ profile.location_country.flag }}"
+            alt="{{ profile.location_country.name }}"
+          />
+          {{profile.location_display}}
+        </div>
+      </div>
+    {% else %}
+      {% if profile == request.user.profile %}
+        <div class="text-sm text-knsPrimary-600 bg-knsPrimary-100 p-2 rounded-sm">
+          Your contact information is hidden.
+        </div>
+      {% endif %}
+    {% endif %}
+
+    {% if profile.bio_details_is_visible %}
+      <div>
+        <div class="text-xs text-gray-500 uppercase font-semibold">Date of birth</div>
+        <div>
+          {{ profile.formatted_date_of_birth }}
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs text-gray-500 uppercase font-semibold">Place of birth</div>
+        <div class="flex gap-x-1.5 items-center">
+          <img
+            src="{{ profile.place_of_birth_country.flag }}"
+            alt="{{ profile.place_of_birth_country.name }}"
+          />
+          {{profile.place_of_birth_display}}
+        </div>
+      </div>
+    {% else %}
+      {% if profile == request.user.profile %}
+        <div class="text-sm text-knsPrimary-600 bg-knsPrimary-100 p-2 rounded-sm">
+          Your bio information is hidden.
+        </div>
+      {% endif %}
+    {% endif %}
   </div>
 </div>

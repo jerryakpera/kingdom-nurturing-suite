@@ -12,6 +12,15 @@
     <ul class="py-2 text-sm text-gray-700" aria-labelledby="profileMenuDropdown">
       <li>
         <a
+          href="{% url "profiles:edit_profile_picture" profile_slug=profile.slug %}"
+          class="block px-4 py-2 hover:bg-gray-100"
+        >
+          Edit profile picture
+        </a>
+      </li>
+
+      <li>
+        <a
           href="{% url "profiles:edit_bio_details" profile_slug=profile.slug %}"
           class="block px-4 py-2 hover:bg-gray-100"
         >
@@ -28,27 +37,14 @@
         </a>
       </li>
 
-      <li>
+      {% comment %} <li>
         <a
           href="{% url "profiles:edit_involvement_details" profile_slug=profile.slug %}"
           class="block px-4 py-2 hover:bg-gray-100"
         >
           Edit involvement details
         </a>
-      </li>
-
-      <li>
-        <a
-          href="{% url "profiles:edit_profile_picture" profile_slug=profile.slug %}"
-          class="block px-4 py-2 hover:bg-gray-100"
-        >
-          Edit profile picture
-        </a>
-      </li>
-
-      <li>
-        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Earnings</a>
-      </li>
+      </li> {% endcomment %}
     </ul>
     <div class="py-1">
       <a

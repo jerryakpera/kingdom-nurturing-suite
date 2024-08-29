@@ -2,6 +2,7 @@
 Models for the profiles app.
 """
 
+from datetime import datetime
 from uuid import uuid4
 
 from cloudinary.models import CloudinaryField
@@ -468,6 +469,69 @@ class Profile(
                 group_created_for=leader.group_in.group,
                 action_type=core_constants.CHANGE_ROLE_TO_LEADER_ACTION_TYPE,
             )
+
+    def formatted_date_of_birth(self):
+        """
+        Return the formatted date of birth as a string.
+
+        This method formats the profile's date of birth into a readable string
+        format. If the date of birth is not set, it returns a placeholder string.
+
+        Returns
+        -------
+        str
+            The formatted date of birth or a placeholder string if the date is not set.
+        """
+        if self.date_of_birth:
+            return self.date_of_birth.strftime("%B %d, %Y")
+        else:
+            return "---"
+
+    def place_of_birth_display(self):
+        """
+        Return a formatted string representing the place of birth.
+
+        This method constructs a string that includes the country and city of the
+        profile's place of birth. If either the country or city is not set, it
+        returns a placeholder string `"---"`.
+
+        Returns
+        -------
+        str
+            The formatted place of birth, or `"---"` if no place of birth information is set.
+        """
+        place_of_birth_str = "---"
+
+        if self.place_of_birth_country:
+            place_of_birth_str = self.place_of_birth_country.name
+
+            if self.place_of_birth_city:
+                place_of_birth_str += f", {self.place_of_birth_city}"
+
+        return place_of_birth_str
+
+    def location_display(self):
+        """
+        Return a formatted string representing the current location.
+
+        This method constructs a string that includes the country and city of the
+        profile's current location. If either the country or city is not set, it
+        returns a placeholder string `"---"`.
+
+        Returns
+        -------
+        str
+            The formatted location, or `"---"` if no location information is set.
+        """
+        location_str = "---"
+
+        if self.location_country:
+            location_str = self.location_country.name
+
+            if self.location_city:
+                location_str += f", {self.location_city}"
+
+        return location_str
 
 
 @receiver(post_save, sender=User)
