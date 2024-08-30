@@ -781,8 +781,8 @@ class ProfileSkillsForm(forms.Form):
 
     def clean(self):
         """
-        Clean and validate the form data. Ensures the number of selected skills
-        and interests do not exceed the allowed maximums, as defined in the settings.
+        Clean and validate the form data. Ensures no overlap between skills and interests,
+        and that the number of selected skills and interests do not exceed allowed maximums.
 
         Returns
         -------
@@ -792,7 +792,8 @@ class ProfileSkillsForm(forms.Form):
         Raises
         ------
         ValidationError
-            If the number of selected skills or interests exceeds the allowed maximum.
+            If there is an overlap between selected skills and interests,
+            or if the number of selected skills/interests exceeds the allowed maximum.
         """
         cleaned_data = super().clean()
         skills = cleaned_data.get("skills", [])
@@ -808,6 +809,17 @@ class ProfileSkillsForm(forms.Form):
             error_msg = (
                 f"You can select up to {settings.max_interests_per_user} interests."
             )
+            self.add_error("interests", error_msg)
+
+        # Check for overlapping skills and interests
+        overlapping_items = set(skills).intersection(interests)
+        if overlapping_items:
+            overlap_names = ", ".join([str(item) for item in overlapping_items])
+            error_msg = (
+                "The following items cannot be selected as both skills "
+                f"and interests: {overlap_names}."
+            )
+            self.add_error("skills", error_msg)
             self.add_error("interests", error_msg)
 
         return cleaned_data

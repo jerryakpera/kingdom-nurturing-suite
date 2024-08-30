@@ -90,15 +90,16 @@ class ProfileSkill(TimestampedModel, models.Model):
         Custom validation to ensure that a skill cannot be listed as
         both a skill and an interest for the same profile.
         """
+        super().clean()
+
+        # Check if this skill is already listed as an interest
         if ProfileInterest.objects.filter(
             profile=self.profile,
             interest=self.skill,
         ).exists():
             raise ValidationError(
-                (
-                    f"The skill '{self.skill.title}' is already listed "
-                    "as an interest for this profile."
-                )
+                f"The skill '{self.skill.title}' is already listed "
+                "as an interest for this profile."
             )
 
     def __str__(self) -> str:
@@ -141,15 +142,16 @@ class ProfileInterest(TimestampedModel, models.Model):
         Custom validation to ensure that an interest cannot be listed as
         both an interest and a skill for the same profile.
         """
+        super().clean()
+
+        # Check if this interest is already listed as a skill
         if ProfileSkill.objects.filter(
             profile=self.profile,
             skill=self.interest,
         ).exists():
             raise ValidationError(
-                (
-                    f"The interest '{self.interest.title}' is already "
-                    "listed as a skill for this profile."
-                )
+                f"The interest '{self.interest.title}' is already "
+                "listed as a skill for this profile."
             )
 
     def __str__(self) -> str:
