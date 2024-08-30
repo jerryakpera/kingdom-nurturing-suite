@@ -3,7 +3,7 @@ from django.test import TestCase
 from kns.custom_user.models import User
 from kns.groups.models import Group
 
-from ..templatetags import can_edit_profile, get_nth_element
+from ..templatetags import can_edit_profile, get_nth_element, name_with_apostrophe
 
 
 class GetNthElementFilterTest(TestCase):
@@ -136,3 +136,28 @@ class CanEditProfileFilterTest(TestCase):
                 self.profile3,
             ),
         )
+
+
+class NameWithApostropheFilterTest(TestCase):
+    def setUp(self):
+        """Set up any necessary data for the tests."""
+        pass
+
+    def test_name_without_trailing_s(self):
+        """Test that the filter correctly adds 's for names that do not end in s."""
+        self.assertEqual(name_with_apostrophe("John"), "John's")
+        self.assertEqual(name_with_apostrophe("Alice"), "Alice's")
+
+    def test_name_with_trailing_s(self):
+        """Test that the filter correctly adds an apostrophe for names that end in s."""
+        self.assertEqual(name_with_apostrophe("James"), "James'")
+        self.assertEqual(name_with_apostrophe("Moses"), "Moses'")
+
+    def test_empty_name(self):
+        """Test that the filter returns an empty string for an empty name."""
+        self.assertEqual(name_with_apostrophe(""), "")
+
+    def test_name_with_apostrophe_in_the_middle(self):
+        """Test that the filter handles names with an apostrophe correctly."""
+        self.assertEqual(name_with_apostrophe("O'Neil"), "O'Neil's")
+        self.assertEqual(name_with_apostrophe("D'Arcy"), "D'Arcy's")

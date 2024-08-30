@@ -1,0 +1,92 @@
+{% extends "profiles/profile_base.html" %}
+
+{% load custom_tags %}
+
+{% block profile_base_content %}
+  <section>
+    <form
+      method="POST"
+      id="form-container"
+      class="space-y-4"
+      action="{% url "profiles:encrypt_profile" profile_slug=profile.slug %}"
+    >
+      {% csrf_token %}
+
+      <div class="flex flex-col space-y-4">
+        <div>
+          <h1 class="font-semibold text-xl text-primary">Encrypt profile</h1>
+          <p>Encrypt {{ profile.get_full_name|name_with_apostrophe }} name</p>
+          <hr class="mb-3 border-gray-300">
+        </div>
+
+        {% include "profiles/forms/profile_encryption_form.html" %}
+        <div class="flex justify-end space-x-2">
+          {% include "core/components/globals/cancel_button.html" %}
+
+          <button
+            type="submit"
+            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5"
+          >
+            Save
+          </button>
+        </div>
+
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 mb-4">Guide to Profile Encryption</h1>
+
+          <p class="text-gray-700 mb-6">
+            Welcome to the Profile Encryption feature! This guide will help you understand what profile encryption is, why it’s important, and how to use it effectively.
+          </p>
+
+          <div class="space-y-4">
+            <div class="border-l-4 border-amber-600 bg-amber-200 p-3">
+              <h2 class="text-lg font-bold">What is Profile Encryption?</h2>
+              <p>
+                Profile encryption is a feature designed to protect the privacy and security of your personal information. By encrypting the name attached to your profile, you can hide your real name and other personal details from public view, replacing them with randomly generated names. This ensures that your identity remains confidential.
+              </p>
+            </div>
+
+            <div class="border-l-4 border-teal-600 bg-teal-200 p-3">
+              <h2 class="text-lg font-bold">Why is Profile Encryption Important?</h2>
+              <ul class="list-disc list-inside space-y-2">
+                <li><i class="font-medium">Privacy Protection:</i> Safeguard your personal details from unauthorized access or exposure.</li>
+                <li><i class="font-medium">Security:</i> Prevent potential threats by keeping your identity secure.</li>
+                  <li><i class="font-medium">Control Over Personal Information:</i> Decide who can see your real name and when.</li>
+              </ul>
+            </div>
+
+            <div>
+              <h2 class="text-xl font-semibold text-gray-800 mb-2">How to Use Profile Encryption</h2>
+              <div class="mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Select a Reason for Encryption:</h3>
+                <p class="text-gray-700">
+                  When you choose to encrypt your profile, you will be prompted to select a reason for doing so. This helps us understand and respect your privacy needs. The available options include privacy concerns, security purposes, avoiding unwanted attention, and more.
+                </p>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <h3 class="text-lg font-semibold text-gray-800">Encrypt Your Profile:</h3>
+              <p class="text-gray-700">
+                Once you’ve selected your reason, your profile’s name will be replaced with a randomly generated one. This encrypted name will be used wherever your profile appears on the platform.
+              </p>
+            </div>
+
+            <div>
+              <h3 class="text-lg font-semibold text-gray-800">Decryption:</h3>
+              <p class="text-gray-700">
+                If you ever wish to make your real name visible again, you can easily decrypt your profile. This will restore your original name across the platform.
+              </p>
+            </div>
+
+            <p class="text-gray-700 mt-6">
+              By following these steps, you can ensure that your personal information remains secure and that you maintain control over your online identity.
+            </p>
+          </div>
+
+
+        </div>
+      </div>
+    </form>
+  </section>
+{% endblock profile_base_content %}

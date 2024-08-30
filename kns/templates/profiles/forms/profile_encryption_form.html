@@ -1,0 +1,7 @@
+{% with form=profile_encryption_form %}
+  {% include 'core/components/forms/form_error.html' %}
+{% endwith %}
+
+{% with field=profile_encryption_form.encryption_reason %}
+  {% include "core/components/forms/form_field.html" %}
+{% endwith %}

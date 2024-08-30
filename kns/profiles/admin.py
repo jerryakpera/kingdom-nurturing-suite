@@ -6,7 +6,20 @@ from django.contrib import admin
 
 from kns.skills.models import ProfileInterest, ProfileSkill
 
-from .models import ConsentForm, Profile
+from .models import ConsentForm, EncryptionReason, Profile, ProfileEncryption
+
+
+class ProfileEncryptionInline(admin.TabularInline):
+    """
+    Inline admin interface for the ProfileEncryption model.
+
+    This allows the skills associated with a profile to be managed
+    directly within the Profile admin interface.
+    """
+
+    extra = 0
+    model = ProfileEncryption
+    fk_name = "profile"
 
 
 class ProfileSkillInline(admin.TabularInline):
@@ -58,11 +71,12 @@ class ProfileAdmin(admin.ModelAdmin):
         ProfileSkillInline,
         ProfileInterestInline,
         ConsentFormInline,
+        ProfileEncryptionInline,
     ]
 
 
-# Register the ConsentForm model with the admin site
-admin.site.register(ConsentForm)
-
 # Register the ProfileAdmin with the admin site
 admin.site.register(Profile, ProfileAdmin)
+
+admin.site.register(ConsentForm)
+admin.site.register(EncryptionReason)

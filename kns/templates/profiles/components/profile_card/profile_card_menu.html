@@ -1,3 +1,5 @@
+{% load custom_tags %}
+
 <button
   type="button"
   id="profileMenuDropdown"
@@ -36,17 +38,26 @@
           Edit contact details
         </a>
       </li>
-
-      {% comment %} <li>
-        <a
-          href="{% url "profiles:edit_involvement_details" profile_slug=profile.slug %}"
-          class="block px-4 py-2 hover:bg-gray-100"
-        >
-          Edit involvement details
-        </a>
-      </li> {% endcomment %}
     </ul>
     <div class="py-1">
+      {% if request.user|can_edit_profile:profile and not profile.encryption %}
+        <a
+          href="{% url "profiles:encrypt_profile" profile_slug=profile.slug %}"
+          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Hide name
+        </a>
+      {% endif %}
+
+      {% if request.user|can_edit_profile:profile and profile.encryption and profile.encryption.encrypted_by == request.user.profile %}
+        <a
+          href="{% url "profiles:decrypt_profile" profile_slug=profile.slug %}"
+          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Reveal name
+        </a>
+      {% endif %}
+
       <a
         href="{% url "profiles:profile_settings" profile_slug=profile.slug %}"
         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

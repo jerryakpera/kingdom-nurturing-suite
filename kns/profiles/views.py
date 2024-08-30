@@ -987,14 +987,24 @@ def encrypt_profile(request, profile_slug):
                 profile=profile,
                 last_name=last_name,
                 first_name=first_name,
+                encrypted_by=request.user.profile,
                 encryption_reason=encryption_reason,
             )
+
             messages.success(
                 request=request,
                 message="Profiles name has been hidden from all users",
             )
 
-    return redirect(profile)
+            return redirect(profile.get_absolute_url())
+
+    return render(
+        request=request,
+        template_name="profiles/pages/encrypt_profile.html",
+        context={
+            "profile_encryption_form": profile_encryption_form,
+        },
+    )
 
 
 @login_required
@@ -1016,19 +1026,30 @@ def decrypt_profile(request, profile_slug):
         if the profile was decrypted.
     """
     profile = get_object_or_404(Profile, slug=profile_slug)
-    profile_encryption = ProfileEncryption.objects.filter(
+    profile_encryption_exists = ProfileEncryption.objects.filter(
         profile=profile,
-    )
+    ).exists()
 
-    if profile_encryption.exists():
-        profile_encryption.delete()
-
-        messages.success(
-            request=request,
-            message=(
-                f"{name_with_apostrophe(profile.get_full_name())} "
-                "name is now visible to all users"
-            ),
+    if profile_encryption_exists:
+        profile_encryption = ProfileEncryption.objects.get(
+            profile=profile,
         )
+
+        if profile_encryption.encrypted_by != request.user.profile:
+            messages.error(
+                request=request,
+                message="You cannot complete this action.",
+            )
+
+        else:
+            profile_encryption.delete()
+
+            messages.success(
+                request=request,
+                message=(
+                    f"{name_with_apostrophe(profile.get_full_name())} "
+                    "name is now visible to all users"
+                ),
+            )
 
     return redirect(profile)

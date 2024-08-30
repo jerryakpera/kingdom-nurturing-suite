@@ -75,3 +75,30 @@ def can_edit_profile(user, profile):
         return False
 
     return user.profile.group_led.is_member(profile)
+
+
+@register.filter
+def name_with_apostrophe(name: str):
+    """
+    Add an apostrophe to a name to form a possessive version.
+
+    This function appends an apostrophe to the given name. If the name ends with
+    an "s", it simply adds an apostrophe. Otherwise, it adds "'s" to the name.
+
+    Parameters
+    ----------
+    name : str
+        The name to which the possessive apostrophe is to be added.
+
+    Returns
+    -------
+    str
+        The name with an appended possessive apostrophe.
+    """
+    if name.strip() == "":
+        return ""
+
+    if name[-1] == "s":
+        return name + "'"
+    else:
+        return name + "'s"

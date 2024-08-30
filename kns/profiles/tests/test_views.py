@@ -883,77 +883,11 @@ class TestProfileEncryption(TestCase):
 
         # Check if the success message is in the messages
         messages = list(get_messages(response.wsgi_request))
+
         self.assertEqual(len(messages), 1)
         self.assertEqual(
             str(messages[0]),
             "Profiles name has been hidden from all users",
-        )
-
-    def test_encrypt_profile_post_invalid(self):
-        """
-        Test the POST request to encrypt a profile with invalid data.
-        """
-        url = reverse(
-            "profiles:encrypt_profile",
-            kwargs={
-                "profile_slug": self.profile.slug,
-            },
-        )
-
-        # Post with no encryption reason
-        data = {}
-        response = self.client.post(url, data=data)
-
-        # The profile should not be encrypted
-        self.assertFalse(
-            ProfileEncryption.objects.filter(
-                profile=self.profile,
-            ).exists()
-        )
-
-        # Check if the response redirects
-        self.assertEqual(response.status_code, 302)
-
-        # Follow the redirect to ensure that the form errors are present
-        response = self.client.get(response.headers["Location"])
-
-    def test_decrypt_profile(self):
-        """
-        Test the decrypt_profile view to ensure it decrypts the profile correctly.
-        """
-        # First, encrypt the profile
-        self.profile_encryption = ProfileEncryption.objects.create(
-            profile=self.profile,
-            last_name="Encrypted",
-            first_name="Profile",
-            encryption_reason=self.encryption_reason,
-        )
-
-        url = reverse(
-            "profiles:decrypt_profile",
-            kwargs={
-                "profile_slug": self.profile.slug,
-            },
-        )
-        response = self.client.get(url)
-
-        # Check if the profile was decrypted
-        self.assertFalse(
-            ProfileEncryption.objects.filter(
-                profile=self.profile,
-            ).exists()
-        )
-
-        # Check if the response redirects
-        self.assertEqual(response.status_code, 302)
-
-        # Check if the success message is in the messages
-        messages = list(get_messages(response.wsgi_request))
-
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(
-            str(messages[0]),
-            "Test User's name is now visible to all users",
         )
 
     def test_gender_based_name_generation(self):
@@ -992,4 +926,117 @@ class TestProfileEncryption(TestCase):
         self.assertNotIn(
             "male",
             profile_encryption.first_name.lower(),
+        )
+
+    def test_decrypt_profile(self):
+        """
+        Test the decrypt_profile view to ensure it decrypts the profile correctly.
+        """
+        # First, encrypt the profile
+        self.profile_encryption = ProfileEncryption.objects.create(
+            profile=self.profile,
+            last_name="Encrypted",
+            first_name="Profile",
+            encrypted_by=self.profile,
+            encryption_reason=self.encryption_reason,
+        )
+
+        url = reverse(
+            "profiles:decrypt_profile",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the profile was decrypted
+        self.assertFalse(
+            ProfileEncryption.objects.filter(
+                profile=self.profile,
+            ).exists()
+        )
+
+        # Check if the response redirects
+        self.assertEqual(response.status_code, 302)
+
+        # Check if the success message is in the messages
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "Test User's name is now visible to all users",
+        )
+
+    def test_encrypt_profile_post_invalid(self):
+        """
+        Test the POST request to encrypt a profile with invalid data.
+        """
+        url = reverse(
+            "profiles:encrypt_profile",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        # Post with no encryption reason
+        data = {}
+        response = self.client.post(
+            url,
+            data=data,
+        )
+
+        # The profile should not be encrypted
+        self.assertFalse(
+            ProfileEncryption.objects.filter(
+                profile=self.profile,
+            ).exists()
+        )
+
+        # Check if the response redirects
+        self.assertEqual(response.status_code, 200)
+
+    def test_different_author_of_profile_encryption(self):
+        """
+        Test the decrypt_profile view to ensure it decrypts the profile correctly.
+        """
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com", password="password"
+        )
+
+        self.other_profile = self.other_user.profile
+
+        # First, encrypt the profile
+        self.profile_encryption = ProfileEncryption.objects.create(
+            profile=self.profile,
+            last_name="Encrypted",
+            first_name="Profile",
+            encrypted_by=self.other_profile,
+            encryption_reason=self.encryption_reason,
+        )
+
+        url = reverse(
+            "profiles:decrypt_profile",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        data = {
+            "encryption_reason": self.encryption_reason.pk,
+        }
+
+        response = self.client.post(url, data)
+
+        # Check if the response redirects
+        self.assertEqual(response.status_code, 302)
+
+        # Check if the success message is in the messages
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "You cannot complete this action.",
         )

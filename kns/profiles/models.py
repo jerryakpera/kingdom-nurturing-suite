@@ -758,6 +758,14 @@ class ProfileEncryption(
         on_delete=models.CASCADE,
     )
 
+    encrypted_by = models.OneToOneField(
+        Profile,
+        related_name="created_encryptions",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
     last_name = models.CharField(max_length=25)
     first_name = models.CharField(max_length=25)
 

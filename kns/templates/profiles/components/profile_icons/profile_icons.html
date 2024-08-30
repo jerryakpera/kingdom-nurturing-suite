@@ -133,4 +133,22 @@
       </div>
     </div>
   {% endif %}
+
+  {% if profile.encryption %}
+    <div>
+      <iconify-icon
+        icon="simple-icons:letsencrypt"
+        class="text-2xl text-[#3185FC]"
+        data-tooltip-target="encryption-tooltip-{{ profile.id }}"
+      ></iconify-icon>
+
+      <div
+        role="tooltip"
+        id="encryption-tooltip-{{ profile.id }}"
+        class="absolute bottom-full mb-2 w-max bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        Name is hidden
+      </div>
+    </div>
+  {% endif %}
 </div>
