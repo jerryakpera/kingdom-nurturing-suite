@@ -41,6 +41,8 @@ django-tinymce==4.1.0
     # via -r requirements.in
 django-use-email-as-username==1.4.0
     # via -r requirements.in
+faker==28.0.0
+    # via -r requirements.in
 gunicorn==23.0.0
     # via -r requirements.in
 packaging==24.1
@@ -49,12 +51,16 @@ pillow==10.4.0
     # via -r requirements.in
 psycopg2-binary==2.9.9
     # via -r requirements.in
+python-dateutil==2.9.0.post0
+    # via faker
 python-decouple==3.8
     # via -r requirements.in
 python-ipware==3.0.0
     # via django-ipware
 six==1.16.0
-    # via cloudinary
+    # via
+    #   cloudinary
+    #   python-dateutil
 sqlparse==0.5.1
     # via django
 typing-extensions==4.12.2

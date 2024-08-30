@@ -8,6 +8,7 @@ django-formtools==2.5.1
 django-mptt==0.16.0
 django-tinymce==4.1.0
 django-use-email-as-username==1.4.0
+Faker==28.0.0
 gunicorn==23.0.0
 pillow==10.4.0
 psycopg2-binary==2.9.9
