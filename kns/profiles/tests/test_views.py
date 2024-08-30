@@ -1,8 +1,12 @@
+from datetime import date
+
+from django.contrib.messages import get_messages
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.core.models import Setting
 from kns.custom_user.models import User
+from kns.profiles.models import EncryptionReason, ProfileEncryption
 from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 
 
@@ -822,83 +826,149 @@ class TestViews(TestCase):
             f"{self.profile.get_full_name()}'s profile updated.",
         )
 
-    # def test_edit_profile_skills_post_invalid(self):
-    #     """
-    #     Test posting invalid data to edit_profile_skills view does not
-    #     update the profile.
-    #     """
-    #     skill1 = Skill.objects.create(
-    #         title="Python",
-    #         content="This is a sample content",
-    #         author=self.profile,
-    #     )
-    #     interest1 = Skill.objects.create(
-    #         title="Django",
-    #         content="This is a sample content",
-    #         author=self.profile,
-    #     )
 
-    #     # Add initial valid data
-    #     ProfileSkill.objects.create(
-    #         profile=self.profile,
-    #         skill=skill1,
-    #     )
-    #     ProfileInterest.objects.create(
-    #         profile=self.profile,
-    #         interest=interest1,
-    #     )
+class TestProfileEncryption(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
 
-    #     url = reverse(
-    #         "profiles:edit_profile_skills",
-    #         kwargs={
-    #             "profile_slug": self.profile.slug,
-    #         },
-    #     )
-    #     data = {
-    #         "skills": [],  # Invalid as no skills are provided
-    #         "interests": [],  # Invalid as no interests are provided
-    #     }
-    #     response = self.client.post(url, data=data)
+        self.client.login(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
 
-    #     # The profile's skills and interests should not be updated (i.e., deleted)
-    #     self.profile.refresh_from_db()
+        self.profile = self.user.profile
 
-    #     self.assertEqual(
-    #         ProfileSkill.objects.filter(
-    #             profile=self.profile,
-    #         ).count(),
-    #         1,
-    #     )
-    #     self.assertEqual(
-    #         ProfileInterest.objects.filter(
-    #             profile=self.profile,
-    #         ).count(),
-    #         1,
-    #     )
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.gender = "male"
+        self.profile.date_of_birth = date(2015, 1, 1)
+        self.profile.place_of_birth_country = "NG"
+        self.profile.place_of_birth_city = "City"
 
-    #     # Check if the response does not redirect
-    #     self.assertEqual(response.status_code, 200)
+        self.profile.save()
 
-    #     # Extract the form from the response context
-    #     form = response.context.get("profile_skills_form")
+        self.encryption_reason = EncryptionReason.objects.create(
+            title="Privacy",
+            description="Random description",
+            author=self.profile,
+        )
 
-    #     # Ensure the form contains errors
-    #     self.assertIsNotNone(
-    #         form,
-    #         "Form is not present in the response context",
-    #     )
-    #     # self.assertTrue(
-    #     #     form.errors,
-    #     #     "Form should contain errors",
-    #     # )
+    def test_encrypt_profile_post_valid(self):
+        """
+        Test the POST request to encrypt a profile.
+        """
+        url = reverse(
+            "profiles:encrypt_profile",
+            kwargs={"profile_slug": self.profile.slug},
+        )
 
-    #     self.assertIn(
-    #         "skills",
-    #         form.errors,
-    #         "Skills field should have errors",
-    #     )
-    #     self.assertIn(
-    #         "interests",
-    #         form.errors,
-    #         "Interests field should have errors",
-    #     )
+        data = {
+            "encryption_reason": self.encryption_reason.pk,
+        }
+        response = self.client.post(url, data=data)
+
+        # Check if the profile was encrypted
+        self.assertTrue(
+            ProfileEncryption.objects.filter(
+                profile=self.profile,
+            ).exists(),
+        )
+
+        # Check if the response redirects
+        self.assertEqual(response.status_code, 302)
+
+        # Check if the success message is in the messages
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "Profiles name has been hidden from all users",
+        )
+
+    def test_encrypt_profile_post_invalid(self):
+        """
+        Test the POST request to encrypt a profile with invalid data.
+        """
+        url = reverse(
+            "profiles:encrypt_profile",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        # Post with no encryption reason
+        data = {}
+        response = self.client.post(url, data=data)
+
+        # The profile should not be encrypted
+        self.assertFalse(
+            ProfileEncryption.objects.filter(
+                profile=self.profile,
+            ).exists()
+        )
+
+        # Check if the response redirects
+        self.assertEqual(response.status_code, 302)
+
+        # Follow the redirect to ensure that the form errors are present
+        response = self.client.get(response.headers["Location"])
+
+    def test_decrypt_profile(self):
+        """
+        Test the decrypt_profile view to ensure it decrypts the profile correctly.
+        """
+        # First, encrypt the profile
+        self.profile_encryption = ProfileEncryption.objects.create(
+            profile=self.profile,
+            last_name="Encrypted",
+            first_name="Profile",
+            encryption_reason=self.encryption_reason,
+        )
+
+        url = reverse(
+            "profiles:decrypt_profile",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the profile was decrypted
+        self.assertFalse(
+            ProfileEncryption.objects.filter(
+                profile=self.profile,
+            ).exists()
+        )
+
+        # Check if the response redirects
+        self.assertEqual(response.status_code, 302)
+
+        # Check if the success message is in the messages
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "Test User's name is now visible to all users",
+        )
+
+    def test_gender_based_name_generation(self):
+        """
+        Test that the correct first name is generated based on profile gender.
+        """
+        # Set up for a female profile
+        self.profile.gender = "female"
+        self.profile.save()
+
+        profile_encryption = ProfileEncryption.objects.get(
+            profile=self.profile,
+        )
+        self.assertTrue(profile_encryption.first_name.isalpha())
+        self.assertNotIn(
+            "male",
+            profile_encryption.first_name.lower(),
+        )

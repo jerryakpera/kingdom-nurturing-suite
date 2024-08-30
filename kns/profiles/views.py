@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
+from faker import Faker
 from formtools.wizard.views import SessionWizardView
 
 from kns.accounts import emails as account_emails
@@ -15,7 +16,7 @@ from kns.skills.models import ProfileInterest, ProfileSkill
 
 from . import constants as profile_constants
 from . import forms as profile_forms
-from .models import ConsentForm, Profile
+from .models import ConsentForm, EncryptionReason, Profile, ProfileEncryption
 from .utils import name_with_apostrophe
 
 
@@ -936,3 +937,98 @@ def edit_profile_skills(request, profile_slug):
             "profile_skills_form": profile_skills_form,
         },
     )
+
+
+@login_required
+def encrypt_profile(request, profile_slug):
+    """
+    Encrypt the profile's name to hide it from public view.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object containing the POST data.
+    profile_slug : str
+        The slug of the profile to encrypt.
+
+    Returns
+    -------
+    HttpResponse
+        A redirect response to the profile page with a success message
+        if the profile was encrypted.
+    """
+    fake = Faker()
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    profile_encryption_form = profile_forms.ProfileEncryptionForm(
+        request.POST or None,
+    )
+
+    if request.method == "POST":
+        if profile_encryption_form.is_valid():
+            last_name = fake.last_name()
+            first_name = fake.first_name_male()
+
+            if profile.gender == "female":
+                first_name = fake.first_name_female()
+
+            encryption_reason = profile_encryption_form.cleaned_data.get(
+                "encryption_reason",
+            )
+
+            encryption_reason = EncryptionReason.objects.get(
+                pk=encryption_reason,
+            )
+
+            ProfileEncryption.objects.create(
+                profile=profile,
+                last_name=last_name,
+                first_name=first_name,
+                encryption_reason=encryption_reason,
+            )
+            messages.success(
+                request=request,
+                message="Profiles name has been hidden from all users",
+            )
+
+    return redirect(profile)
+
+
+@login_required
+def decrypt_profile(request, profile_slug):
+    """
+    Decrypt the profile's name to make it visible to all users.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    profile_slug : str
+        The slug of the profile to decrypt.
+
+    Returns
+    -------
+    HttpResponse
+        A redirect response to the profile page with a success message
+        if the profile was decrypted.
+    """
+    profile = get_object_or_404(Profile, slug=profile_slug)
+    profile_encryption = ProfileEncryption.objects.filter(
+        profile=profile,
+    )
+
+    if profile_encryption.exists():
+        profile_encryption.delete()
+
+        messages.success(
+            request=request,
+            message=(
+                f"{name_with_apostrophe(profile.get_full_name())} "
+                "name is now visible to all users"
+            ),
+        )
+
+    return redirect(profile)

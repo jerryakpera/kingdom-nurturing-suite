@@ -4,7 +4,15 @@ from unittest.mock import patch
 from django.test import RequestFactory, TestCase
 from django.utils import timezone
 
-from kns.profiles.utils import calculate_max_dob, get_profile_slug, name_with_apostrophe
+from kns.custom_user.models import User
+from kns.profiles.db_data import encryption_reasons
+from kns.profiles.models import EncryptionReason
+from kns.profiles.utils import (
+    calculate_max_dob,
+    get_profile_slug,
+    name_with_apostrophe,
+    populate_encryption_reasons,
+)
 
 
 class TestGetProfileSlug(TestCase):
@@ -86,3 +94,60 @@ class TestNameWithApostrophe(TestCase):
         name = "John"
         result = name_with_apostrophe(name)
         self.assertEqual(result, "John's")
+
+
+class PopulateSkillsTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password",
+        )
+
+        self.profile = self.user.profile
+
+        # Modify encryption_reasons for testing if necessary
+        self.encryption_reasons = encryption_reasons
+
+    def test_encryption_reasons_are_created_correctly(self):
+        # Override the encryption reasons in the module with test data
+
+        # Call the function
+        populate_encryption_reasons(self.encryption_reasons)
+
+        # Check that the correct number of encryption reasons were created
+        self.assertEqual(EncryptionReason.objects.count(), len(self.encryption_reasons))
+
+        # Check that each encryption_reason was created with the correct data
+        for i, encryption_reason_data in enumerate(self.encryption_reasons):
+            encryption_reason = EncryptionReason.objects.get(
+                title=encryption_reason_data["title"]
+            )
+            self.assertEqual(
+                encryption_reason.description,
+                encryption_reason_data["description"],
+            )
+            self.assertEqual(encryption_reason.author, self.profile)
+
+    def test_no_encryption_reasons_created_if_no_predefined_encryption_reasons(self):
+        # Override the encryption reasons in the module with an empty list
+        self.encryption_reasons = []
+
+        # Call the function
+        populate_encryption_reasons(self.encryption_reasons)
+
+        # Check that no encryption reasons were created
+        self.assertEqual(EncryptionReason.objects.count(), 0)
+
+    def test_first_profile_is_set_as_author(self):
+        # Ensure there is more than one profile in the database
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="password",
+        )
+
+        # Call the function
+        populate_encryption_reasons(self.encryption_reasons)
+
+        # Check that the first profile is set as the author for all encryption reasons
+        for encryption_reason in EncryptionReason.objects.all():
+            self.assertEqual(encryption_reason.author, self.profile)

@@ -40,15 +40,6 @@ class ProfileMethodsTests(TestCase):
 
         self.settings = Setting.get_or_create_setting()
 
-    def test_get_full_name(self):
-        """Test that the full name is correctly returned."""
-        full_name = methods.get_full_name(self.profile)
-
-        self.assertEqual(
-            full_name,
-            "John Doe",
-        )
-
     def test_is_leading_group_false(self):
         """Test that a profile not leading a group returns False."""
 

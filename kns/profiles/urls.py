@@ -11,6 +11,16 @@ urlpatterns = [
         name="register_member",
     ),
     path(
+        "<slug:profile_slug>/edit/decrypt",
+        views.decrypt_profile,
+        name="decrypt_profile",
+    ),
+    path(
+        "<slug:profile_slug>/edit/encrypt",
+        views.encrypt_profile,
+        name="encrypt_profile",
+    ),
+    path(
         "<slug:profile_slug>/edit/profile-picture",
         views.edit_profile_picture,
         name="edit_profile_picture",

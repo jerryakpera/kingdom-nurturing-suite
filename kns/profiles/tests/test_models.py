@@ -10,7 +10,12 @@ from kns.core.models import Setting
 from kns.custom_user.models import User
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
-from kns.profiles.models import ConsentForm, Profile
+from kns.profiles.models import (
+    ConsentForm,
+    EncryptionReason,
+    Profile,
+    ProfileEncryption,
+)
 
 
 class TestProfileModel(TestCase):
@@ -372,6 +377,84 @@ class TestProfileModel(TestCase):
 
         assert self.profile.can_become_member_role() is False
 
+    def test_get_full_name_no_encryption(self):
+        """
+        Test that the get_full_name method returns the full name
+        of the profile instance when there is no ProfileEncryption.
+        """
+        # Set first and last name on the profile
+        self.profile.first_name = "John"
+        self.profile.last_name = "Doe"
+        self.profile.save()
+
+        # Test get_full_name with no encryption
+        self.assertEqual(
+            self.profile.get_full_name(),
+            "John Doe",
+        )
+
+    def test_get_full_name_with_encryption(self):
+        """
+        Test that the get_full_name method returns the full name
+        of the profile instance when there is a ProfileEncryption.
+        """
+        EncryptionReason.objects.create(
+            title="Sample encryption reason title",
+            description="Sample encryption reason description",
+            author=self.profile,
+        )
+
+        # Create ProfileEncryption instance
+        ProfileEncryption.objects.create(
+            profile=self.profile,
+            first_name="Jane",
+            last_name="Smith",
+            encryption_reason=EncryptionReason.objects.first(),
+        )
+
+        # Test get_full_name with encryption
+        self.assertEqual(
+            self.profile.get_full_name(),
+            "Jane Smith",
+        )
+
+    def test_get_full_name_with_encryption_and_no_profile(self):
+        """
+        Test that the get_full_name method returns the profile's full name
+        if the profile encryption is not present.
+        """
+        # Set first and last name on the profile
+        self.profile.first_name = "Emily"
+        self.profile.last_name = "Davis"
+
+        self.profile.save()
+
+        # Test get_full_name with no encryption
+        self.assertEqual(
+            self.profile.get_full_name(),
+            "Emily Davis",
+        )
+
+        EncryptionReason.objects.create(
+            title="Sample encryption reason title",
+            description="Sample encryption reason description",
+            author=self.profile,
+        )
+
+        # Create ProfileEncryption instance
+        ProfileEncryption.objects.create(
+            profile=self.profile,
+            first_name="Emma",
+            last_name="Brown",
+            encryption_reason=EncryptionReason.objects.first(),
+        )
+
+        # Test get_full_name with encryption
+        self.assertEqual(
+            self.profile.get_full_name(),
+            "Emma Brown",
+        )
+
 
 class TestConsentFormModel:
     @pytest.fixture(autouse=True)
@@ -426,3 +509,58 @@ class TestConsentFormModel:
             f"{self.profile} consent form - {consent_form.get_status_display()}"
         )
         assert str(consent_form) == expected_str
+
+
+class TestEncryptionReasonModel(TestCase):
+    def setUp(self):
+        # Create a sample profile instance for the ForeignKey relationship
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password",
+        )
+
+        self.profile = self.user.profile
+
+        self.encryption_reason = EncryptionReason.objects.create(
+            title="Sample Encryption Title",
+            slug="sample-encryption-title",
+            description="Sample description for encryption reason",
+            author=self.profile,
+        )
+
+    def test_str_method(self):
+        # Test the __str__ method of EncryptionReason
+        self.assertEqual(
+            str(self.encryption_reason),
+            "Sample Encryption Title",
+        )
+
+
+class TestProfileEncryptionModel(TestCase):
+    def setUp(self):
+        # Create instances for testing
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password",
+        )
+
+        self.profile = self.user.profile
+
+        self.encryption_reason = EncryptionReason.objects.create(
+            title="Sample Encryption Title",
+            slug="sample-encryption-title",
+            description="Sample description for encryption reason",
+            author=self.profile,
+        )
+        self.profile_encryption = ProfileEncryption.objects.create(
+            profile=self.profile,
+            first_name="Emma",
+            last_name="Brown",
+            encryption_reason=self.encryption_reason,
+        )
+
+    def test_str_method(self):
+        # Test the __str__ method of ProfileEncryption
+        expected_str = f"{self.profile.get_full_name()} encrypted as Emma Brown"
+
+        self.assertEqual(str(self.profile_encryption), expected_str)

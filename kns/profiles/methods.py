@@ -8,23 +8,6 @@ from datetime import date
 from django.urls import reverse
 
 
-def get_full_name(profile):
-    """
-    Return the full name of the profile instance.
-
-    Parameters
-    ----------
-    profile : Profile
-        The profile instance.
-
-    Returns
-    -------
-    str
-        Full name of the profile instance.
-    """
-    return f"{profile.first_name} {profile.last_name}"
-
-
 def is_leading_group(profile):
     """
     Return if the profile instance is a leader of a group.

@@ -2,7 +2,6 @@
 Models for the profiles app.
 """
 
-from datetime import datetime
 from uuid import uuid4
 
 from cloudinary.models import CloudinaryField
@@ -12,6 +11,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django_countries.fields import CountryField
+from faker import Faker
 
 from kns.core import modelmixins
 from kns.custom_user.models import User
@@ -184,7 +184,11 @@ class Profile(
         str
             The full name of the profile instance.
         """
-        return model_methods.get_full_name(self)
+        try:
+            profile_encryption = self.encryption
+            return f"{profile_encryption.first_name} {profile_encryption.last_name}"
+        except ProfileEncryption.DoesNotExist:
+            return f"{self.first_name} {self.last_name}"
 
     def is_leading_group(self):
         """
@@ -533,8 +537,6 @@ class Profile(
 
         return location_str
 
-    # def can_edit
-
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -684,3 +686,94 @@ class ConsentForm(modelmixins.TimestampedModel, models.Model):
         self.reviewed_by = reviewer
 
         self.save()
+
+
+class EncryptionReason(
+    modelmixins.TimestampedModel,
+    models.Model,
+):
+    """
+    Represents a reason for encrypting a profile's name.
+
+    Attributes:
+        title: A unique title for the encryption reason.
+        slug: A unique slug for the encryption reason, automatically generated.
+        description: A brief description of the encryption reason.
+        author: The Profile that created this encryption reason.
+    """
+
+    title = models.CharField(
+        max_length=150,
+        unique=True,
+    )
+    slug = models.SlugField(
+        unique=True,
+        default=uuid4,
+        null=True,
+        blank=True,
+        editable=False,
+    )
+    description = models.CharField(
+        max_length=250,
+    )
+    author = models.ForeignKey(
+        Profile,
+        related_name="encryption_reasons_created",
+        on_delete=models.CASCADE,
+    )
+
+    def __str__(self) -> str:
+        """
+        Return a string representation of the EncryptionReason.
+
+        Returns
+        -------
+        str
+            The title of the encryption reason.
+        """
+        return self.title
+
+    class Meta:
+        ordering = ("-created_at",)
+        unique_together = ("title", "slug")
+
+
+class ProfileEncryption(
+    modelmixins.TimestampedModel,
+    models.Model,
+):
+    """
+    Represents an encryption of a profile's name, making it hidden from public view.
+
+    Attributes:
+        profile: The Profile that is encrypted.
+        last_name: The encrypted last name of the profile.
+        first_name: The encrypted first name of the profile.
+        encryption_reason: The reason for encrypting the profile's name.
+    """
+
+    profile = models.OneToOneField(
+        Profile,
+        related_name="encryption",
+        on_delete=models.CASCADE,
+    )
+
+    last_name = models.CharField(max_length=25)
+    first_name = models.CharField(max_length=25)
+
+    encryption_reason = models.ForeignKey(
+        EncryptionReason,
+        related_name="encryptions",
+        on_delete=models.PROTECT,
+    )
+
+    def __str__(self) -> str:
+        """
+        Return a string representation of the ProfileEncryption.
+
+        Returns
+        -------
+        str
+            A string showing the profile's full name and the encrypted name.
+        """
+        return f"{self.profile.get_full_name()} encrypted as {self.first_name} {self.last_name}"

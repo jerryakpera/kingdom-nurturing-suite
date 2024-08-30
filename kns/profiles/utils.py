@@ -7,6 +7,8 @@ from datetime import timedelta
 from django.urls import resolve
 from django.utils import timezone
 
+from .models import EncryptionReason, Profile
+
 
 def get_profile_slug(request):
     """
@@ -77,3 +79,29 @@ def name_with_apostrophe(name):
         return name + "'"
     else:
         return name + "'s"
+
+
+def populate_encryption_reasons(encryption_reasons_data):
+    """
+    Populate the database with encryption reasons data.
+
+    This function iterates over a list of encryption reasons data and
+    creates `EncryptionReason` objects in the database.
+
+    Parameters
+    ----------
+    encryption_reasons_data : list
+        A list of dictionaries where each dictionary contains the 'title'.
+    """
+
+    for encryption_reason_data in encryption_reasons_data:
+        encryption_reason_exists = EncryptionReason.objects.filter(
+            title=encryption_reason_data["title"],
+        ).exists()
+
+        if not encryption_reason_exists:
+            EncryptionReason.objects.create(
+                title=encryption_reason_data["title"],
+                description=encryption_reason_data["description"],
+                author=Profile.objects.first(),
+            )

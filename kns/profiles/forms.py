@@ -16,7 +16,7 @@ from kns.skills.models import Skill
 
 from . import constants as profile_constants
 from . import utils as profile_utils
-from .models import ConsentForm, Profile
+from .models import ConsentForm, EncryptionReason, Profile
 
 
 class BioDetailsForm(forms.ModelForm):
@@ -823,3 +823,63 @@ class ProfileSkillsForm(forms.Form):
             self.add_error("interests", error_msg)
 
         return cleaned_data
+
+
+class ProfileEncryptionForm(forms.Form):
+    """
+    Form for encrypting a profile. Allows the user to select a reason
+    for hiding the profile's name from public view.
+
+    Parameters
+    ----------
+    *args
+        Variable length argument list.
+    **kwargs
+        Keyword arguments.
+
+    Attributes
+    ----------
+    encryption_reason
+        A ChoiceField that presents a dropdown of available encryption
+        reasons fetched from the EncryptionReason model.
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the ProfileEncryptionForm with dynamic choices for the
+        encryption_reason field based on the EncryptionReason model.
+
+        Parameters
+        ----------
+        *args
+            Variable length argument list.
+        **kwargs
+            Keyword arguments.
+        """
+        super(ProfileEncryptionForm, self).__init__(*args, **kwargs)
+
+        choices = (
+            EncryptionReason.objects.all()
+            .order_by("id")
+            .values_list(
+                "id",
+                "title",
+            )
+        )
+
+        self.fields["encryption_reason"] = forms.ChoiceField(
+            required=False,
+            choices=choices,
+            label="Select the reason for hiding this user's name",
+            widget=forms.Select(
+                attrs={
+                    "class": (
+                        "bg-gray-50 border border-gray-300 text-gray-900 "
+                        "text-sm rounded-lg focus:ring-blue-500 "
+                        "focus:border-blue-500 block w-full p-2.5"
+                    ),
+                    "id": "encryption_reason",
+                    "name": "encryption_reason",
+                }
+            ),
+        )

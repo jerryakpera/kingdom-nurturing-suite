@@ -8,10 +8,12 @@ from kns.profiles import constants as profile_constants
 from kns.profiles.forms import (
     BioDetailsForm,
     ContactDetailsForm,
+    ProfileEncryptionForm,
     ProfileInvolvementForm,
     ProfileSettingsForm,
     ProfileSkillsForm,
 )
+from kns.profiles.models import EncryptionReason
 from kns.skills.models import Skill
 
 
@@ -577,3 +579,95 @@ class TestProfileSkillsForm(TestCase):
             form.is_valid(),
             "Form should be valid with no skills or interests selected",
         )
+
+
+class TestProfileEncryptionForm(TestCase):
+    def setUp(self):
+        """
+        Set up a published encryption reason for testing.
+        """
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password",
+        )
+
+        self.reason1 = EncryptionReason.objects.create(
+            title="Test Reason 1",
+            description="Sample description for encryption reason",
+            author=self.user.profile,
+        )
+
+        self.reason2 = EncryptionReason.objects.create(
+            title="Test Reason 2",
+            description="Sample description for encryption reason",
+            author=self.user.profile,
+        )
+
+        self.reason3 = EncryptionReason.objects.create(
+            title="Test Reason 3",
+            description="Sample description for encryption reason",
+            author=self.user.profile,
+        )
+
+    def test_form_initial_choices(self):
+        """
+        Test that the form loads with the correct initial choices.
+        """
+        form = ProfileEncryptionForm()
+
+        # Extract the available choices from the form
+        choices = form.fields["encryption_reason"].choices
+
+        # Ensure that only published reasons are included
+        expected_choices = [
+            (self.reason1.id, self.reason1.title),
+            (self.reason2.id, self.reason2.title),
+            (self.reason3.id, self.reason3.title),
+        ]
+
+        self.assertEqual(choices, expected_choices)
+
+    def test_form_empty_choices_when_no_published_reason(self):
+        """
+        Test the form when there are no published encryption reasons.
+        """
+        EncryptionReason.objects.all().delete()
+
+        form = ProfileEncryptionForm()
+        choices = form.fields["encryption_reason"].choices
+
+        # Expecting an empty list as no published reasons exist
+        self.assertEqual(choices, [])
+
+    def test_form_valid_with_reason(self):
+        """
+        Test that the form is valid when a reason is selected.
+        """
+        form_data = {
+            "encryption_reason": self.reason1.id,
+        }
+
+        form = ProfileEncryptionForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_form_valid_without_reason(self):
+        """
+        Test that the form is valid when no reason is selected.
+        """
+        form_data = {
+            "encryption_reason": "",
+        }
+
+        form = ProfileEncryptionForm(data=form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_form_invalid_with_nonexistent_reason(self):
+        """
+        Test that the form is invalid when a nonexistent reason is selected.
+        """
+        form_data = {
+            "encryption_reason": 999,
+        }
+
+        form = ProfileEncryptionForm(data=form_data)
+        self.assertFalse(form.is_valid())
