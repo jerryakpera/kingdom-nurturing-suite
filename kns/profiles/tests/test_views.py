@@ -964,9 +964,30 @@ class TestProfileEncryption(TestCase):
         self.profile.gender = "female"
         self.profile.save()
 
+        url = reverse(
+            "profiles:encrypt_profile",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        # Prepare the data to be sent in the POST request
+        data = {
+            "encryption_reason": self.encryption_reason.pk,
+        }
+
+        # Perform the POST request to trigger the encryption
+        response = self.client.post(url, data=data)
+
+        # Ensure the response status is 302 (redirect after successful encryption)
+        self.assertEqual(response.status_code, 302)
+
+        # Retrieve the ProfileEncryption object
         profile_encryption = ProfileEncryption.objects.get(
             profile=self.profile,
         )
+
+        # Validate the generated first name
         self.assertTrue(profile_encryption.first_name.isalpha())
         self.assertNotIn(
             "male",
