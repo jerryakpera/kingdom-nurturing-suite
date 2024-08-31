@@ -328,7 +328,7 @@ class AuthenticationViewsTests(TestCase):
         self.assertRedirects(
             response,
             reverse(
-                "profiles:profile_detail",
+                "profiles:profile_overview",
                 kwargs={
                     "profile_slug": self.user.profile.slug,
                 },
@@ -414,7 +414,7 @@ class VerificationEmailTests(TestCase):
         self.assertRedirects(
             response,
             reverse(
-                "profiles:profile_detail",
+                "profiles:profile_overview",
                 kwargs={
                     "profile_slug": self.user.profile.slug,
                 },

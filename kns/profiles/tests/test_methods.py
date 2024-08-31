@@ -61,7 +61,7 @@ class ProfileMethodsTests(TestCase):
     def test_get_absolute_url(self):
         """Test that the correct absolute URL is returned."""
         expected_url = reverse(
-            "profiles:profile_detail",
+            "profiles:profile_overview",
             kwargs={
                 "profile_slug": self.profile.slug,
             },

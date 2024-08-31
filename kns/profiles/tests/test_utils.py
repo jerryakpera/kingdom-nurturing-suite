@@ -5,11 +5,13 @@ from django.test import RequestFactory, TestCase
 from django.utils import timezone
 
 from kns.custom_user.models import User
+from kns.groups.models import Group, GroupMember
 from kns.profiles.db_data import encryption_reasons
-from kns.profiles.models import EncryptionReason
+from kns.profiles.models import EncryptionReason, Profile
 from kns.profiles.utils import (
     calculate_max_dob,
     get_profile_slug,
+    is_profiles_group_leader,
     name_with_apostrophe,
     populate_encryption_reasons,
 )
@@ -151,3 +153,90 @@ class PopulateSkillsTestCase(TestCase):
         # Check that the first profile is set as the author for all encryption reasons
         for encryption_reason in EncryptionReason.objects.all():
             self.assertEqual(encryption_reason.author, self.profile)
+
+
+class TestIsProfilesGroupLeader(TestCase):
+    def setUp(self):
+        # Create users and profiles
+        self.leader_user = User.objects.create_user(
+            email="leader@example.com",
+            password="password",
+        )
+        self.leader_profile = self.leader_user.profile
+
+        self.other_user = User.objects.create_user(
+            email="other@example.com",
+            password="password",
+        )
+        self.other_profile = self.other_user.profile
+
+        # Create a group with leader_profile as the leader
+        self.group = Group.objects.create(
+            name="Test Group",
+            leader=self.leader_profile,
+        )
+
+        # Add other_profile to the group as a member
+        self.group_member = GroupMember.objects.create(
+            group=self.group,
+            profile=self.other_profile,
+        )
+
+    def test_user_is_group_leader_of_own_group(self):
+        """
+        Test if the function returns True when the user is the leader
+        of their own group.
+        """
+        result = is_profiles_group_leader(
+            self.leader_user,
+            self.leader_profile,
+        )
+        self.assertTrue(result)
+
+    def test_user_is_not_group_leader(self):
+        """
+        Test if the function returns False when the user is not the
+        leader of any group.
+        """
+        another_user = User.objects.create_user(
+            email="another@example.com",
+            password="password",
+        )
+
+        result = is_profiles_group_leader(
+            another_user,
+            self.other_profile,
+        )
+        self.assertFalse(result)
+
+    def test_user_is_leader_of_group_containing_profile(self):
+        """
+        Test if the function returns True when the user is the leader
+        of the group containing the profile.
+        """
+        result = is_profiles_group_leader(
+            self.leader_user,
+            self.other_profile,
+        )
+        self.assertTrue(result)
+
+    def test_user_is_leader_but_profile_not_in_group(self):
+        """
+        Test if the function returns False when the user is the leader
+        of a group but the profile is not in the group.
+        """
+        user = User.objects.create_user(
+            email="newuser@example.com",
+            password="password",
+        )
+
+        if Profile.objects.filter(user=user).exists():
+            Profile.objects.filter(user=user).delete()
+
+        new_profile = Profile.objects.create(user=user)
+
+        result = is_profiles_group_leader(
+            self.leader_user,
+            new_profile,
+        )
+        self.assertFalse(result)

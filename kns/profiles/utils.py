@@ -7,6 +7,8 @@ from datetime import timedelta
 from django.urls import resolve
 from django.utils import timezone
 
+from kns.groups.models import Group, GroupMember
+
 from .models import EncryptionReason, Profile
 
 
@@ -75,6 +77,9 @@ def name_with_apostrophe(name):
     str
         The name with an appended possessive apostrophe.
     """
+    if name.strip() == "":
+        return ""
+
     if name[-1] == "s":
         return name + "'"
     else:
@@ -105,3 +110,37 @@ def populate_encryption_reasons(encryption_reasons_data):
                 description=encryption_reason_data["description"],
                 author=Profile.objects.first(),
             )
+
+
+def is_profiles_group_leader(user, profile):
+    """
+    Determine if the given user is the leader of the group to which the specified profile belongs.
+
+    Parameters
+    ----------
+    user : User
+        The user whose leadership status is being checked.
+    profile : Profile
+        The profile to be checked against the user's leadership.
+
+    Returns
+    -------
+    bool
+        `True` if the user is the leader of the profile's group, `False` otherwise.
+    """
+    users_group_exists = Group.objects.filter(
+        leader=user.profile,
+    ).exists()
+
+    if not users_group_exists:
+        return False
+
+    profile_group_member_exists = GroupMember.objects.filter(
+        profile=profile,
+        group=user.profile.group_led,
+    ).exists()
+
+    if not profile_group_member_exists and user.profile == profile:
+        return True
+
+    return profile_group_member_exists

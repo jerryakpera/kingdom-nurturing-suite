@@ -5,6 +5,8 @@ Custom tags for the `profiles` app.
 from django import template
 
 from kns.core.utils import log_this
+from kns.groups.models import Group, GroupMember
+from kns.profiles import utils as profile_utils
 
 register = template.Library()
 
@@ -95,10 +97,25 @@ def name_with_apostrophe(name: str):
     str
         The name with an appended possessive apostrophe.
     """
-    if name.strip() == "":
-        return ""
+    return profile_utils.name_with_apostrophe(name)
 
-    if name[-1] == "s":
-        return name + "'"
-    else:
-        return name + "'s"
+
+@register.filter
+def is_profiles_group_leader(user, profile):
+    """
+    Determine if the given user is the leader of the group to which
+    the specified profile belongs.
+
+    Parameters
+    ----------
+    user : User
+        The user whose leadership status is being checked.
+    profile : Profile
+        The profile to be checked against the user's leadership.
+
+    Returns
+    -------
+    bool
+        `True` if the user is the leader of the profile's group, `False` otherwise.
+    """
+    return profile_utils.is_profiles_group_leader(user, profile)

@@ -1,0 +1,15 @@
+<div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+  {% for profile_faith_milestone in profile.faith_milestones.all %}
+    {% with faith_milestone=profile_faith_milestone.faith_milestone %}
+      <div class="bg-knsSecondary-200 border-l-4 p-3 border-knsSecondary-500 space-y-2">
+        <div class="font-serif font-semibold text-lg leading-5 flex gap-x-2 items-start">
+          <iconify-icon icon="mdi:check-all" class="text-knsSecondary-600 text-lg"></iconify-icon>
+          {{ faith_milestone.title }}
+        </div>
+        <div class="text-sm font-medium">
+          {{ faith_milestone.description }}
+        </div>
+      </div>
+    {% endwith %}
+  {% endfor %}
+</div>

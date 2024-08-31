@@ -1,0 +1,20 @@
+{% load custom_tags %}
+
+<div class="space-y-4">
+  <div class="flex justify-between items-center">
+    <h1 class="text-xl font-bold">
+      Faith milestones
+    </h1>
+
+    {% if request.user|is_profiles_group_leader:profile %}
+      <a
+        href="{% url "profiles:edit_profile_faith_milestones" profile_slug=profile.slug %}"
+        class="px-2 py-1.5 items-center text-xs sm:text-sm text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300"
+      >
+        Edit
+      </a>
+    {% endif %}
+  </div>
+
+  {% include "profiles/components/faith_milestones/faith_milestones_list.html" %}
+</div>

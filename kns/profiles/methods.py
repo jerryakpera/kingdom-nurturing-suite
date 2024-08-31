@@ -40,7 +40,7 @@ def get_absolute_url(profile):
         The absolute URL of the profile's detail view.
     """
     return reverse(
-        "profiles:profile_detail",
+        "profiles:profile_overview",
         kwargs={
             "profile_slug": profile.slug,
         },

@@ -5,9 +5,7 @@
 {% endblock title %}
 
 {% block profile_base_content %}
-  <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-    <div>
-      <div>Location</div>
-    </div>
+  <section>
+    {% include "profiles/components/faith_milestones/profiles_faith_milestones.html" %}
   </section>
 {% endblock profile_base_content %}

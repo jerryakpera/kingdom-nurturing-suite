@@ -243,7 +243,7 @@ class TestProfileModel(TestCase):
 
     def test_get_absolute_url(self):
         expected_url = reverse(
-            "profiles:profile_detail",
+            "profiles:profile_overview",
             kwargs={
                 "profile_slug": self.profile.slug,
             },

@@ -12,6 +12,9 @@ from formtools.wizard.views import SessionWizardView
 from kns.accounts import emails as account_emails
 from kns.core.utils import log_this
 from kns.custom_user.models import User
+from kns.faith_milestones.forms import ProfileFaithMilestonesForm
+from kns.faith_milestones.models import ProfileFaithMilestone
+from kns.skills.forms import ProfileSkillsForm
 from kns.skills.models import ProfileInterest, ProfileSkill
 
 from . import constants as profile_constants
@@ -202,7 +205,7 @@ def index(request):
 
 
 @login_required
-def profile_detail(request, profile_slug):
+def profile_overview(request, profile_slug):
     """
     View to render a page displaying details for a specific profile.
 
@@ -229,7 +232,7 @@ def profile_detail(request, profile_slug):
 
     return render(
         request=request,
-        template_name="profiles/pages/profile_detail.html",
+        template_name="profiles/pages/profile_overview.html",
         context=context,
     )
 
@@ -446,7 +449,7 @@ def upload_consent_form(request, profile_slug):  # pragma: no cover
                 ),
             )
             return redirect(
-                "profiles:profile_detail",
+                "profiles:profile_overview",
                 profile_slug=profile.slug,
             )
     except ConsentForm.DoesNotExist:
@@ -483,7 +486,7 @@ def upload_consent_form(request, profile_slug):  # pragma: no cover
                 )
 
                 return redirect(
-                    "profiles:profile_detail",
+                    "profiles:profile_overview",
                     profile_slug=profile.slug,
                 )
             else:
@@ -884,7 +887,7 @@ def edit_profile_skills(request, profile_slug):
         "interests": profile_interests,
     }
 
-    profile_skills_form = profile_forms.ProfileSkillsForm(
+    profile_skills_form = ProfileSkillsForm(
         request.POST or None,
         initial=initial_data,
     )
@@ -1053,3 +1056,80 @@ def decrypt_profile(request, profile_slug):
             )
 
     return redirect(profile)
+
+
+@login_required
+def edit_profile_faith_milestones(request, profile_slug):
+    """
+    Edit the faith milestones details of a user profile.
+
+    This view allows updating the faith milestones details of a profile. It processes
+    both GET and POST requests. If the request is POST and the form is valid,
+    the profile is updated, and a success message is displayed.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to edit.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the edit faith milestones details template or redirects to the profile
+        detail page with a success message if the form is valid.
+    """
+    profile = Profile.objects.get(slug=profile_slug)
+
+    # Get faith milestones associated with the profile
+    profile_faith_milestones = profile.faith_milestones.values_list(
+        "faith_milestone",
+        flat=True,
+    )
+
+    # Initialize the form with initial values
+    initial_data = {
+        "faith_milestones": profile_faith_milestones,
+    }
+
+    profile_faith_milestones_form = ProfileFaithMilestonesForm(
+        request.POST or None,
+        initial=initial_data,
+    )
+
+    if request.method == "POST":
+        if profile_faith_milestones_form.is_valid():
+            # Delete all profile faith milestones and interests before saving
+            ProfileFaithMilestone.objects.filter(profile=profile).delete()
+
+            faith_milestones = profile_faith_milestones_form.cleaned_data.get(
+                "faith_milestones"
+            )
+
+            for faith_milestone in faith_milestones:
+                profile_faith_milestone_exists = ProfileFaithMilestone.objects.filter(
+                    profile=profile,
+                    faith_milestone=faith_milestone,
+                )
+
+                if profile_faith_milestone_exists.count() == 0:
+                    profile_faith_milestone = ProfileFaithMilestone.objects.create(
+                        profile=profile, faith_milestone=faith_milestone
+                    )
+                    profile_faith_milestone.save()
+
+            messages.success(
+                request,
+                f"{name_with_apostrophe(profile.get_full_name())} profile updated.",
+            )
+
+            return redirect(profile)
+
+    return render(
+        request,
+        "profiles/pages/edit_profile_faith_milestones.html",
+        {
+            "profile_faith_milestones_form": profile_faith_milestones_form,
+        },
+    )

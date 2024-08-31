@@ -26,6 +26,11 @@ urlpatterns = [
         name="edit_profile_picture",
     ),
     path(
+        "<slug:profile_slug>/edit/faith-milestones",
+        views.edit_profile_faith_milestones,
+        name="edit_profile_faith_milestones",
+    ),
+    path(
         "<slug:profile_slug>/edit/skills",
         views.edit_profile_skills,
         name="edit_profile_skills",
@@ -82,8 +87,8 @@ urlpatterns = [
     ),
     path(
         "<slug:profile_slug>/",
-        views.profile_detail,
-        name="profile_detail",
+        views.profile_overview,
+        name="profile_overview",
     ),
     path(
         "",
