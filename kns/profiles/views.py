@@ -1100,9 +1100,6 @@ def edit_profile_faith_milestones(request, profile_slug):
 
     if request.method == "POST":
         if profile_faith_milestones_form.is_valid():
-            # Delete all profile faith milestones and interests before saving
-            ProfileFaithMilestone.objects.filter(profile=profile).delete()
-
             faith_milestones = profile_faith_milestones_form.cleaned_data.get(
                 "faith_milestones"
             )
@@ -1111,12 +1108,14 @@ def edit_profile_faith_milestones(request, profile_slug):
                 profile_faith_milestone_exists = ProfileFaithMilestone.objects.filter(
                     profile=profile,
                     faith_milestone=faith_milestone,
-                )
+                ).exists()
 
-                if profile_faith_milestone_exists.count() == 0:
+                if not profile_faith_milestone_exists:
                     profile_faith_milestone = ProfileFaithMilestone.objects.create(
-                        profile=profile, faith_milestone=faith_milestone
+                        profile=profile,
+                        faith_milestone=faith_milestone,
                     )
+
                     profile_faith_milestone.save()
 
             messages.success(
