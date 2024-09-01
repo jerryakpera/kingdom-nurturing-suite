@@ -883,3 +883,147 @@ class TestEditGroupMilestonesView(TestCase):
                 faith_milestone=self.faith_milestone2,
             ).exists()
         )
+
+
+class TestRemoveGroupMilestoneView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        self.profile = self.user.profile
+
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        # Create a group
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Test Group",
+            slug="test-group",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        # Create a milestone and associate it with the group
+        self.milestone = FaithMilestone.objects.create(
+            title="Test Milestone",
+            type="group",
+            description="This is a test milestone.",
+            author=self.profile,
+        )
+
+        self.group_faith_milestone = GroupFaithMilestone.objects.create(
+            group=self.group,
+            faith_milestone=self.milestone,
+        )
+
+    def test_remove_group_milestone_success(self):
+        """
+        Test the successful removal of a milestone from a group.
+        """
+        url = reverse(
+            "groups:remove_group_milestone",
+            kwargs={
+                "milestone_id": self.milestone.id,
+            },
+        )
+        response = self.client.post(url)
+
+        # Check if the milestone was deleted
+        self.assertEqual(GroupFaithMilestone.objects.count(), 0)
+
+        # Ensure redirection to the group's detail page
+        self.assertRedirects(
+            response,
+            self.group.get_absolute_url(),
+        )
+
+        # Check if the success message is displayed
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Group milestone removed.")
+
+    def test_remove_group_milestone_not_found(self):
+        """
+        Test the removal of a non-existent milestone results in a 404 error.
+        """
+        non_existent_id = self.milestone.id + 1
+        url = reverse(
+            "groups:remove_group_milestone",
+            kwargs={
+                "milestone_id": non_existent_id,
+            },
+        )
+        response = self.client.post(url)
+
+        # Check if a 404 error is returned
+        self.assertEqual(response.status_code, 404)
+
+    def test_remove_group_milestone_unauthenticated(self):
+        """
+        Test that an unauthenticated user cannot remove a milestone.
+        """
+        self.client.logout()
+
+        url = reverse(
+            "groups:remove_group_milestone",
+            kwargs={
+                "milestone_id": self.milestone.id,
+            },
+        )
+
+        response = self.client.post(url)
+
+        # Check if redirected to login page
+        self.assertRedirects(
+            response,
+            f"/accounts/login/?next={url}",
+        )
+
+    # def test_remove_group_milestone_permission(self):
+    #     """
+    #     Test that only authenticated users can remove a milestone.
+    #     """
+    #     # Create another user and login as them
+    #     another_user = User.objects.create_user(
+    #         email="anotheruser@example.com",
+    #         password="password123",
+    #     )
+
+    #     self.client.login(
+    #         email="anotheruser@example.com",
+    #         password="password123",
+    #     )
+
+    #     url = reverse(
+    #         "groups:remove_group_milestone",
+    #         kwargs={
+    #             "milestone_id": self.milestone.id,
+    #         },
+    #     )
+    #     response = self.client.post(url)
+
+    #     # Check if the response redirects back (not allowed to remove)
+    #     self.assertRedirects(
+    #         response,
+    #         reverse(
+    #             "groups:group_overview",
+    #             kwargs={
+    #                 "group_slug": self.group.slug,
+    #             },
+    #         ),
+    #     )
+
+    #     # Ensure a warning message is displayed
+    #     messages = list(response.wsgi_request._messages)
+
+    #     self.assertEqual(len(messages), 1)
+    #     self.assertEqual(
+    #         str(messages[0]),
+    #         "You do not have permission to remove this milestone.",
+    #     )

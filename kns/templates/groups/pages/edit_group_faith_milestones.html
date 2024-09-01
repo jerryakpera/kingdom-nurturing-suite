@@ -1,4 +1,4 @@
-{% extends "profiles/profile_base.html" %}
+{% extends "groups/group_base.html" %}
 
 {% block title %}
   {{ group.get_full_name }} | Edit faith milestones
@@ -10,7 +10,7 @@
       method="POST"
       class="space-y-4"
       id="form-container"
-      action="{% url "groups:edit_milestones" group_slug=group.slug %}"
+      action="{% url "groups:edit_group_milestones" group_slug=group.slug %}"
     >
       {% csrf_token %}
 
@@ -20,7 +20,9 @@
           <p>Update the faith milestones of this group</p>
         </div>
 
-        {% include "faith_milestones/forms/faith_milestones_form.html" %}
+        {% with form=group_milestones_form %}
+          {% include "faith_milestones/forms/faith_milestones_form.html" %}
+        {% endwith %}
       </div>
 
       <div class="card-footer">

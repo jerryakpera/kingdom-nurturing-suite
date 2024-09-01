@@ -418,3 +418,43 @@ def edit_group_milestones(request, group_slug):
             "group_milestones_form": group_milestones_form,
         },
     )
+
+
+@login_required
+def remove_group_milestone(request, milestone_id):
+    """
+    Remove a milestone from a group based on its ID.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    milestone_id : int
+        The ID of the GroupFaithMilestone to be removed.
+
+    Returns
+    -------
+    HttpResponse
+        Redirects to the group's detail page with a success message if the milestone
+        was successfully removed.
+    """
+    # Ensure the milestone exists and get the associated GroupFaithMilestone instance
+    group_milestone = get_object_or_404(
+        GroupFaithMilestone,
+        pk=milestone_id,
+    )
+
+    # Get the group associated with the milestone
+    group = group_milestone.group
+
+    # Delete the milestone
+    group_milestone.delete()
+
+    # Provide feedback to the user
+    messages.success(
+        request=request,
+        message="Group milestone removed.",
+    )
+
+    # Redirect to the group's detail page
+    return redirect(group.get_absolute_url())

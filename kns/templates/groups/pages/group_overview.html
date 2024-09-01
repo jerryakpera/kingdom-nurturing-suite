@@ -1,5 +1,7 @@
 {% extends "groups/group_base.html" %}
 
+{% load groups_custom_tags %}
+
 {% block title %}
   KNS | {{ group.name }}
 {% endblock title %}
@@ -9,18 +11,34 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-0 md:gap-x-4 lg:gap-x-6">
       <div class="space-y-3">
         <h3 class="font-semibold text-md uppercase">Group Overview</h3>
+
         <div class="w-full grid grid-cols-3 xs:grid-cols-4 md:grid-cols-3 lg:grid-cols-3 gap-2 lg:gap-4 justify-center">
           {% include "groups/components/group_stats_overview.html" %}
         </div>
       </div>
       <div class="space-y-3">
-        <h3 class="font-semibold text-md uppercase">Group Milestones</h3>
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-md uppercase">Group Milestones</h3>
+
+          {% if request.user|is_leader_of_parent_group:group %}
+            <a
+              href="{% url "groups:edit_group_milestones" group_slug=group.slug %}"
+              class="px-3 py-2 text-xs font-medium text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300"
+            >
+              Edit
+            </a>
+          {% endif %}
+        </div>
 
         <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-1 xl:grid-cols-2 gap-2">
           {% for item_faith_milestone in group.faith_milestones.all %}
             {% with faith_milestone=item_faith_milestone.faith_milestone %}
               {% include "faith_milestones/components/faith_milestones_item.html" %}
             {% endwith %}
+          {% empty %}
+            <div class="text-sm font-semibold text-red-700 bg-red-100 border-red-700 border rounded-md p-3">
+              This group has no milestones to display.
+            </div>
           {% endfor %}
         </div>
       </div>

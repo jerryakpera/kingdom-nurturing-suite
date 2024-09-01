@@ -1,1 +1,1 @@
-from .custom_tags import *
+from .profiles_custom_tags import *

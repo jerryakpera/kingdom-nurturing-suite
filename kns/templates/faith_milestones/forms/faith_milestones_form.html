@@ -1,11 +1,9 @@
 <div class="flex flex-col gap-y-4">
   <div>
-    {% with form=profile_faith_milestones_form %}
-      {% include 'core/components/forms/form_error.html' %}
-    {% endwith %}
+    {% include 'core/components/forms/form_error.html' %}
   </div>
 
-  {% for field in profile_faith_milestones_form %}
+  {% for field in form %}
     <div>
       {% include "core/components/forms/form_field.html" %}
     </div>

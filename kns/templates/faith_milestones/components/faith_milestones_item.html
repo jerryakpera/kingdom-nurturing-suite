@@ -1,12 +1,33 @@
-<div class="bg-knsSecondary-200 border-l-4 p-3 border-knsSecondary-500 flex flex-col justify-between space-y-2">
+{% load groups_custom_tags %}
+
+<div class="bg-knsSecondary-50 border rounded-md p-3 border-knsSecondary-500 flex flex-col justify-between space-y-2">
   <div class="space-y-2">
     <div class="font-serif font-semibold text-md leading-5 flex gap-x-2 items-start">
-      <iconify-icon icon="mdi:check-all" class="text-knsSecondary-600 text-lg"></iconify-icon>
+      {% if faith_milestone.type == 'group' %}
+        <iconify-icon icon="lets-icons:group-fill" class="text-black text-lg"></iconify-icon>
+      {% endif %}
+
+      {% if faith_milestone.type == 'profile' %}
+        <iconify-icon icon="mdi:check-all" class="text-black text-lg"></iconify-icon>
+      {% endif %}
+
       {{ faith_milestone.title }}
     </div>
   </div>
 
-  <div class="text-xs text-black text-right">
-    {{ item_faith_milestone.created_at|date:"F j, Y" }}
+  <div class="flex justify-between items-center">
+    <div class="text-xs text-knsSecondary-800">
+      {{ item_faith_milestone.created_at|date:"F j, Y" }}
+    </div>
+
+    {% if request.user|is_leader_of_parent_group:group and faith_milestone.type == 'group' %}
+      <a
+        href="{% url "groups:remove_group_milestone" milestone_id=item_faith_milestone.id %}"
+        class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center inline-flex items-center"
+      >
+        <iconify-icon icon="line-md:remove" class="text-sm"></iconify-icon>
+        <span class="sr-only">Icon description</span>
+      </a>
+    {% endif %}
   </div>
 </div>
