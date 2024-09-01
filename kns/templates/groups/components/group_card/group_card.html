@@ -13,24 +13,37 @@
         <img
           alt="blog"
           src="https://dummyimage.com/720x400"
-          class="lg:h-48 md:h-36 w-full object-cover object-center"
+          class="lg:h-48 md:h-36 w-full object-cover object-center rounded-md"
         >
       {% else %}
         <img
           alt="{{ group }}"
           src="{{ group.image.url }}"
-          class="h-48 lg:h-48 md:h-36 w-full object-cover object-center"
+          class="h-48 lg:h-48 md:h-36 w-full object-cover object-center rounded-md"
         >
       {% endif %}
     </div>
 
     <div>
-      <div class="text-gray-600">
+      <div class="text-gray-600 text-sm">
         Leader:
         <a class="font-semibold text-knsPrimary" href="{{ group.leader.get_absolute_url }}">
           {{ group.leader.get_full_name }}
         </a>
       </div>
+      <h6 class="tracking-widest text-sm title-font font-semibold text-gray-700 my-2 flex items-center gap-x-2">
+        {% if group.location_country %}
+          <span class="mb-0 fw-semibold">
+            <img
+              alt="Event location flag"
+              src="{{ group.location_country.flag }}"
+            />
+          </span>
+        {% endif %}
+
+        {{ group.location_display }}
+      </h6>
+
       <p class="mx-auto max-w-screen-md text-gray-900 font-medium text-sm">
         {{ group.description }}
       </p>
