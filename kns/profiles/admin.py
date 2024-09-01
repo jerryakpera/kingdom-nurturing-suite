@@ -4,6 +4,7 @@ Django admin site configuration for the profiles app.
 
 from django.contrib import admin
 
+from kns.faith_milestones.models import ProfileFaithMilestone
 from kns.skills.models import ProfileInterest, ProfileSkill
 
 from .models import ConsentForm, EncryptionReason, Profile, ProfileEncryption
@@ -46,6 +47,18 @@ class ProfileInterestInline(admin.TabularInline):
     model = ProfileInterest
 
 
+class ProfileFaithMilestoneInline(admin.TabularInline):
+    """
+    Inline admin interface for the ProfileFaithMilestone model.
+
+    This allows the interests associated with a profile to be managed
+    directly within the Profile admin interface.
+    """
+
+    extra = 0
+    model = ProfileFaithMilestone
+
+
 class ConsentFormInline(admin.StackedInline):
     """
     Inline admin interface for the ConsentForm model.
@@ -72,6 +85,7 @@ class ProfileAdmin(admin.ModelAdmin):
         ProfileInterestInline,
         ConsentFormInline,
         ProfileEncryptionInline,
+        ProfileFaithMilestoneInline,
     ]
 
 

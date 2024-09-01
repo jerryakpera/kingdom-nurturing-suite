@@ -7,10 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
-from kns.core.utils import log_this
+from kns.faith_milestones.forms import GroupFaithMilestonesForm
+from kns.faith_milestones.models import GroupFaithMilestone
 from kns.groups.forms import GroupForm
 from kns.groups.models import Group, GroupMember
 from kns.profiles.models import Profile
+from kns.profiles.utils import name_with_apostrophe
 
 
 @login_required
@@ -339,4 +341,80 @@ def edit_group(request, group_slug):
         request=request,
         template_name="groups/pages/edit_group.html",
         context=context,
+    )
+
+
+@login_required
+def edit_group_milestones(request, group_slug):
+    """
+    Edit the faith milestones details of a user group.
+
+    This view allows updating the faith milestones details of a group. It processes
+    both GET and POST requests. If the request is POST and the form is valid,
+    the group is updated, and a success message is displayed.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    group_slug : str
+        The slug of the group to edit.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the edit faith milestones details template or redirects to the group
+        detail page with a success message if the form is valid.
+    """
+    group = Group.objects.get(slug=group_slug)
+
+    # Get faith milestones associated with the group
+    group_milestones = group.faith_milestones.values_list(
+        "faith_milestone",
+        flat=True,
+    )
+
+    # Initialize the form with initial values
+    initial_data = {
+        "faith_milestones": group_milestones,
+    }
+
+    group_milestones_form = GroupFaithMilestonesForm(
+        request.POST or None,
+        initial=initial_data,
+    )
+
+    if request.method == "POST":
+        if group_milestones_form.is_valid():
+            faith_milestones = group_milestones_form.cleaned_data.get(
+                "faith_milestones"
+            )
+
+            for faith_milestone in faith_milestones:
+                group_milestone_exists = GroupFaithMilestone.objects.filter(
+                    group=group,
+                    faith_milestone=faith_milestone,
+                ).exists()
+
+                if not group_milestone_exists:
+                    group_milestone = GroupFaithMilestone.objects.create(
+                        group=group,
+                        faith_milestone=faith_milestone,
+                    )
+
+                    group_milestone.save()
+
+            messages.success(
+                request,
+                f"{name_with_apostrophe(group.name)} group updated.",
+            )
+
+            return redirect(group)
+
+    return render(
+        request,
+        "groups/pages/edit_group_faith_milestones.html",
+        {
+            "group_milestones_form": group_milestones_form,
+        },
     )

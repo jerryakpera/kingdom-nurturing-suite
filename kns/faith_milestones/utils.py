@@ -28,6 +28,7 @@ def populate_faith_milestones(faith_milestones_data):
 
         if not faith_milestone_exists:
             FaithMilestone.objects.create(
+                type=faith_milestone_data["type"],
                 title=faith_milestone_data["title"],
                 description=faith_milestone_data["description"],
                 author=Profile.objects.first(),

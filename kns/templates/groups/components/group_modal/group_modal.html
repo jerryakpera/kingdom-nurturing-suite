@@ -37,87 +37,8 @@
           </div>
           <!-- text - end -->
 
-
           <div class="w-11/12 sm:w-9/12 md:w-8/12 lg:w-7/12 mx-auto grid grid-cols-2 gap-2 sm:grid-cols-4 lg:gap-4 justify-center">
-            <div>
-              {% with title="Descendant groups" %}
-                {% with value=group.get_descendant_count %}
-                  {% with icon="typcn:flow-children" %}
-                    {% include "groups/components/group_modal/group_stat_item.html" %}
-                  {% endwith %}
-                {% endwith %}
-              {% endwith %}
-            </div>
-
-            <div>
-              {% with title="Total members in group" %}
-                {% with value=group.members.count %}
-                  {% with icon="fluent:people-add-32-light" %}
-                    {% include "groups/components/group_modal/group_stat_item.html" %}
-                  {% endwith %}
-                {% endwith %}
-              {% endwith %}
-            </div>
-
-            <div>
-              {% with title="Male members" %}
-                {% with value=group.male_count %}
-                  {% with icon="fa-solid:male" %}
-                    {% include "groups/components/group_modal/group_stat_item.html" %}
-                  {% endwith %}
-                {% endwith %}
-              {% endwith %}
-            </div>
-
-            <div>
-              {% with title="Female members" %}
-                {% with value=group.female_count %}
-                  {% with icon="fa-solid:female" %}
-                    {% include "groups/components/group_modal/group_stat_item.html" %}
-                  {% endwith %}
-                {% endwith %}
-              {% endwith %}
-            </div>
-
-            <div>
-              {% with title="Leaders in group" %}
-                {% with value=group.leaders_count %}
-                  {% with icon="heroicons:user-group-16-solid" %}
-                    {% include "groups/components/group_modal/group_stat_item.html" %}
-                  {% endwith %}
-                {% endwith %}
-              {% endwith %}
-            </div>
-
-            <div>
-              {% with title="Members in group" %}
-                {% with value=group.members_count %}
-                  {% with icon="iconamoon:profile-light" %}
-                    {% include "groups/components/group_modal/group_stat_item.html" %}
-                  {% endwith %}
-                {% endwith %}
-              {% endwith %}
-            </div>
-
-            <div>
-              {% with title="E. Persons" %}
-                {% with value=group.external_persons_count %}
-                  {% with icon="fluent:person-ribbon-24-regular" %}
-                    {% include "groups/components/group_modal/group_stat_item.html" %}
-                  {% endwith %}
-                {% endwith %}
-              {% endwith %}
-            </div>
-
-            <div>
-              {% with title="Mentors" %}
-                {% with value=group.mentors_count %}
-                  {% with icon="hugeicons:teacher" %}
-                    {% include "groups/components/group_modal/group_stat_item.html" %}
-                  {% endwith %}
-                {% endwith %}
-              {% endwith %}
-            </div>
+            {% include "groups/components/group_stats_overview.html" %}
           </div>
         </div>
       </div>

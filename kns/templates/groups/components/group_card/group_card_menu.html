@@ -1,0 +1,32 @@
+{% load custom_tags %}
+
+<button
+  type="button"
+  id="groupMenuDropdown"
+  data-dropdown-toggle="dropdownDots"
+  class="inline-flex items-center p-1 text-sm font-medium text-center text-white bg-knsSecondary rounded-lg hover:bg-knsSecondary-600 focus:ring-4 focus:outline-none"
+  >
+    <iconify-icon icon="mdi:dots-vertical" class="text-xl"></iconify-icon>
+  </button>
+
+  <!-- Dropdown menu -->
+  <div id="dropdownDots" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+    <ul class="py-2 text-sm text-gray-700" aria-labelledby="groupMenuDropdown">
+      <li>
+        <a
+          href="{% url "groups:edit_group" group_slug=group.slug %}"
+          class="block px-4 py-2 hover:bg-gray-100"
+        >
+          Edit group
+        </a>
+      </li>
+    </ul>
+    <div class="py-1">
+      <a
+        href="#"
+        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
+        Settings
+      </a>
+    </div>
+  </div>

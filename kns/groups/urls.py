@@ -16,6 +16,11 @@ urlpatterns = [
         name="group_overview",
     ),
     path(
+        "<slug:group_slug>/edit-milestones",
+        views.edit_group_milestones,
+        name="edit_group_milestones",
+    ),
+    path(
         "<slug:group_slug>/edit",
         views.edit_group,
         name="edit_group",

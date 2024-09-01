@@ -1,0 +1,38 @@
+<div class="border border-gray-200 shadow-sm p-3 rounded-md">
+  <div class="space-y-4">
+    <div class="flex justify-between items-center">
+      <h1 class="text-lg font-bold text-black lg:text-xl font-serif">
+        {{ group.name }}
+      </h1>
+
+      {% include "groups/components/group_card/group_card_menu.html" %}
+    </div>
+
+    <div class="flex items-center gap-2">
+      {% if not group.image %}
+        <img class="lg:h-48 md:h-36 w-full object-cover object-center" src="https://dummyimage.com/720x400" alt="blog">
+      {% else %}
+        <img
+          src="{{ group.image.url }}"
+          alt="{{ group }}"
+          class="h-48 lg:h-48 md:h-36 w-full object-cover object-center"
+        >
+      {% endif %}
+    </div>
+
+    <p class="mx-auto max-w-screen-md text-gray-900 font-medium text-sm">
+      {{ group.description }}
+    </p>
+
+    {% if group.leader == request.user.profile %}
+      <div>
+        <a
+          href="{% url "profiles:register_member" %}"
+          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3.5 py-1.5 w-full block text-center"
+        >
+          Register member
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>

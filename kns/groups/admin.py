@@ -4,7 +4,50 @@ Django admin configuration for the `groups` app.
 
 from django.contrib import admin
 
+from kns.faith_milestones.models import FaithMilestone, GroupFaithMilestone
+
 from .models import Group, GroupMember
+
+
+class GroupFaithMilestoneInline(admin.TabularInline):
+    """
+    Inline admin interface for the GroupFaithMilestone model.
+
+    This allows the interests associated with a profile to be managed
+    directly within the Group admin interface.
+    """
+
+    extra = 0
+    model = GroupFaithMilestone
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """
+        Filter the faith milestone choices to only include those of type 'group'.
+
+        Parameters
+        ----------
+        db_field : models.Field
+            The model field for which the foreign key relation is being defined.
+        request : HttpRequest
+            The current request object.
+        **kwargs
+            Additional keyword arguments.
+
+        Returns
+        -------
+        models.Field
+            The filtered model field.
+        """
+        if db_field.name == "faith_milestone":
+            kwargs["queryset"] = FaithMilestone.objects.filter(
+                type="group",
+            )
+
+        return super().formfield_for_foreignkey(
+            db_field,
+            request,
+            **kwargs,
+        )
 
 
 class GroupMemberInline(admin.TabularInline):
@@ -30,4 +73,7 @@ class GroupAdmin(admin.ModelAdmin):
     inline within the Group detail page.
     """
 
-    inlines = [GroupMemberInline]
+    inlines = [
+        GroupMemberInline,
+        GroupFaithMilestoneInline,
+    ]

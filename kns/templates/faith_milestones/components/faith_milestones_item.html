@@ -1,0 +1,12 @@
+<div class="bg-knsSecondary-200 border-l-4 p-3 border-knsSecondary-500 flex flex-col justify-between space-y-2">
+  <div class="space-y-2">
+    <div class="font-serif font-semibold text-md leading-5 flex gap-x-2 items-start">
+      <iconify-icon icon="mdi:check-all" class="text-knsSecondary-600 text-lg"></iconify-icon>
+      {{ faith_milestone.title }}
+    </div>
+  </div>
+
+  <div class="text-xs text-black text-right">
+    {{ item_faith_milestone.created_at|date:"F j, Y" }}
+  </div>
+</div>

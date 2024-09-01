@@ -1,0 +1,7 @@
+<div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+  {% for item_faith_milestone in profile.faith_milestones.all %}
+    {% with faith_milestone=item_faith_milestone.faith_milestone %}
+      {% include "faith_milestones/components/faith_milestones_item.html" %}
+    {% endwith %}
+  {% endfor %}
+</div>

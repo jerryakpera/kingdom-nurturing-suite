@@ -73,4 +73,72 @@ milestones = [  # pragma: no cover
         ),
         "type": "profile",
     },
+    {
+        "title": "Group has baptized new members",
+        "description": (
+            "This milestone signifies that the group has facilitated the "
+            "baptism of new members, marking their public declaration of "
+            "faith."
+        ),
+        "type": "group",
+    },
+    {
+        "title": "Group completed a discipleship course",
+        "description": (
+            "This milestone indicates that the group has collectively "
+            "completed a course focused on foundational principles of "
+            "Christian discipleship."
+        ),
+        "type": "group",
+    },
+    {
+        "title": "Group has led others to Christ",
+        "description": (
+            "This milestone celebrates the group's role in leading others "
+            "to faith in Jesus Christ."
+        ),
+        "type": "group",
+    },
+    {
+        "title": "Group consistently studies the Bible",
+        "description": (
+            "This milestone reflects the group's commitment to regular "
+            "Bible study sessions, fostering spiritual growth among its "
+            "members."
+        ),
+        "type": "group",
+    },
+    {
+        "title": "Group regularly attends church services",
+        "description": (
+            "This milestone signifies the group's consistent participation "
+            "in church services, enhancing their spiritual journey."
+        ),
+        "type": "group",
+    },
+    {
+        "title": "Group has regular discipleship meetings",
+        "description": (
+            "This milestone indicates that the group holds regular "
+            "discipleship meetings, fostering mutual spiritual growth."
+        ),
+        "type": "group",
+    },
+    {
+        "title": "Group completed a Movement Training",
+        "description": (
+            "This milestone marks the group's completion of a Movement "
+            "Training, focusing on discovering and using spiritual gifts."
+        ),
+        "type": "group",
+    },
+    {
+        "title": "Group participates in small group studies",
+        "description": (
+            "This milestone reflects the group's active engagement in "
+            "small group or Bible study sessions, encouraging community "
+            "and spiritual development."
+        ),
+        "type": "group",
+    },
 ]

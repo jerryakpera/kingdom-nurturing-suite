@@ -2,6 +2,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.custom_user.models import User
+from kns.faith_milestones.models import FaithMilestone, GroupFaithMilestone
 from kns.groups.forms import GroupForm
 from kns.groups.models import Group
 
@@ -719,3 +720,166 @@ class TestEditGroupView(TestCase):
             GroupForm,
         )
         self.assertTrue(response.context["group_form"].errors)
+
+
+class TestEditGroupMilestonesView(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Create a user and a group
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        self.profile = self.user.profile
+
+        self.group = Group.objects.create(
+            leader=self.user.profile,
+            name="Test Group",
+            slug="test-group",
+            description="A test group description",
+        )
+
+        self.faith_milestone1 = FaithMilestone.objects.create(
+            title="Faith milestone 1",
+            description="This is test description for a faith milestone",
+            type="group",
+            author=self.profile,
+        )
+        self.faith_milestone2 = FaithMilestone.objects.create(
+            type="group",
+            title="Faith milestone 2",
+            description="This is test description for a faith milestone",
+            author=self.profile,
+        )
+        self.faith_milestone3 = FaithMilestone.objects.create(
+            type="group",
+            title="Faith milestone 3",
+            description="This is test description for a faith milestone",
+            author=self.profile,
+        )
+        self.faith_milestone4 = FaithMilestone.objects.create(
+            type="group",
+            title="Faith milestone 4",
+            description="This is test description for a faith milestone",
+            author=self.profile,
+        )
+
+        self.url = reverse(
+            "groups:edit_group_milestones",
+            kwargs={
+                "group_slug": self.group.slug,
+            },
+        )
+
+    def test_edit_group_milestones_get(self):
+        """
+        Test that the edit_group_milestones view renders correctly for a GET request.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "groups/pages/edit_group_faith_milestones.html",
+        )
+        self.assertIn(
+            "group_milestones_form",
+            response.context,
+        )
+
+    def test_edit_group_milestones_post_valid_data(self):
+        """
+        Test that valid data updates the group milestones and redirects correctly.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        data = {
+            "faith_milestones": [
+                self.faith_milestone1.pk,
+                self.faith_milestone2.pk,
+            ],
+        }
+
+        response = self.client.post(
+            self.url,
+            data,
+        )
+
+        # Check if the response status code is 302 (redirect)
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
+
+        # Verify that the milestones have been added to the group
+        milestones = GroupFaithMilestone.objects.filter(
+            group=self.group,
+        )
+
+        self.assertEqual(
+            milestones.count(),
+            2,
+        )
+
+        self.assertTrue(
+            milestones.filter(
+                faith_milestone=self.faith_milestone1,
+            ).exists(),
+        )
+        self.assertTrue(
+            milestones.filter(
+                faith_milestone=self.faith_milestone2,
+            ).exists(),
+        )
+
+    def test_edit_group_milestones_post_duplicate_milestones(self):
+        """
+        Test that posting duplicate milestones does not create multiple entries.
+        """
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        GroupFaithMilestone.objects.create(
+            group=self.group,
+            faith_milestone=self.faith_milestone1,
+        )
+
+        data = {
+            "faith_milestones": [
+                self.faith_milestone1.pk,
+                self.faith_milestone2.pk,
+            ],
+        }
+        response = self.client.post(self.url, data)
+
+        # Check if the response status code is 302 (redirect)
+        self.assertEqual(response.status_code, 302)
+
+        # Verify that no duplicate milestones are created
+        milestones = GroupFaithMilestone.objects.filter(
+            group=self.group,
+        )
+
+        self.assertEqual(milestones.count(), 2)
+
+        self.assertTrue(
+            milestones.filter(
+                faith_milestone=self.faith_milestone1,
+            ).exists()
+        )
+        self.assertTrue(
+            milestones.filter(
+                faith_milestone=self.faith_milestone2,
+            ).exists()
+        )

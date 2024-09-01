@@ -5,31 +5,25 @@
 {% endblock title %}
 
 {% block group_base_content %}
-  <section class="container-default py-4 md:py-8">
-    <div class="mb-8 md:mb-12">
-      <a href="{% url "groups:edit_group" group_slug=group.slug %}">Edit group</a>
-      <h1 class="text-center text-2xl font-bold text-black lg:text-3xl font-serif">
-        {{ group.name }}
-      </h1>
-      <p class="mx-auto max-w-screen-md text-center text-gray-700 font-medium">
-        {{ group.description }}
-      </p>
-    </div>
-    {% if request.user.profile == group.leader %}
-      <div class="flex space-x-2">
-        <a
-          href="{% url "profiles:register_member" %}"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
-        >
-          Register member
-        </a>
-        <a
-          href="{% url "groups:edit_group" group_slug=group.slug %}"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
-        >
-          Edit group
-        </a>
+  <section>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 md:gap-y-0 md:gap-x-4 lg:gap-x-6">
+      <div class="space-y-3">
+        <h3 class="font-semibold text-md uppercase">Group Overview</h3>
+        <div class="w-full grid grid-cols-3 xs:grid-cols-4 md:grid-cols-3 lg:grid-cols-3 gap-2 lg:gap-4 justify-center">
+          {% include "groups/components/group_stats_overview.html" %}
+        </div>
       </div>
-    {% endif %}
+      <div class="space-y-3">
+        <h3 class="font-semibold text-md uppercase">Group Milestones</h3>
+
+        <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-1 xl:grid-cols-2 gap-2">
+          {% for item_faith_milestone in group.faith_milestones.all %}
+            {% with faith_milestone=item_faith_milestone.faith_milestone %}
+              {% include "faith_milestones/components/faith_milestones_item.html" %}
+            {% endwith %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
   </section>
 {% endblock group_base_content %}
