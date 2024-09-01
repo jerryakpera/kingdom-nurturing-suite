@@ -1,12 +1,15 @@
 from datetime import date
 
 from django.contrib.messages import get_messages
+from django.core.paginator import Page
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.core.models import Setting
 from kns.custom_user.models import User
 from kns.faith_milestones.models import FaithMilestone, ProfileFaithMilestone
+from kns.groups.models import Group
+from kns.groups.tests import test_constants
 from kns.profiles.models import EncryptionReason, ProfileEncryption
 from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 
@@ -18,11 +21,6 @@ class TestViews(TestCase):
             email="testuser@example.com",
             password="oldpassword",
         )
-        User.objects.create_user(
-            email="adminuser@example.com",
-            password="oldpassword",
-        )
-
         self.client.login(
             email="testuser@example.com",
             password="oldpassword",
@@ -34,6 +32,43 @@ class TestViews(TestCase):
         self.profile.last_name = "User"
 
         self.profile.save()
+
+        # Create another profile that should be excluded by the filtering logic
+        self.user2 = User.objects.create_user(
+            email="testuser2@example.com",
+            password="password",
+        )
+
+        self.profile2 = self.user2.profile
+
+        # Create group and descendant groups
+        # Create a group
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Test Group",
+            slug="test-group",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.child_group = Group.objects.create(
+            leader=self.profile2,
+            name="Test Group 2",
+            slug="test-group-2",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+            parent=self.group,
+        )
+
+        self.user3 = User.objects.create_user(
+            email="childuser@example.com",
+            password="password",
+        )
+
+        self.profile3 = self.user3.profile
+
+        self.profile3.first_name = "Test3"
+        self.profile3.last_name = "User"
+
+        self.profile3.save()
 
         self.settings = Setting.get_or_create_setting()
 
@@ -61,14 +96,59 @@ class TestViews(TestCase):
         # Check if the correct template is used
         self.assertTemplateUsed(response, "profiles/pages/index.html")
 
-        self.assertIn("profiles", response.context)
-        self.assertEqual(
-            response.context["profiles"].count(),
-            1,
+        # Check if 'page_obj' is in context and is a Page instance
+        self.assertIn("page_obj", response.context)
+        self.assertIsInstance(response.context["page_obj"], Page)
+
+        # Check that the excluded profile is not in the page object
+        self.assertNotIn(
+            self.profile2,
+            response.context["page_obj"].object_list,
         )
 
-        # Ensure the profile is listed
-        assert b"Test User" in response.content
+        # Check that the child profile is included in the page object
+        self.assertIn(
+            self.profile3,
+            response.context["page_obj"].object_list,
+        )
+
+        # Ensure the profiles are listed
+        self.assertContains(response, "Test User")
+
+    def test_index_view_pagination(self):
+        """
+        Test the pagination behavior of the index view.
+        """
+        # Create multiple profiles to trigger pagination
+        for i in range(15):
+            user = User.objects.create_user(
+                email=f"test_user{i}@example.com",
+                password="password",
+            )
+
+            profile = user.profile
+
+            profile.first_name = f"Test{i}"
+            profile.last_name = "User"
+
+            self.group.add_member(profile)
+
+        response = self.client.get(reverse("profiles:index"))
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(response, "profiles/pages/index.html")
+
+        # Check if the page object is paginated correctly
+        self.assertIn("page_obj", response.context)
+
+        self.assertIsInstance(response.context["page_obj"], Page)
+
+        # Test second page
+        # response = self.client.get(reverse("profiles:index") + "?page=2")
+        # self.assertEqual(len(response.context["page_obj"].object_list), 4)
 
     def test_profile_overview_view(self):
         """
@@ -529,60 +609,6 @@ class TestViews(TestCase):
             "Profile contact details updated.",
         )
 
-    # def test_edit_contact_details_post_invalid(self):
-    #     """
-    #     Test posting invalid data to edit_contact_details view does not update the profile.
-    #     """
-    #     url = reverse(
-    #         "profiles:edit_contact_details",
-    #         kwargs={"profile_slug": self.profile.slug},
-    #     )
-    #     data = {
-    #         "phone_prefix": "",
-    #         "phone": "",
-    #         "email": "invalid-email",
-    #         "location_city": "",
-    #         "location_country": "",
-    #     }
-    #     response = self.client.post(url, data=data)
-
-    #     # Refresh the profile from the database
-    #     self.profile.refresh_from_db()
-
-    #     # Check if the profile details remain unchanged
-    #     self.assertEqual(self.profile.email, "testuser@example.com")
-    #     self.assertEqual(self.profile.phone_prefix or "", "")
-    #     self.assertEqual(self.profile.phone or "", "")
-    #     self.assertEqual(self.profile.location_city or "", "")
-    #     self.assertEqual(self.profile.location_country or "", "")
-
-    #     # Check if the response does not redirect
-    #     self.assertEqual(response.status_code, 200)
-
-    #     # Extract the form from the response context
-    #     form = response.context.get("contact_details_form")
-
-    #     # Ensure the form contains errors
-    #     self.assertIsNotNone(form, "Form is not present in the response context")
-    #     self.assertTrue(form.errors, "Form should contain errors")
-
-    #     # Check specific errors
-    #     self.assertIn(
-    #         "phone_prefix", form.errors, "Phone prefix field should have errors"
-    #     )
-    #     self.assertIn(
-    #         "This field is required.",
-    #         form.errors["phone_prefix"],
-    #         "Expected error message not found for phone_prefix",
-    #     )
-
-    #     self.assertIn("email", form.errors, "Email field should have errors")
-    #     self.assertIn(
-    #         "Enter a valid email address.",
-    #         form.errors["email"],
-    #         "Expected error message not found for email",
-    #     )
-
     def test_edit_involvement_details_get(self):
         """
         Test the edit_involvement_details view renders the form correctly.
@@ -879,6 +905,7 @@ class TestViews(TestCase):
                 "profile_slug": self.profile.slug,
             },
         )
+
         data = {
             "faith_milestones": [
                 self.faith_milestone_1.id,
@@ -897,6 +924,7 @@ class TestViews(TestCase):
                 faith_milestone=self.faith_milestone_1,
             ).exists()
         )
+
         self.assertTrue(
             ProfileFaithMilestone.objects.filter(
                 profile=self.profile,

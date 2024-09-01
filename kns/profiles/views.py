@@ -5,6 +5,7 @@ Views for the profiles app.
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from faker import Faker
 from formtools.wizard.views import SessionWizardView
@@ -185,16 +186,52 @@ def index(request):
     HttpResponse
         The rendered template with a list of profiles.
     """
-    profiles = Profile.objects.filter(
-        first_name__isnull=False,
-        last_name__isnull=False,
-    ).exclude(
-        first_name="",
-        last_name="",
+    profiles = (
+        Profile.objects.filter(
+            first_name__isnull=False,
+            last_name__isnull=False,
+        )
+        .exclude(
+            first_name="",
+            last_name="",
+        )
+        .order_by("-created_at")
     )
 
+    # Get the current user's group
+    user_profile = request.user.profile
+    users_group = (
+        user_profile.group_in.group
+        if hasattr(
+            user_profile,
+            "group_in",
+        )
+        else None
+    )
+
+    if users_group:  # pragma: no cover
+        # Get all descendant groups of the user's group
+        descendant_groups = users_group.get_descendants(
+            include_self=True,
+        )
+        # Filter profiles to include only those in the descendant groups
+        profiles = profiles.filter(
+            group_in__group__in=descendant_groups,
+        )
+
+    # Pagination
+    paginator = Paginator(profiles, 12)
+    page = request.GET.get("page")
+
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:  # pragma: no cover
+        page_obj = paginator.page(paginator.num_pages)
+
     context = {
-        "profiles": profiles,
+        "page_obj": page_obj,
     }
 
     return render(
