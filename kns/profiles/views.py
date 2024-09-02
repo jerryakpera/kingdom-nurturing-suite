@@ -20,7 +20,13 @@ from kns.skills.models import ProfileInterest, ProfileSkill
 
 from . import constants as profile_constants
 from . import forms as profile_forms
-from .models import ConsentForm, EncryptionReason, Profile, ProfileEncryption
+from .models import (
+    ConsentForm,
+    Discipleship,
+    EncryptionReason,
+    Profile,
+    ProfileEncryption,
+)
 from .utils import name_with_apostrophe
 
 
@@ -309,6 +315,47 @@ def profile_involvements(request, profile_slug):
     return render(
         request=request,
         template_name="profiles/pages/profile_involvements.html",
+        context=context,
+    )
+
+
+@login_required
+def profile_discipleships(request, profile_slug):
+    """
+    View to render a page displaying discipleships for a specific profile.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The request object used to generate the response.
+    profile_slug : str
+        The slug of the profile to retrieve.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template with the discipleships of the specified
+        profile.
+
+    Raises
+    ------
+    Profile.DoesNotExist
+        If no Profile with the given slug exists.
+    """
+    profile = get_object_or_404(Profile, slug=profile_slug)
+
+    group_member_discipleship_form = profile_forms.GroupMemberDiscipleForm(
+        request.POST,
+        profile=profile,
+    )
+
+    context = {
+        "group_member_discipleship_form": group_member_discipleship_form,
+    }
+
+    return render(
+        request=request,
+        template_name="profiles/pages/profile_discipleships.html",
         context=context,
     )
 
@@ -1169,3 +1216,62 @@ def edit_profile_faith_milestones(request, profile_slug):
             "profile_faith_milestones_form": profile_faith_milestones_form,
         },
     )
+
+
+@login_required
+def group_member_disciple(request, profile_slug):
+    """
+    Handle the process of adding a new disciple to a group member.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object that contains metadata about the request.
+    profile_slug : str
+        The slug of the profile to which a disciple is being added.
+
+    Returns
+    -------
+    HttpResponseRedirect
+        Redirects to the profile's discipleships page after processing the form.
+    """
+    profile = get_object_or_404(Profile, slug=profile_slug)
+
+    disciple_form = profile_forms.GroupMemberDiscipleForm(
+        request.POST,
+        profile=profile,
+    )
+
+    if request.method == "POST":
+        if disciple_form.is_valid():
+            # Check if the discipleship already exists
+            discipleship_exists = Discipleship.objects.filter(
+                disciple=disciple_form.cleaned_data["disciple"]
+            ).count()
+
+            if discipleship_exists > 0:
+                # Display a warning if the discipleship already exists
+                messages.warning(
+                    request=request,
+                    message="This person is already a disciple",
+                )
+            else:
+                # Create a new discipleship if it doesn't exist
+                discipleship = disciple_form.save(commit=False)
+
+                # Assign the current user as the author and save the discipleship
+                discipleship.author = request.user.profile
+                discipleship.disciple = disciple_form.cleaned_data["disciple"]
+                discipleship.discipler = profile
+                discipleship.group = "Group member"
+
+                discipleship.save()
+
+                # Display a success message
+                messages.success(
+                    request=request,
+                    message="Disciple added to your group members",
+                )
+
+    # Redirect to the profile's discipleships page
+    return redirect(profile.get_discipleships_url())

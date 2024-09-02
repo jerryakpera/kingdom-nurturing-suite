@@ -782,13 +782,24 @@ class GroupMemberDiscipleForm(forms.ModelForm):
     class Meta:
         model = Discipleship
         fields = ["disciple"]
-        widgets = {
-            "disciple": forms.Select(
-                attrs={
-                    "class": "form-select",
-                },
-            ),
-        }
+
+    disciple = forms.ModelChoiceField(
+        required=True,
+        queryset=Profile.objects.none(),
+        label=(
+            "Select a person in your group to add to your Group "
+            "members discipleship group"
+        ),
+        widget=forms.Select(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            },
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         """

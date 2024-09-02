@@ -1,0 +1,33 @@
+
+<button id="discipleship_menu_{{discipleship.id}}" data-dropdown-toggle="dropdownDivider_discipleship_{{discipleship.id}}" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-1.5 py-1.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+  <iconify-icon icon="mdi:dots-vertical" class="text-md"></iconify-icon>
+</button>
+
+<!-- Dropdown menu -->
+<div id="dropdownDivider_discipleship_{{discipleship.id}}" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
+    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="discipleship_menu_{{discipleship.id}}">
+      {% if discipleship.group != 'group_member' and discipleship.group != 'sent_forth' %}
+        <li>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Move to Group member</a>
+        </li>
+      {% endif %}
+
+      {% if discipleship.group != 'sent_forth' and discipleship.group != 'first_12' %}
+        <li>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Move to First 12</a>
+        </li>
+      {% endif %}
+
+      {% if discipleship.group != 'sent_forth' and discipleship.group != 'first_3' %}
+        <li>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Move to First 3</a>
+        </li>
+      {% endif %}
+
+      {% if discipleship.group != 'sent_forth' %}
+        <li>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Send forth</a>
+        </li>
+      {% endif %}
+    </ul>
+</div>

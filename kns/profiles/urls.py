@@ -86,6 +86,16 @@ urlpatterns = [
         name="profile_involvements",
     ),
     path(
+        "<slug:profile_slug>/discipleships",
+        views.profile_discipleships,
+        name="profile_discipleships",
+    ),
+    path(
+        "<slug:profile_slug>/discpleships/group-member/",
+        views.group_member_disciple,
+        name="group_member_disciple",
+    ),
+    path(
         "<slug:profile_slug>/",
         views.profile_overview,
         name="profile_overview",

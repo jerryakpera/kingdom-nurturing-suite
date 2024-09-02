@@ -17,12 +17,12 @@
       <div class="flex items-center">
         <ul class="flex flex-row mt-0 space-x-6 rtl:space-x-reverse text-sm">
           <li class="text-white cursor-pointer">
-            <div id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white flex items-center space-x-2" type="button">People <iconify-icon icon="tabler:caret-down-filled" class="ml-1 text-lg"></iconify-icon>
+            <div id="account_menu_dropdown" data-dropdown-toggle="dropdown" class="text-white flex items-center space-x-2" type="button">People <iconify-icon icon="tabler:caret-down-filled" class="ml-1 text-lg"></iconify-icon>
             </div>
 
             <!-- Dropdown menu -->
             <div id="dropdown" class="z-10 hidden divide-y divide-gray-100 rounded-lg shadow w-44 bg-knsSecondary-600">
-              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="account_menu_dropdown">
                 <li>
                   <a href="{% url "profiles:index" %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Profiles</a>
                 </li>

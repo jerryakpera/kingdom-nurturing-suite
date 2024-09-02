@@ -1,0 +1,25 @@
+<form
+  method="POST"
+  id="form-container"
+  class="space-y-2"
+  action="{% url "profiles:group_member_disciple" profile_slug=profile.slug %}"
+>
+  {% csrf_token %}
+
+  {% with form=group_member_discipleship_form %}
+    {% include 'core/components/forms/form_error.html' %}
+  {% endwith %}
+
+  {% for field in group_member_discipleship_form %}
+    {% include "core/components/forms/form_field.html" %}
+  {% endfor %}
+
+  <div class="flex justify-end space-x-2">
+    <button
+      type="submit"
+      class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+    >
+      Save
+    </button>
+  </div>
+</form>

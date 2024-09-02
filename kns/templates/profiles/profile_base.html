@@ -10,32 +10,7 @@
       </div>
 
       <div class="col-span-1 sm:col-span-3 lg:col-span-3 space-y-4">
-        <div class="flex flex-wrap text-lg sm:text-sm border-b border-gray-300 gap-x-10 sm:gap-x-5 md:gap-x-8 pb-1 items-end" role="tablist">
-          <a href="{{ profile.get_absolute_url }}" class="{% if request.path == profile.get_absolute_url %}text-knsPrimary font-semibold{% endif %}">
-            <iconify-icon icon="ri:dashboard-fill"></iconify-icon>
-            <span class="hidden sm:block">
-              Overview
-            </span>
-          </a>
-          <a href="{{ profile.get_involvements_url }}" class="{% if request.path == profile.get_involvements_url %}text-knsPrimary font-semibold{% endif %}">
-            <iconify-icon icon="material-symbols:interactive-space-rounded"></iconify-icon>
-            <div class="hidden sm:block">
-              Involvements
-            </div>
-          </a>
-          <a href="{{ profile.get_trainings_url }}" class="{% if request.path == profile.get_trainings_url %}text-knsPrimary font-semibold{% endif %}">
-            <iconify-icon icon="oui:training"></iconify-icon>
-            <span class="hidden sm:block">
-              Trainings
-            </span>
-          </a>
-          <a href="{{ profile.get_activities_url }}" class="{% if request.path == profile.get_activities_url %}text-knsPrimary font-semibold{% endif %}">
-            <iconify-icon icon="uim:list-ul"></iconify-icon>
-            <span class="hidden sm:block">
-              Activities
-            </span>
-          </a>
-        </div>
+        {% include "profiles/layout/profile_tabs.html" %}
 
         <div>
           {% block profile_base_content %}{% endblock profile_base_content %}

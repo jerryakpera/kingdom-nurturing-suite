@@ -6,11 +6,12 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.core.models import Setting
+from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.models import FaithMilestone, ProfileFaithMilestone
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
-from kns.profiles.models import EncryptionReason, ProfileEncryption
+from kns.profiles.models import Discipleship, EncryptionReason, ProfileEncryption
 from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 
 
@@ -1146,3 +1147,250 @@ class TestProfileEncryption(TestCase):
             str(messages[0]),
             "You cannot complete this action.",
         )
+
+
+class TestProfileDiscipleshipsView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.slug = "test-user"
+
+        self.profile.save()
+
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Test Group",
+            slug="test-group",
+            description="A test group",
+        )
+
+    def test_profile_discipleships_view_loads_correctly(self):
+        """
+        Test that the profile_discipleships view loads correctly
+        and renders the form.
+        """
+        url = reverse(
+            "profiles:profile_discipleships",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/profile_discipleships.html",
+        )
+        self.assertIn(
+            "group_member_discipleship_form",
+            response.context,
+        )
+
+    def test_profile_discipleships_view_with_invalid_slug(self):
+        """
+        Test that the profile_discipleships view returns a 404 error
+        when the profile slug does not exist.
+        """
+        url = reverse(
+            "profiles:profile_discipleships",
+            kwargs={
+                "profile_slug": "invalid-slug",
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_profile_discipleships_form_submission(self):
+        """
+        Test that submitting the form in the profile_discipleships view
+        processes correctly.
+        """
+        url = reverse(
+            "profiles:profile_discipleships",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        response = self.client.post(
+            url,
+            data={
+                "disciple": self.profile.id,
+            },
+        )
+
+        # Since this view only renders the form and does not handle form submission,
+        # we expect the response to still be 200, and no changes to have occurred.
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "group_member_discipleship_form",
+            response.context,
+        )
+
+
+class TestGroupMemberDiscipleView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+        self.profile.slug = "test-user"
+
+        self.profile.save()
+
+        # Create a group
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Test Group",
+            slug="test-group",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="testpassword",
+        )
+
+        self.other_user.verified = True
+        self.other_user.agreed_to_terms = True
+
+        self.other_user.save()
+
+        self.other_profile = self.other_user.profile
+        self.other_profile.slug = "other-user"
+
+        self.other_profile.save()
+
+        self.group.add_member(self.other_profile)
+
+    def test_group_member_disciple_view_post_success(self):
+        """
+        Test that a valid POST request adds a new disciple
+        and redirects correctly.
+        """
+        url = reverse(
+            "profiles:group_member_disciple",
+            kwargs={"profile_slug": self.profile.slug},
+        )
+        data = {
+            "disciple": self.other_profile.id,
+        }
+
+        response = self.client.post(url, data=data)
+
+        # Check if the disciple was added
+        self.assertTrue(
+            Discipleship.objects.filter(
+                disciple=self.other_profile,
+                discipler=self.profile,
+            ).exists()
+        )
+
+        # Check if the response redirects
+        self.assertEqual(response.status_code, 302)
+
+        # Check if the success message is in the messages
+        messages_list = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(len(messages_list), 1)
+        self.assertEqual(
+            str(messages_list[0]),
+            "Disciple added to your group members",
+        )
+
+    def test_group_member_disciple_view_post_duplicate_disciple(self):
+        """
+        Test that trying to add an existing disciple shows a warning message.
+        """
+        # First, create an existing discipleship
+        Discipleship.objects.create(
+            disciple=self.other_profile,
+            discipler=self.profile,
+            group="Group member",
+            author=self.profile,
+        )
+
+        url = reverse(
+            "profiles:group_member_disciple",
+            kwargs={"profile_slug": self.profile.slug},
+        )
+        data = {
+            "disciple": self.other_profile.id,
+        }
+
+        response = self.client.post(url, data=data)
+
+        # Check that no new discipleship is created
+        self.assertEqual(
+            Discipleship.objects.filter(
+                disciple=self.other_profile,
+                discipler=self.profile,
+            ).count(),
+            1,
+        )
+
+        # Check if the response redirects
+        self.assertEqual(response.status_code, 302)
+
+        # Check if the warning message is in the messages
+        messages_list = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages_list), 1)
+        self.assertEqual(
+            str(messages_list[0]),
+            "This person is already a disciple",
+        )
+
+    def test_group_member_disciple_view_post_invalid_form(self):
+        """
+        Test that submitting an invalid form does not create a disciple
+        and stays on the same page.
+        """
+        url = reverse(
+            "profiles:group_member_disciple",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        data = {
+            "disciple": "",  # Invalid data
+        }
+
+        response = self.client.post(url, data=data)
+
+        # Check that no discipleship is created
+        self.assertFalse(
+            Discipleship.objects.filter(
+                discipler=self.profile,
+            ).exists()
+        )
+
+        # Check if the response redirects back to the same page
+        self.assertEqual(response.status_code, 302)
+
+        # Since no disciple was added, check that the form errors are correctly handled
+        messages_list = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(len(messages_list), 0)

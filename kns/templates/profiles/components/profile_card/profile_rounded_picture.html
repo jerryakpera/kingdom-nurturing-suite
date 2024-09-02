@@ -1,0 +1,13 @@
+{% if not profile.image %}
+  <img
+    class="rounded-full w-20 h-20 object-cover"
+    src="https://dummyimage.com/720x400"
+    alt="blog"
+  >
+{% else %}
+  <img
+    src="{{ profile.image.url }}"
+    alt="{{ profile.get_full_name }}"
+    class="rounded-full w-20 h-20 object-cover"
+  >
+{% endif %}

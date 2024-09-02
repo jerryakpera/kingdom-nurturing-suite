@@ -457,6 +457,22 @@ class TestProfileModel(TestCase):
             "Emma Brown",
         )
 
+    def test_get_real_name(self):
+        """
+        Test that the get_real_name method returns the real name
+        of the profile instance when there is no ProfileEncryption.
+        """
+        # Set first and last name on the profile
+        self.profile.first_name = "John"
+        self.profile.last_name = "Doe"
+        self.profile.save()
+
+        # Test get_real_name with no encryption
+        self.assertEqual(
+            self.profile.get_real_name(),
+            "John Doe",
+        )
+
 
 class TestConsentFormModel:
     @pytest.fixture(autouse=True)
@@ -667,3 +683,13 @@ class TestDiscipleshipModel(TestCase):
         discipleships = Discipleship.objects.all()
 
         self.assertEqual(discipleships[0], discipleship2)
+
+    def test_group_display(self):
+        discipleship = Discipleship.objects.create(
+            disciple=self.user2.profile,
+            discipler=self.user3.profile,
+            group="first_12",
+            author=self.author,
+        )
+
+        self.assertTrue(discipleship.group_display(), "First 12")

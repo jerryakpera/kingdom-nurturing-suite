@@ -7,7 +7,13 @@ from django.contrib import admin
 from kns.faith_milestones.models import ProfileFaithMilestone
 from kns.skills.models import ProfileInterest, ProfileSkill
 
-from .models import ConsentForm, EncryptionReason, Profile, ProfileEncryption
+from .models import (
+    ConsentForm,
+    Discipleship,
+    EncryptionReason,
+    Profile,
+    ProfileEncryption,
+)
 
 
 class ProfileEncryptionInline(admin.TabularInline):
@@ -33,6 +39,18 @@ class ProfileSkillInline(admin.TabularInline):
 
     extra = 0
     model = ProfileSkill
+
+
+class ProfileDisciplesInline(admin.TabularInline):
+    """
+    Inline admin interface for the Discipleship model.
+
+    This allows the disciples to be associated with the discipler.
+    """
+
+    model = Discipleship
+    fk_name = "discipler"
+    extra = 0
 
 
 class ProfileInterestInline(admin.TabularInline):
@@ -80,12 +98,19 @@ class ProfileAdmin(admin.ModelAdmin):
     consent form, skills, and interests.
     """
 
+    list_display = [
+        "get_real_name",
+        "email",
+        "get_role_display_str",
+    ]
+
     inlines = [
         ProfileSkillInline,
         ProfileInterestInline,
         ConsentFormInline,
         ProfileEncryptionInline,
         ProfileFaithMilestoneInline,
+        ProfileDisciplesInline,
     ]
 
 

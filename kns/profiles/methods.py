@@ -135,6 +135,28 @@ def get_settings_url(profile):
     )
 
 
+def get_discipleships_url(profile):
+    """
+    Return the discipleships URL to access a detail view of this profile.
+
+    Parameters
+    ----------
+    profile : Profile
+        The profile instance.
+
+    Returns
+    -------
+    str
+        The discipleships URL of the profile's detail view.
+    """
+    return reverse(
+        "profiles:profile_discipleships",
+        kwargs={
+            "profile_slug": profile.slug,
+        },
+    )
+
+
 def get_role_display_str(profile):
     """
     Return the string display for this profile role.

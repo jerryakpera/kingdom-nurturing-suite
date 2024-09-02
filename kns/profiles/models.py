@@ -190,6 +190,17 @@ class Profile(
         except ProfileEncryption.DoesNotExist:
             return f"{self.first_name} {self.last_name}"
 
+    def get_real_name(self):
+        """
+        Return the real name of the profile instance.
+
+        Returns
+        -------
+        str
+            The real name of the profile instance.
+        """
+        return f"{self.first_name} {self.last_name}"
+
     def is_leading_group(self):
         """
         Check if the profile is leading a group.
@@ -278,6 +289,21 @@ class Profile(
             The URL for the profile's settings view.
         """
         return model_methods.get_settings_url(self)
+
+    def get_discipleships_url(self):
+        """
+        Get the URL for the profile's discipleships view.
+
+        This method uses the `get_discipleships_url` function from
+        `model_methods` to generate the URL for the profile's discipleships
+        view.
+
+        Returns
+        -------
+        str
+            The URL for the profile's discipleships view.
+        """
+        return model_methods.get_discipleships_url(self)
 
     def get_role_display_str(self):
         """
@@ -793,42 +819,41 @@ class Discipleship(
 ):
     """
     Represents a discipleship relationship between two profiles.
-
-    Attributes:
-        disciple (Profile): The profile being discipled.
-        discipler (Profile): The profile acting as the discipler.
-        group (str): The group classification of the discipleship
-        (e.g., group_member, group_leader).
-        author (Profile): The profile that created this discipleship
-        relationship.
-        slug (str): A unique identifier for the discipleship instance.
     """
 
     class Meta:
         ordering = ("-created_at",)
+        # Other Meta options, if any
 
     disciple = models.ForeignKey(
         Profile,
         related_name="discipleships_where_disciple",
         on_delete=models.CASCADE,
+        help_text="The profile being discipled.",
     )
 
     discipler = models.ForeignKey(
         Profile,
         related_name="discipleships_where_discipler",
         on_delete=models.CASCADE,
+        help_text="The profile acting as the discipler.",
     )
 
     group = models.CharField(
         max_length=12,
         choices=constants.DISCIPLESHIP_GROUP_CHOICES,
         default="group_member",
+        help_text=(
+            "The group classification of the discipleship (e.g., "
+            "group_member, group_leader)."
+        ),
     )
 
     author = models.ForeignKey(
         Profile,
         related_name="discipleships_created",
         on_delete=models.CASCADE,
+        help_text="The profile that created this discipleship relationship.",
     )
 
     slug = models.SlugField(
@@ -837,6 +862,7 @@ class Discipleship(
         null=True,
         blank=True,
         editable=False,
+        help_text="A unique identifier for the discipleship instance.",
     )
 
     def __str__(self) -> str:
@@ -846,6 +872,25 @@ class Discipleship(
         Returns
         -------
         str
-            A string showing the group, disciple, and discipler in this relationship.
+            A string showing the group, disciple, and discipler in this
+            relationship.
         """
         return f"{self.group} discipleship of {self.disciple} by {self.discipler}"
+
+    def group_display(self) -> str:
+        """
+        Return a human-readable string representation of the group.
+
+        Returns
+        -------
+        str
+            A string representing the group classification.
+        """
+        groups_key = {
+            "group_member": "Group member",
+            "first_12": "First 12",
+            "first_3": "First 3",
+            "sent_forth": "Sent forth",
+        }
+
+        return groups_key[self.group]
