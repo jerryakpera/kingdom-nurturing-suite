@@ -1,3 +1,4 @@
+import time
 from datetime import date, timedelta
 
 import pytest
@@ -12,6 +13,7 @@ from kns.groups.models import Group
 from kns.groups.tests import test_constants
 from kns.profiles.models import (
     ConsentForm,
+    Discipleship,
     EncryptionReason,
     Profile,
     ProfileEncryption,
@@ -564,3 +566,104 @@ class TestProfileEncryptionModel(TestCase):
         expected_str = f"{self.profile.get_full_name()} encrypted as Emma Brown"
 
         self.assertEqual(str(self.profile_encryption), expected_str)
+
+
+class TestDiscipleshipModel(TestCase):
+    def setUp(self):
+        """
+        Setup method to create necessary profiles for testing.
+        """
+        self.user1 = User.objects.create_user(
+            email="testuser1@example.com",
+            password="testpassword",
+        )
+        self.user2 = User.objects.create_user(
+            email="testuser2@example.com",
+            password="testpassword",
+        )
+        self.user3 = User.objects.create_user(
+            email="testuser3@example.com",
+            password="testpassword",
+        )
+
+        self.disciple = self.user1.profile
+        self.discipler = self.user2.profile
+
+        self.author = self.user3.profile
+
+    def test_discipleship_creation(self):
+        """
+        Test that a Discipleship instance is created correctly.
+        """
+        discipleship = Discipleship.objects.create(
+            disciple=self.disciple,
+            discipler=self.discipler,
+            group="Group leader",
+            author=self.author,
+        )
+
+        self.assertIsNotNone(discipleship)
+        self.assertEqual(discipleship.disciple, self.disciple)
+        self.assertEqual(discipleship.discipler, self.discipler)
+        self.assertEqual(discipleship.group, "Group leader")
+        self.assertEqual(discipleship.author, self.author)
+
+    def test_discipleship_slug_creation(self):
+        """
+        Test that the slug is automatically generated for a Discipleship instance.
+        """
+        discipleship = Discipleship.objects.create(
+            disciple=self.disciple,
+            discipler=self.discipler,
+            group="group_member",
+            author=self.author,
+        )
+
+        self.assertIsNotNone(discipleship.slug)
+        self.assertEqual(
+            Discipleship.objects.filter(slug=discipleship.slug).count(),
+            1,
+        )
+
+    def test_discipleship_str_method(self):
+        """
+        Test that the __str__ method returns the correct string representation.
+        """
+        discipleship = Discipleship.objects.create(
+            disciple=self.disciple,
+            discipler=self.discipler,
+            group="Group leader",
+            author=self.author,
+        )
+        expected_str = (
+            f"Group leader discipleship of {self.disciple} by {self.discipler}"
+        )
+        self.assertEqual(
+            str(discipleship),
+            expected_str,
+        )
+
+    def test_discipleship_ordering(self):
+        """
+        Test that the Discipleship instances are ordered by created_at in descending order.
+        """
+        Discipleship.objects.create(
+            disciple=self.user1.profile,
+            discipler=self.user2.profile,
+            group="group_member",
+            author=self.author,
+        )
+
+        # Add a delay to ensure a different timestamp
+        time.sleep(0.01)
+
+        discipleship2 = Discipleship.objects.create(
+            disciple=self.user2.profile,
+            discipler=self.user3.profile,
+            group="first_12",
+            author=self.author,
+        )
+
+        discipleships = Discipleship.objects.all()
+
+        self.assertEqual(discipleships[0], discipleship2)

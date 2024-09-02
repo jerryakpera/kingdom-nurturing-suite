@@ -6,6 +6,13 @@ Constants:
 - PROFILE_ROLE_OPTIONS: List of tuples representing different roles a profile can have.
 """
 
+DISCIPLESHIP_GROUP_CHOICES = [
+    ("group_member", "Group member"),
+    ("first_12", "First 12"),
+    ("first_3", "First 3"),
+    ("sent_forth", "Sent forth"),
+]
+
 # GENDER_OPTIONS
 # List of tuples representing gender options for user profiles.
 # Each tuple contains a value and a human-readable name.

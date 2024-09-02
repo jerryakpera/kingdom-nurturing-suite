@@ -9,9 +9,9 @@ from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.urls import reverse
 from django.utils import timezone
 from django_countries.fields import CountryField
-from faker import Faker
 
 from kns.core import modelmixins
 from kns.custom_user.models import User
@@ -785,3 +785,67 @@ class ProfileEncryption(
             A string showing the profile's full name and the encrypted name.
         """
         return f"{self.profile.get_full_name()} encrypted as {self.first_name} {self.last_name}"
+
+
+class Discipleship(
+    modelmixins.TimestampedModel,
+    models.Model,
+):
+    """
+    Represents a discipleship relationship between two profiles.
+
+    Attributes:
+        disciple (Profile): The profile being discipled.
+        discipler (Profile): The profile acting as the discipler.
+        group (str): The group classification of the discipleship
+        (e.g., group_member, group_leader).
+        author (Profile): The profile that created this discipleship
+        relationship.
+        slug (str): A unique identifier for the discipleship instance.
+    """
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    disciple = models.ForeignKey(
+        Profile,
+        related_name="discipleships_where_disciple",
+        on_delete=models.CASCADE,
+    )
+
+    discipler = models.ForeignKey(
+        Profile,
+        related_name="discipleships_where_discipler",
+        on_delete=models.CASCADE,
+    )
+
+    group = models.CharField(
+        max_length=12,
+        choices=constants.DISCIPLESHIP_GROUP_CHOICES,
+        default="group_member",
+    )
+
+    author = models.ForeignKey(
+        Profile,
+        related_name="discipleships_created",
+        on_delete=models.CASCADE,
+    )
+
+    slug = models.SlugField(
+        unique=True,
+        default=uuid4,
+        null=True,
+        blank=True,
+        editable=False,
+    )
+
+    def __str__(self) -> str:
+        """
+        Return a string representation of the Discipleship instance.
+
+        Returns
+        -------
+        str
+            A string showing the group, disciple, and discipler in this relationship.
+        """
+        return f"{self.group} discipleship of {self.disciple} by {self.discipler}"
