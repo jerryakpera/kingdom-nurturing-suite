@@ -2,7 +2,7 @@
   method="POST"
   id="form-container"
   class="space-y-2"
-  action="{% url "profiles:group_member_disciple" profile_slug=profile.slug %}"
+  action="{% url "profiles:profile_discipleships" profile_slug=profile.slug %}"
 >
   {% csrf_token %}
 

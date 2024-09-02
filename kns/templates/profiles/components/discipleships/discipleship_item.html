@@ -5,7 +5,9 @@
         {{ discipleship.group_display }} discipleship
       </h4>
 
-      {% include "profiles/components/discipleships/discipleship_item_menu.html" %}
+      {% if discipleship.group != 'sent_forth' %}
+        {% include "profiles/components/discipleships/discipleship_item_menu.html" %}
+      {% endif %}
     </div>
     <div class="flex justify-around p-2">
       <div class="space-y-1 justify-center">

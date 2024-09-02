@@ -8,25 +8,25 @@
     <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="discipleship_menu_{{discipleship.id}}">
       {% if discipleship.group != 'group_member' and discipleship.group != 'sent_forth' %}
         <li>
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Move to Group member</a>
+          <a href="{% url "profiles:move_to_group_member" discipleship_id=discipleship.id %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Move to Group member</a>
         </li>
       {% endif %}
 
       {% if discipleship.group != 'sent_forth' and discipleship.group != 'first_12' %}
         <li>
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Move to First 12</a>
+          <a href="{% url "profiles:move_to_first_12" discipleship_id=discipleship.id %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Move to First 12</a>
         </li>
       {% endif %}
 
       {% if discipleship.group != 'sent_forth' and discipleship.group != 'first_3' %}
         <li>
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Move to First 3</a>
+          <a href="{% url "profiles:move_to_first_3" discipleship_id=discipleship.id %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Move to First 3</a>
         </li>
       {% endif %}
 
       {% if discipleship.group != 'sent_forth' %}
         <li>
-          <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Send forth</a>
+          <a href="{% url "profiles:move_to_sent_forth" discipleship_id=discipleship.id %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Send forth</a>
         </li>
       {% endif %}
     </ul>

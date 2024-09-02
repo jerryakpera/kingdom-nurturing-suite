@@ -13,7 +13,16 @@
     {% endif %}
 
     <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-1 md:grid-cols-2 gap-2">
-      {% for discipleship in profile.discipleships_where_discipler.all %}
+      {% for discipleship in group_member_discipleships %}
+        {% include "profiles/components/discipleships/discipleship_item.html" %}
+      {% endfor %}
+      {% for discipleship in first_12_discipleships %}
+        {% include "profiles/components/discipleships/discipleship_item.html" %}
+      {% endfor %}
+      {% for discipleship in first_3_discipleships %}
+        {% include "profiles/components/discipleships/discipleship_item.html" %}
+      {% endfor %}
+      {% for discipleship in sent_forth_discipleships %}
         {% include "profiles/components/discipleships/discipleship_item.html" %}
       {% endfor %}
     </div>
