@@ -418,7 +418,7 @@ class Profile(
             # There is no consent form so return True
             return True
 
-    def can_become_leader_role(self):  # pragma: n cover
+    def can_become_leader_role(self):  # pragma: no cover
         """
         Determine if the profile can become a leader role.
 
