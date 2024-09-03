@@ -1323,6 +1323,10 @@ video {
   border-inline-end-width: 0px;
 }
 
+.border-l-2{
+  border-left-width: 2px;
+}
+
 .border-l-4{
   border-left-width: 4px;
 }
@@ -1340,6 +1344,11 @@ video {
 .border-amber-600{
   --tw-border-opacity: 1;
   border-color: rgb(217 119 6 / var(--tw-border-opacity));
+}
+
+.border-black{
+  --tw-border-opacity: 1;
+  border-color: rgb(0 0 0 / var(--tw-border-opacity));
 }
 
 .border-blue-300{
