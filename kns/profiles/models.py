@@ -9,7 +9,6 @@ from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.urls import reverse
 from django.utils import timezone
 from django_countries.fields import CountryField
 
@@ -419,7 +418,7 @@ class Profile(
             # There is no consent form so return True
             return True
 
-    def can_become_leader_role(self):
+    def can_become_leader_role(self):  # pragma: n cover
         """
         Determine if the profile can become a leader role.
 
@@ -457,16 +456,10 @@ class Profile(
         """
         from kns.core.models import Setting
 
-        settings = Setting.get_or_create_setting()
-
-        is_origin_user = not hasattr(
-            self.group_led,
-            "parent",
-        )
-
-        if is_origin_user:
+        if not self.group_led.parent:
             return False
 
+        settings = Setting.get_or_create_setting()
         return settings.change_role_approval_required
 
     def change_role_to_leader(self, leader):  # pragma: no cover
@@ -481,6 +474,13 @@ class Profile(
         ----------
         leader : Profile
             The profile of the person initiating the role change.
+
+        Returns
+        -------
+        MakeLeaderActionApproval or None
+            If approval is required, returns an instance of `MakeLeaderActionApproval`
+            representing the created approval action. If no approval is required,
+            returns `None` after changing the role to leader.
         """
         from kns.core import constants as core_constants
         from kns.core.models import MakeLeaderActionApproval
@@ -493,12 +493,26 @@ class Profile(
             self.save()
         else:
             # Create the approval action
-            MakeLeaderActionApproval.objects.create(
+            return MakeLeaderActionApproval.objects.create(
                 new_leader=self,
                 created_by=leader,
-                group_created_for=leader.group_in.group,
+                group_created_for=leader.group_led.parent,
                 action_type=core_constants.CHANGE_ROLE_TO_LEADER_ACTION_TYPE,
             )
+
+    def pending_make_leader_approval_request(self):  # pragma: no cover
+        """
+        Check if there is a pending leader approval request for the profile.
+
+        This method checks whether there is a pending approval request
+        for the current profile to be made a leader.
+
+        Returns
+        -------
+        bool
+            True if a pending leader approval request exists, False otherwise.
+        """
+        return model_methods.pending_make_leader_approval_request(self)
 
     def formatted_date_of_birth(self):
         """
@@ -562,6 +576,22 @@ class Profile(
                 location_str += f", {self.location_city}"
 
         return location_str
+
+    def phone_display(self):
+        """
+        Return a formatted string representing the current phone.
+
+        Returns
+        -------
+        str
+            The formatted phone, or `"---"` if no phone information is set.
+        """
+        phone_str = "---"
+
+        if self.phone:
+            phone_str = f"(+{self.phone_prefix}) {self.phone}"
+
+        return phone_str
 
 
 @receiver(post_save, sender=User)

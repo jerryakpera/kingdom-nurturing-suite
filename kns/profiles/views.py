@@ -708,15 +708,6 @@ def make_leader_page(request, profile_slug):  # pragma: no cover
 
         return redirect(profile.get_absolute_url())
 
-    # Verify that the profile can be made into a leader
-    if not profile.can_become_leader_role():
-        messages.error(
-            request=request,
-            message=f"{profile.get_full_name()} is not eligible to become a leader.",
-        )
-
-        return redirect(profile.get_absolute_url())
-
     return render(
         request=request,
         template_name="profiles/pages/make_leader.html",
@@ -767,7 +758,7 @@ def make_leader(request, profile_slug):  # pragma: no cover
 
         return redirect(profile.get_absolute_url())
 
-    profile.change_role_to_leader(request.user.profile)
+    action_approval = profile.change_role_to_leader(request.user.profile)
 
     if request.user.profile.needs_approval_to_change_group_members_role():
         # User needs approval
@@ -778,6 +769,8 @@ def make_leader(request, profile_slug):  # pragma: no cover
                 f"{profile.get_full_name()} to a leader role"
             ),
         )
+
+        action_approval.notify_consumer(request)
     else:
         # Send the set password email
         account_emails.send_set_password_email(

@@ -6,81 +6,69 @@
 
 {% block profile_base_content %}
   <section class="space-y-6">
-    <a
-      type="button"
-      href="{% url "profiles:make_leader" profile_slug=profile.slug %}"
-      class="text-white bg-knsSecondary hover:bg-knsSecondary-600 focus:ring-4 focus:ring-knsSecondary-400 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none"
-    >
-      Make {{ profile.get_full_name }} a member
-    </a>
+    {% if profile.can_become_leader_role and is_member_of_user_group and not profile.pending_make_leader_approval_request %}
+      <a
+        type="button"
+        href="{% url "profiles:make_leader" profile_slug=profile.slug %}"
+        class="text-white bg-knsSecondary hover:bg-knsSecondary-600 focus:ring-4 focus:ring-knsSecondary-400 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none"
+      >
+        Make {{ profile.get_full_name }} a leader
+      </a>
+    {% endif %}
+
+    {% if profile.pending_make_leader_approval_request and is_member_of_user_group %}
+      <div class="p-2 border-l-4 border-gray-700 bg-gray-200 text-sm font-semibold">
+        You have submitted a request to make {{ profile.get_full_name }} a leader role.
+      </div>
+    {% endif %}
 
     <div>
-      <h1 class="text-lg font-bold underline text-gray-800">Changing a User's Role to Leader</h1>
+      <h1 class="text-lg font-bold underline text-gray-800">How to make a member a leader role.</h1>
       <p>
-        This guide explains the process for promoting a user to the leader role within a group. The promotion process
-        involves verifying permissions, checking eligibility, and optionally requiring approval before the role change
-        is finalized. If approval is required, a request is submitted for further action.
+        This guide explains how to change the role of your group member into a leader. If approval is required, a request will be sent for further action.
       </p>
     </div>
 
     <div class="space-y-4">
       <div>
-        <h3 class="text-md font-semibold">Step 1: Verifying Permissions</h3>
+        <h3 class="text-md font-semibold">Checking Eligibility</h3>
         <p>
-          The first step in promoting a user to a leader role is to verify that the current user (the one initiating the
-          promotion) has the necessary permissions. This is done by ensuring the user is a leader of the group to which
-          the target user belongs.
-        </p>
-      </div>
-      <div class="p-4 bg-gray-100 border-l-4 border-blue-500 mb-6">
-        <p class="text-gray-700">
-          <strong>Note:</strong> If the requesting user is not the leader of the target user's group, the action will
-          be blocked and an error message will be displayed.
-        </p>
-      </div>
-    </div>
-
-    <div class="space-y-4">
-      <div>
-        <h3 class="text-md font-semibold">Step 2: Checking Eligibility</h3>
-        <p>
-          After verifying permissions, the next step is to check if the target user is eligible to become a leader. This
-          includes ensuring that the user meets any specific criteria defined within the application (e.g., the user may
-          need to have certain roles or experience).
+          Make sure the person you're promoting meets the requirements to become a leader.
+          The person should have a fully completed profile, which includes filling out their first name, last name, gender, date of birth, country, city, and role.
+          Their email must be verified, and they must have agreed to the terms. Additionally, they cannot already hold the leader role and if they are underage must have an approved consent form.
         </p>
       </div>
       <div class="bg-gray-100 border-l-4 border-green-500 p-4">
         <p class="text-gray-700">
-          <strong>Eligibility Check:</strong> If the user is not eligible, the promotion process will be halted, and
-          an error message will be shown.
+          <strong>Eligibility Check:</strong> If the user does not meet the above requirements, the promotion process will be halted, and an error message will be shown.
         </p>
       </div>
     </div>
 
     <div class="space-y-4">
       <div>
-        <h3 class="text-md font-semibold">Step 3: Role Change or Approval Request</h3>
+        <h3 class="text-md font-semibold">Role Change or Approval Request</h3>
         <p class="mb-4">
-          If the target user is eligible, the system checks whether approval is required to change their role to leader.
-          If approval is not required, the role change is applied immediately, and the user is notified via email.
+          If the user meets the requirements, the system will check if approval is needed to make them a leader.
+          If no approval is needed, their role will be updated right away, and they'll receive an email notification.
         </p>
       </div>
 
       <div class="bg-gray-100 border-l-4 border-yellow-500 p-4">
         <p class="text-gray-700">
           <strong>Approval Required:</strong> If approval is required, an approval request is created and submitted
-          for further review. The user will be promoted to leader only after the approval is granted.
+          for further review. The user will be promoted to leader only after the approval is granted by your group leader.
         </p>
       </div>
     </div>
 
     <div class="space-y-4">
       <div>
-        <h3 class="text-md font-semibold">Step 4: Sending Notification</h3>
+        <h3 class="text-md font-semibold">Informing the new leader</h3>
         <p>
-          Once the user's role is successfully changed to leader (either directly or after approval), a notification is
-          sent to the user. This notification typically includes instructions for setting a password and accessing their
-          new leader privileges.
+          Once the user's role is successfully changed to leader (either directly or after approval), a notification email is
+          sent to the user. This notification typically includes instructions for setting a password, accessing their
+          KNS Account, and creating and managing their new group.
         </p>
       </div>
 

@@ -45,19 +45,12 @@
 
   <div class="px-4 mt-4 space-y-4">
     {% if profile.contact_details_is_visible %}
-      <div>
-        <div class="text-xs text-gray-500 uppercase font-semibold">Email</div>
-        <div>
-          {{ profile.email }}
-        </div>
-      </div>
-
-      <div>
+      {% comment %} <div>
         <div class="text-xs text-gray-500 uppercase font-semibold">Phone</div>
         <div>
-          (+{{ profile.phone_prefix }}) {{ profile.phone }}
+          {{ profile.phone_display }}
         </div>
-      </div>
+      </div> {% endcomment %}
 
       <div>
         <div class="text-xs text-gray-500 uppercase font-semibold">Location</div>

@@ -343,6 +343,35 @@ def get_current_consent_form(profile):
     )
 
 
+def pending_make_leader_approval_request(profile):
+    """
+    Check if there is a pending approval request to make the profile a leader.
+
+    This function queries the `MakeLeaderActionApproval` model to determine
+    if there are any approval requests where the given profile is designated
+    as the new leader and the request is still pending.
+
+    Parameters
+    ----------
+    profile : Profile
+        The profile object for which the function checks for pending leader approval requests.
+
+    Returns
+    -------
+    bool
+        Returns `True` if there is a pending approval request for the profile,
+        otherwise returns `False`.
+    """
+    from kns.core.models import MakeLeaderActionApproval
+
+    pending_approval_request = MakeLeaderActionApproval.objects.filter(
+        new_leader=profile,
+        status="pending",
+    )
+
+    return pending_approval_request.exists()
+
+
 def can_become_leader_role(profile):
     """
     Determine if the profile can become a leader.

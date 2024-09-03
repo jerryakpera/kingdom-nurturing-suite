@@ -21,8 +21,7 @@ from kns.profiles.models import (
 
 
 class TestProfileModel(TestCase):
-    @pytest.fixture(autouse=True)
-    def setup(self):
+    def setUp(self):
         """
         Setup method to create a Profile instance linked to the test user.
         """
@@ -471,6 +470,30 @@ class TestProfileModel(TestCase):
         self.assertEqual(
             self.profile.get_real_name(),
             "John Doe",
+        )
+
+    def test_phone_display_no_phone(self):
+        """
+        Test that the phone_display method returns the phone number of the
+        profile.
+        """
+        self.assertEqual(
+            self.profile.phone_display(),
+            "---",
+        )
+
+    def test_phone_display(self):
+        """
+        Test that the phone_display method returns the phone number of the
+        profile.
+        """
+
+        self.profile.phone_prefix = "234"
+        self.profile.phone = "8122151744"
+
+        self.assertEqual(
+            self.profile.phone_display(),
+            "(+234) 8122151744",
         )
 
 

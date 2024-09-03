@@ -12,6 +12,7 @@ from kns.groups.models import Group
 from kns.profiles.models import Profile
 
 from . import constants
+from . import emails as core_emails
 from .modelmixins import TimestampedModel
 
 
@@ -319,7 +320,14 @@ class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
         related_name="approved_actions",
     )
 
-    # 1. Implement timeouts for approvals
+    read_by = models.ForeignKey(
+        Profile,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="approved_actions_read",
+    )
+
     timeout_duration = models.DurationField(
         default=timedelta(days=7),
     )
@@ -375,61 +383,25 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
         related_name="make_leader_action_approvals",
     )
 
-    def notify_leader(self):
+    def notify_consumer(self, request):
         """
         Notify the new leader of the approval request.
 
-        This method sends a notification to the individual who is being
-        considered for a leader role, informing them of the pending
-        approval request.
-        """
-        # Implement notification logic specific to making someone a leader
-        pass
-
-    def notify_approval(self):
-        """
-        Notify relevant parties of the approval status change, including the new leader.
-
-        This method extends the base `notify_approval` to include additional
-        logic specific to leader appointments. It ensures that all relevant
-        parties, including the newly appointed leader, are notified of the
-        change in approval status.
-        """
-        super().notify_approval()
-        # Add any additional notification logic for leader appointments
-
-    def save(self, *args, **kwargs):
-        """
-        Override the save method to prevent duplicate pending approvals
-        and notify the leader upon creation.
-
-        This method checks if there is already a pending approval request
-        for the same leader. If so, it avoids creating a new approval
-        request. If the instance is new, it triggers the notification to the
-        new leader.
+        This method sends a notification to the individual group leader
+        about the approval request for a role change initiated by a specific user.
 
         Parameters
         ----------
-        *args
-            Variable length argument list.
-        **kwargs
-            Arbitrary keyword arguments.
+        request : HttpRequest
+            The HTTP request object, used to retrieve the current site
+            domain and other request-specific data.
         """
-        if not self.pk:  # Only check for duplicates if this is a new instance
-            if MakeLeaderActionApproval.objects.filter(
-                new_leader=self.new_leader,
-                status="pending",
-            ).exists():
-                raise ValidationError(
-                    "There is already a pending make leader approval request for this profile."
-                )
-
-        super().save(*args, **kwargs)
-
-        if self.pk is None:
-            self.notify_leader()
-        else:
-            self.check_timeout()
+        core_emails.send_make_leader_action_approval_consumer_email(
+            request,
+            self.new_leader,
+            self.created_by,
+            self.group_created_for.leader,
+        )
 
     def __str__(self):
         """
