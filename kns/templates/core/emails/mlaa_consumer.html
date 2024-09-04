@@ -71,8 +71,8 @@
         <p>To learn more about {{ member.get_full_name }}, log into your KNS Account.</p>
 
         <p style="text-align: center;">
-          <a href="{{ protocol }}://{{ domain }}/approve/{{ uid }}/{{ token }}/" class="btn">Approve</a>
-          <a href="{{ protocol }}://{{ domain }}/reject/{{ uid }}/{{ token }}/" class="btn" style="background-color: #e53935;">Reject</a>
+          <a href="{{ protocol }}://{{ domain }}/make-leader-action-approval/{{ action_approval.id }}/{{ uid }}/{{ token }}/approve/" class="btn">Approve</a>
+          <a href="{{ protocol }}://{{ domain }}/make-leader-action-approval/{{ action_approval.id }}/{{ uid }}/{{ token }}/reject/" class="btn" style="background-color: #e53935;">Reject</a>
         </p>
 
         <p>Please note that this request will automatically timeout and be marked as denied if you do not respond within 7 days.

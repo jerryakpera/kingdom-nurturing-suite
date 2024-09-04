@@ -2,9 +2,15 @@
 Views for the core application.
 """
 
+from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 
+from kns.accounts import emails as account_emails
+from kns.accounts.utils import decode_uid, verify_token
+from kns.core.models import MakeLeaderActionApproval
+from kns.core.utils import log_this
+from kns.custom_user.models import User
 from kns.groups.models import Group
 from kns.profiles.models import Profile
 
@@ -165,3 +171,102 @@ def error_404(
         context,
         status=404,
     )
+
+
+def approve_make_leader_action(
+    request,
+    action_approval_id,
+    uidb64,
+    token,
+):
+    """
+    View to approve a request to make a member a leader.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    action_approval_id : int
+        Unique id of the MakeLeaderActionApproval item.
+    uidb64 : str
+        The base64-encoded UID of the user whose role is being approved.
+    token : str
+        The token used to validate the approval request.
+
+    Returns
+    -------
+    HttpResponse
+        A response indicating the result of the approval process.
+    """
+    uid = decode_uid(uidb64)
+    user = get_object_or_404(User, pk=uid)
+
+    if user and verify_token(user, token):
+        approval_request = get_object_or_404(
+            MakeLeaderActionApproval,
+            id=action_approval_id,
+        )
+
+        if approval_request.status != "pending":
+            messages.warning(
+                request=request,
+                message="This request is no longer valid and cannot be accepted.",
+            )
+
+            return redirect(approval_request.new_leader)
+
+        # Ensure that the consumer is the leader of the created_group_for
+        if approval_request.group_created_for != user.profile.group_led:
+            messages.warning(
+                request=request,
+                message="You cannot complete this action.",
+            )
+
+            return redirect(approval_request.new_leader)
+
+        approval_request.approve(user.profile)
+
+        # Send the set password email
+        account_emails.send_set_password_email(
+            request=request,
+            profile=approval_request.new_leader,
+        )
+
+        messages.success(
+            request=request,
+            message=f"{approval_request.new_leader.get_full_name()} is now a leader.",
+        )
+    else:
+        messages.warning(
+            request=request,
+            message="You cannot complete this action",
+        )
+
+    return redirect(user.profile)
+
+
+def reject_make_leader_action(request, uidb64, token):  # pragma: no cover
+    """
+    View to reject a request to make a member a leader.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    uidb64 : str
+        The base64-encoded UID of the user whose role is being rejected.
+    token : str
+        The token used to validate the approval request.
+
+    Returns
+    -------
+    HttpResponse
+        A response indicating the result of the approval process.
+    """
+    uid = decode_uid(uidb64)
+    user = get_object_or_404(User, pk=uid)
+
+    if user and verify_token(user, token):
+        log_this("Reject make leader request")
+
+    return redirect(user.profile)

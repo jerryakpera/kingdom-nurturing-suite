@@ -11,7 +11,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from kns.core.utils import log_this
 from kns.custom_user.models import User
 
 from .decorators import guest_required

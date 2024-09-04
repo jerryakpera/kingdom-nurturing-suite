@@ -17,6 +17,7 @@ from kns.accounts.utils import generate_verification_token
 
 def send_make_leader_action_approval_consumer_email(
     request,
+    action_approval,
     member,
     requester,
     consumer,
@@ -29,6 +30,8 @@ def send_make_leader_action_approval_consumer_email(
     ----------
     request : HttpRequest
         The HTTP request object, used to retrieve the current site domain.
+    action_approval : MakeLeaderActionApproval
+        The MakeLeaderActionApproval item in question.
     member : Profile
         The profile object of the member to be approved for a leader role.
     requester : Profile
@@ -60,6 +63,7 @@ def send_make_leader_action_approval_consumer_email(
         "core/emails/mlaa_consumer.html",
         {
             "member": member,
+            "action_approval": action_approval,
             "requester": requester,
             "consumer": consumer,
             "domain": current_site.domain,

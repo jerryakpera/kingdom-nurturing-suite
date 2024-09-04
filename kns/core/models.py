@@ -332,31 +332,10 @@ class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
         default=timedelta(days=7),
     )
 
-    def approve(self, leader):
-        """
-        Approve the action request.
-
-        Parameters
-        ----------
-        leader : Profile
-            The leader that will approve the action.
-        """
-        # Ensure that actions cannot be approved multiple times
-        # Set the approved_by field to the profile that approved the
-        # request
-
-    def reject(self, leader):
-        """
-        Reject the action request.
-
-        Parameters
-        ----------
-        leader : Profile
-            The leader that will reject the action.
-        """
-        # Ensure that actions cannot be approved or rejected multiple
-        # times.
-        # Notify the initiator about the rejection
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
 
     def check_timeout(self):  # pragma: no cover
         """
@@ -398,10 +377,31 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
         """
         core_emails.send_make_leader_action_approval_consumer_email(
             request,
+            self,
             self.new_leader,
             self.created_by,
             self.group_created_for.leader,
         )
+
+    def approve(self, consumer):
+        """
+        Approve the action request.
+
+        This method sets the status to 'approved', records the approver,
+        and sets the approved_at timestamp to the current time.
+
+        Parameters
+        ----------
+        consumer : Profile
+            The leader or admin that is approving the action.
+        """
+        if self.status == "pending":
+            self.approved_by = consumer
+            self.status = "approved"
+            self.approved_at = timezone.now()
+            self.new_leader.role = "leader"
+            self.new_leader.save()
+            self.save()
 
     def __str__(self):
         """
