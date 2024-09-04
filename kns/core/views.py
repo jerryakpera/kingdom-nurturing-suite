@@ -225,6 +225,7 @@ def approve_make_leader_action(
             return redirect(approval_request.new_leader)
 
         approval_request.approve(user.profile)
+        approval_request.notify_creator(request)
 
         # Send the set password email
         account_emails.send_set_password_email(
@@ -245,7 +246,9 @@ def approve_make_leader_action(
     return redirect(user.profile)
 
 
-def reject_make_leader_action(request, uidb64, token):  # pragma: no cover
+def reject_make_leader_action(
+    request, action_approval_id, uidb64, token
+):  # pragma: no cover
     """
     View to reject a request to make a member a leader.
 
@@ -253,6 +256,8 @@ def reject_make_leader_action(request, uidb64, token):  # pragma: no cover
     ----------
     request : HttpRequest
         The HTTP request object.
+    action_approval_id : int
+        Unique id of the MakeLeaderActionApproval item.
     uidb64 : str
         The base64-encoded UID of the user whose role is being rejected.
     token : str
@@ -261,12 +266,49 @@ def reject_make_leader_action(request, uidb64, token):  # pragma: no cover
     Returns
     -------
     HttpResponse
-        A response indicating the result of the approval process.
+        A response indicating the result of the rejection process.
     """
     uid = decode_uid(uidb64)
     user = get_object_or_404(User, pk=uid)
 
     if user and verify_token(user, token):
-        log_this("Reject make leader request")
+        approval_request = get_object_or_404(
+            MakeLeaderActionApproval,
+            id=action_approval_id,
+        )
 
-    return redirect(user.profile)
+        if approval_request.status != "pending":
+            messages.warning(
+                request=request,
+                message="This request is no longer valid and cannot be rejected.",
+            )
+
+            return redirect(approval_request.new_leader)
+
+        # Ensure that the consumer is the leader of the created_group_for
+        if approval_request.group_created_for != user.profile.group_led:
+            messages.warning(
+                request=request,
+                message="You cannot complete this action.",
+            )
+
+            return redirect(approval_request.new_leader)
+
+        approval_request.reject(user.profile)
+        approval_request.notify_creator(request)
+
+        messages.success(
+            request=request,
+            message=(
+                "You have rejected the request to make "
+                f"{approval_request.new_leader.get_full_name()} "
+                "a leader role."
+            ),
+        )
+    else:
+        messages.warning(
+            request=request,
+            message="You cannot complete this action",
+        )
+
+    return redirect(approval_request.new_leader)

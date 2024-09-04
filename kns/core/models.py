@@ -383,6 +383,27 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
             self.group_created_for.leader,
         )
 
+    def notify_creator(self, request):
+        """
+        Notify the creator of the approval request about status change.
+
+        This method sends a notification to the creator of the request
+        notifying them about a status change of the request.
+
+        Parameters
+        ----------
+        request : HttpRequest
+            The HTTP request object, used to retrieve the current site
+            domain and other request-specific data.
+        """
+        core_emails.send_make_leader_action_approval_status_change_email(
+            request,
+            self,
+            self.new_leader,
+            self.created_by,
+            self.group_created_for.leader,
+        )
+
     def approve(self, consumer):
         """
         Approve the action request.
@@ -401,6 +422,24 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
             self.approved_at = timezone.now()
             self.new_leader.role = "leader"
             self.new_leader.save()
+            self.save()
+
+    def reject(self, consumer):
+        """
+        Reject the action request.
+
+        This method sets the status to 'rejected', records the rejecter,
+        and sets the approved_at timestamp to None.
+
+        Parameters
+        ----------
+        consumer : Profile
+            The leader or admin that is rejecting the action.
+        """
+        if self.status == "pending":
+            self.approved_by = None
+            self.status = "rejected"
+            self.approved_at = None
             self.save()
 
     def __str__(self):

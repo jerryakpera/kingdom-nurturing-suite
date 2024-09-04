@@ -85,3 +85,62 @@ def send_make_leader_action_approval_consumer_email(
     # Save the token to the consumer's profile (if you are storing it)
     consumer.email_token = token
     consumer.save()
+
+
+def send_make_leader_action_approval_status_change_email(
+    request,
+    action_approval,
+    member,
+    requester,
+    consumer,
+):  # pragma: no cover
+    """
+    Send an email to creator of the make leader action approval
+    to notify them that the status of the request has been updated.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object, used to retrieve the current site domain.
+    action_approval : MakeLeaderActionApproval
+        The MakeLeaderActionApproval item in question.
+    member : Profile
+        The profile object of the member to be approved for a leader role.
+    requester : Profile
+        The profile object of the user requesting the approval.
+    consumer : Profile
+        The profile object of the consumer who will receive the approval
+        request email.
+    """
+    subject = (
+        f"Request to make {member.get_full_name()} a leader role"
+        f" has been {action_approval.status}"
+    )
+
+    # Get the current domain
+    current_site = get_current_site(request)
+
+    # Get the protocol depending on the environment
+    protocol = "https" if not settings.DEBUG else "http"
+
+    # Render the HTML email template
+    html_message = render_to_string(
+        "core/emails/mlaasc.html",
+        {
+            "member": member,
+            "action_approval": action_approval,
+            "requester": requester,
+            "consumer": consumer,
+            "domain": current_site.domain,
+            "protocol": protocol,
+        },
+    )
+
+    # Send the email
+    send_mail(
+        subject=subject,
+        message="",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[consumer.email],
+        html_message=html_message,
+    )

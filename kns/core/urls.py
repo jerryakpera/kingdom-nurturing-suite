@@ -12,7 +12,7 @@ urlpatterns = [
         name="approve_make_leader_action",
     ),
     path(
-        "make-leader-action-approval/<int:action_approval_id>/<uidb64>/<token>/approve/",
+        "make-leader-action-approval/<int:action_approval_id>/<uidb64>/<token>/reject/",
         views.reject_make_leader_action,
         name="reject_make_leader_action",
     ),

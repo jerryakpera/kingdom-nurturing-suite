@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Action Approval Request</title>
+    <title>Make Leader Action Approval Response</title>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -59,28 +59,30 @@
   <body>
     <div class="container">
       <div class="header">
-        <h1>Request to change role of group member</h1>
+        <h1>Request to change role of group member {{ action_approval.status }}</h1>
       </div>
       <div class="content">
-        <p>Hi {{ consumer.first_name }},</p>
-        <p>
-          {{ requester.get_full_name }} has made a request to promote {{ member.get_full_name }} to a leader role. Your approval is required
-          to proceed with this action.
-        </p>
+        <p>Hi {{ requester.first_name }},</p>
+        {% if action_approval.status == 'rejected' %}
+          <p>
+            Unfortunately, {{ consumer.get_full_name }} has denied your request to promote {{ member.get_full_name }} to a leader role. You may reach out to {{ consumer.get_full_name }} for more information.
+          </p>
 
-        <p>To learn more about {{ member.get_full_name }}, log into your KNS Account.</p>
+          <p>
+            After addressing their concerns, you can initiate a new request to promote {{ member.get_full_name }} to a leader role.
+          </p>
+        {% endif %}
 
-        <p style="text-align: center;">
-          <a href="http://{{ domain }}/approve/{{ uid }}/{{ token }}/" class="btn">Approve</a>
-          <a href="http://{{ domain }}/reject/{{ uid }}/{{ token }}/" class="btn" style="background-color: #e53935;">Reject</a>
-        </p>
+        {% if action_approval.status == 'accepted' %}
+          <p>
+            {{ consumer.get_full_name }} has approved your request to promote {{ member.get_full_name }} to a leader role.
+          </p>
 
-        <p>Please note that this request will automatically timeout and be marked as denied if you do not respond within 7 days.
+          <p>
+            {{ member.get_full_name }} will receive an email with instructions on setting their KNS password.
+          </p>
+        {% endif %}
 
-          <br />
-          <br />
-          Thank you for your prompt attention to this matter.</p>
-      </div>
       <div class="footer">
         <p>&copy; {{ current_year }} Kingdom Nurturing Suite. All rights reserved.</p>
       </div>

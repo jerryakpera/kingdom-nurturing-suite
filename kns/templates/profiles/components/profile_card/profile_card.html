@@ -26,9 +26,18 @@
       {% endif %}
     </div>
 
-    <div class="mb-0.5 flex items-center gap-2">
+    <div class="mb-0.5">
+      {% if profile.pending_make_leader_approval_request and is_member_of_user_group %}
+        <div class="p-2 bg-gray-200 text-sm font-semibold">
+          You have submitted a request to make {{ profile.get_full_name }} a leader role.
+        </div>
+      {% endif %}
       {% if not profile.image %}
-        <img class="lg:h-48 md:h-36 w-full object-cover object-center" src="https://dummyimage.com/720x400" alt="blog">
+        <img
+          alt="blog"
+          src="https://dummyimage.com/720x400"
+          class="lg:h-48 md:h-36 w-full object-cover object-center"
+        >
       {% else %}
         <img
           src="{{ profile.image.url }}"
