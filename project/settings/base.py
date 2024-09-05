@@ -39,6 +39,7 @@ LOCAL_APPS = [
     "kns.groups",
     "kns.skills",
     "kns.faith_milestones",
+    "kns.vocations",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

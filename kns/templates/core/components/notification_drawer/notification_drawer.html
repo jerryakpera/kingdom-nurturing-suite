@@ -52,7 +52,12 @@
         </div>
 
         <div class="flex items-center justify-end space-x-2">
-          <button type="button" class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300">Reject</button>
+          <a
+            href="{% url "core:reject_make_leader_action_notification" action_approval_id=approval_request.id %}"
+            class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300"
+          >
+            Reject
+          </a>
           <a
             href="{% url "core:approve_make_leader_action_notification" action_approval_id=approval_request.id %}"
             class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"

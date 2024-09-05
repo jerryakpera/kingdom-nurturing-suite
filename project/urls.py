@@ -12,6 +12,7 @@ urlpatterns = [
     path("profiles/", include("kns.profiles.urls")),
     path("groups/", include("kns.groups.urls")),
     path("skills/", include("kns.skills.urls")),
+    path("vocations/", include("kns.vocations.urls")),
     # Password reset urls
     path(
         "reset_password/",
