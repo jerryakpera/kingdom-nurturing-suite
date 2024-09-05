@@ -1,6 +1,5 @@
 """
-This module provides a utility function to populate the database with
-skill data.
+Utility functions for the `skills` app.
 """
 
 from kns.profiles.models import Profile

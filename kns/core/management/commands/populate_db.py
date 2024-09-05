@@ -11,6 +11,8 @@ from kns.profiles.db_data import encryption_reasons
 from kns.profiles.utils import populate_encryption_reasons
 from kns.skills.skills_data import skills as skills_data
 from kns.skills.utils import populate_skills
+from kns.vocations.utils import populate_vocations
+from kns.vocations.vocations_data import vocations as vocations_data
 
 
 class Command(BaseCommand):
@@ -38,6 +40,9 @@ class Command(BaseCommand):
         )
         populate_encryption_reasons(
             encryption_reasons_data=encryption_reasons,
+        )
+        populate_vocations(
+            vocations_data=vocations_data,
         )
 
         print("Database successfully populated.")
