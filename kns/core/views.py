@@ -368,3 +368,60 @@ def reject_make_leader_action(
         )
 
     return redirect(approval_request.new_leader)
+
+
+def reject_make_leader_action_notification(
+    request,
+    action_approval_id,
+):  # pragma: no cover
+    """
+    View to reject a request to make a member a leader via notification.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    action_approval_id : int
+        Unique id of the MakeLeaderActionApproval item.
+
+    Returns
+    -------
+    HttpResponse
+        A response indicating the result of the rejection process.
+    """
+
+    approval_request = get_object_or_404(
+        MakeLeaderActionApproval,
+        id=action_approval_id,
+    )
+
+    if approval_request.status != "pending":
+        messages.warning(
+            request=request,
+            message="This request is no longer valid and cannot be rejected.",
+        )
+
+        return redirect(approval_request.new_leader)
+
+    # Ensure that the consumer is the leader of the created_group_for
+    if approval_request.group_created_for != request.user.profile.group_led:
+        messages.warning(
+            request=request,
+            message="You cannot complete this action.",
+        )
+
+        return redirect(approval_request.new_leader)
+
+    approval_request.reject(request.user.profile)
+    approval_request.notify_creator(request)
+
+    messages.success(
+        request=request,
+        message=(
+            "You have rejected the request to make "
+            f"{approval_request.new_leader.get_full_name()} "
+            "a leader role."
+        ),
+    )
+
+    return redirect(approval_request.new_leader)
