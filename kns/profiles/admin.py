@@ -6,6 +6,7 @@ from django.contrib import admin
 
 from kns.faith_milestones.models import ProfileFaithMilestone
 from kns.skills.models import ProfileInterest, ProfileSkill
+from kns.vocations.models import ProfileVocation
 
 from .models import (
     ConsentForm,
@@ -20,12 +21,25 @@ class ProfileEncryptionInline(admin.TabularInline):
     """
     Inline admin interface for the ProfileEncryption model.
 
-    This allows the skills associated with a profile to be managed
+    This allows the encryption associated with a profile to be managed
     directly within the Profile admin interface.
     """
 
     extra = 0
     model = ProfileEncryption
+    fk_name = "profile"
+
+
+class ProfileVocationInline(admin.TabularInline):
+    """
+    Inline admin interface for the ProfileVocation model.
+
+    This allows the vocations associated with a profile to be managed
+    directly within the Profile admin interface.
+    """
+
+    extra = 0
+    model = ProfileVocation
     fk_name = "profile"
 
 
@@ -69,7 +83,7 @@ class ProfileFaithMilestoneInline(admin.TabularInline):
     """
     Inline admin interface for the ProfileFaithMilestone model.
 
-    This allows the interests associated with a profile to be managed
+    This allows the faith milestones associated with a profile to be managed
     directly within the Profile admin interface.
     """
 
@@ -111,6 +125,7 @@ class ProfileAdmin(admin.ModelAdmin):
         ProfileEncryptionInline,
         ProfileFaithMilestoneInline,
         ProfileDisciplesInline,
+        ProfileVocationInline,
     ]
 
 
