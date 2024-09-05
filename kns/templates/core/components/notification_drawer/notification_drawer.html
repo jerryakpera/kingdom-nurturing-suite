@@ -1,0 +1,68 @@
+{% load static %}
+
+<!-- drawer init and toggle -->
+<button
+  type="button"
+  id="requests-drawer-btn"
+  class="text-sm bg-blue-500 w-8 h-8 flex items-center justify-center rounded-full md:me-0 focus:ring-4 focus:ring-blue-300 text-white me-4"
+>
+<iconify-icon icon="material-symbols:pending-actions-rounded" class="text-xl"></iconify-icon>
+  <span class="sr-only">Icon description</span>
+</button>
+
+<!-- drawer component -->
+<div id="requests-drawer" class="fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-white w-96" tabindex="-1" aria-labelledby="drawer-right-label">
+  <div class="flex justify-between items-center w-full border-b border-gray-300 pb-2">
+    <h5 id="drawer-right-label" class="text-black text-left font-semibold">
+      Approval Requests
+    </h5>
+
+    <button
+      type="button"
+      id="close-requests-drawer-button"
+      data-drawer-hide="requests-drawer"
+      aria-controls="requests-drawer" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center"
+    >
+      <iconify-icon icon="ic:round-close" class="text-lg"></iconify-icon>
+      <span class="sr-only">Close menu</span>
+    </button>
+  </div>
+
+  {% if request.user.profile.pending_approval_requests.count == 0 %}
+    <div class="p-2 text-sm font-medium bg-gray-200 text-gray-800">No pending requests</div>
+  {% else %}
+    <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
+      View a list of approval requests that you are yet to respond to
+    </p>
+  {% endif %}
+
+
+    {% for approval_request in request.user.profile.pending_approval_requests %}
+      <div class="border-b drop-shadow-md border-gray-200 p-2">
+        <div class="font-semibold text-sm">
+          {{ approval_request.action_type_display }}
+        </div>
+
+        <p class="text-sm text-gray-800">
+          {{ approval_request.notification_display }}
+        </p>
+
+        <div class="text-xs text-gray-600 mt-2">
+          {{ approval_request.created_at|date:"F j, Y" }}
+        </div>
+
+        <div class="flex items-center justify-end space-x-2">
+          <button type="button" class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300">Reject</button>
+          <a
+            href="{% url "core:approve_make_leader_action_notification" action_approval_id=approval_request.id %}"
+            class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+          >
+            Approve
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+   </div>
+</div>
+
+<script src="{% static "core/js/requests_drawer.js" %}"></script>

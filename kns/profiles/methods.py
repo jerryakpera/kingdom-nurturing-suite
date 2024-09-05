@@ -425,3 +425,30 @@ def can_become_member_role(profile):
         return False
 
     return True
+
+
+def pending_approval_requests(profile):
+    """
+    Retrieve all pending leader promotion requests for a specific group leader.
+
+    This function filters the `MakeLeaderActionApproval` objects to find
+    all requests with a 'pending' status that are associated with the
+    group led by the given profile.
+
+    Parameters
+    ----------
+    profile : Profile
+        The profile of the user who is the leader of a group.
+
+    Returns
+    -------
+    QuerySet
+        A QuerySet containing all pending `MakeLeaderActionApproval`
+        requests for the group led by the given profile.
+    """
+    from kns.core.models import MakeLeaderActionApproval
+
+    return MakeLeaderActionApproval.objects.filter(
+        status="pending",
+        group_created_for=profile.group_led,
+    )

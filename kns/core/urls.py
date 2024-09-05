@@ -5,7 +5,11 @@ from . import views
 app_name = "core"
 
 urlpatterns = [
-    # http://localhost:8000/make-leader-action-approval/14/Mg/ccs9uj-faad510cb4121e6ccc12f039acc96d7f/approve/
+    path(
+        "make-leader-action-approval/<int:action_approval_id>",
+        views.approve_make_leader_action_notification,
+        name="approve_make_leader_action_notification",
+    ),
     path(
         "make-leader-action-approval/<int:action_approval_id>/<uidb64>/<token>/approve/",
         views.approve_make_leader_action,

@@ -140,10 +140,6 @@ def contact_view(request):
     )
 
 
-# def error_500(request, *args, **argv):
-#     return render(request, "500.html", status=500)
-
-
 def error_404(
     request: HttpRequest,
     exception: Exception,
@@ -237,6 +233,8 @@ def approve_make_leader_action(
             request=request,
             message=f"{approval_request.new_leader.get_full_name()} is now a leader.",
         )
+
+        return redirect(approval_request.new_leader)
     else:
         messages.warning(
             request=request,
@@ -244,6 +242,64 @@ def approve_make_leader_action(
         )
 
     return redirect(user.profile)
+
+
+def approve_make_leader_action_notification(
+    request,
+    action_approval_id,
+):
+    """
+    View to approve a request to make a member a leader via a notification.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    action_approval_id : int
+        Unique id of the MakeLeaderActionApproval item.
+
+    Returns
+    -------
+    HttpResponse
+        A response indicating the result of the approval process.
+    """
+    approval_request = get_object_or_404(
+        MakeLeaderActionApproval,
+        id=action_approval_id,
+    )
+
+    if approval_request.status != "pending":
+        messages.warning(
+            request=request,
+            message="This request is no longer valid and cannot be accepted.",
+        )
+
+        return redirect(approval_request.new_leader)
+
+    # Ensure that the consumer is the leader of the created_group_for
+    if approval_request.group_created_for != request.user.profile.group_led:
+        messages.warning(
+            request=request,
+            message="You cannot complete this action.",
+        )
+
+        return redirect(approval_request.new_leader)
+
+    approval_request.approve(request.user.profile)
+    approval_request.notify_creator(request)
+
+    # Send the set password email
+    account_emails.send_set_password_email(
+        request=request,
+        profile=approval_request.new_leader,
+    )
+
+    messages.success(
+        request=request,
+        message=f"{approval_request.new_leader.get_full_name()} is now a leader.",
+    )
+
+    return redirect(approval_request.new_leader)
 
 
 def reject_make_leader_action(

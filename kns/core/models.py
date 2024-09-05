@@ -350,6 +350,30 @@ class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
             self.save()
             self.notify_approval()
 
+    def action_type_display(self):
+        """
+        Return a human-readable display name for the action type.
+
+        This method translates the internal `action_type` field into a
+        more user-friendly format. For example, if the `action_type` is
+        "change_role_to_leader", it returns "Change role to leader".
+
+        Returns
+        -------
+        str
+            A user-friendly string representing the action type.
+
+        Raises
+        ------
+        KeyError
+            If the `action_type` is not found in the predefined `action_types` dictionary.
+        """
+        action_types = {
+            "change_role_to_leader": "Change role to leader",
+        }
+
+        return action_types[self.action_type]
+
 
 class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
     """
@@ -457,3 +481,23 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
             full name.
         """
         return f"{self.get_action_type_display()} ({self.new_leader.get_full_name()})"
+
+    def notification_display(self):
+        """
+        Generate a human-readable notification message for a leader promotion request.
+
+        This method creates a notification string that summarizes the action request.
+        It includes the full names of the person who created the request (`created_by`)
+        and the member being promoted (`new_leader`), specifying that the member is
+        being promoted to a leader role.
+
+        Returns
+        -------
+        str
+            A string representing the notification message for the leader promotion request.
+        """
+        return (
+            f"{self.created_by.get_full_name()} requests to promote "
+            f"{self.new_leader.get_full_name()} from a member to a "
+            "leader role."
+        )

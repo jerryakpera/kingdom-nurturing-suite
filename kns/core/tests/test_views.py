@@ -234,3 +234,136 @@ class TestMakeLeaderApprovalView(TestCase):
         self.assertTrue(
             "You cannot complete this action" in str(messages[0]),
         )
+
+
+class TestMakeLeaderApprovalNotificationView(TestCase):
+    def setUp(self):
+        # Set up the initial data
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password",
+        )
+        self.profile = self.user.profile
+
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Test Group",
+            slug="test-group",
+            description="A test group.",
+        )
+
+        self.approval_request = MakeLeaderActionApproval.objects.create(
+            new_leader=self.profile,
+            created_by=self.profile,
+            group_created_for=self.group,
+            action_type="change_role_to_leader",
+            status="pending",
+        )
+
+    def test_approve_make_leader_success(self):
+        """
+        Test that a valid approval request is successfully processed.
+        """
+
+        self.client.login(
+            email=self.user.email,
+            password="password",
+        )
+
+        response = self.client.get(
+            reverse(
+                "core:approve_make_leader_action_notification",
+                kwargs={
+                    "action_approval_id": self.approval_request.pk,
+                },
+            )
+        )
+
+        self.approval_request.refresh_from_db()
+
+        self.assertEqual(self.approval_request.status, "approved")
+        self.assertIsNotNone(self.approval_request.approved_at)
+
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertTrue(
+            any("is now a leader" in str(message) for message in messages),
+        )
+
+    def test_request_no_longer_valid(self):
+        """
+        Test that an already approved or expired request cannot be approved again.
+        """
+        self.client.login(
+            email=self.user.email,
+            password="password",
+        )
+
+        self.approval_request.status = "approved"
+        self.approval_request.save()
+
+        response = self.client.get(
+            reverse(
+                "core:approve_make_leader_action_notification",
+                kwargs={
+                    "action_approval_id": self.approval_request.pk,
+                },
+            )
+        )
+
+        self.approval_request.refresh_from_db()
+        self.assertEqual(self.approval_request.status, "approved")
+
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            "This request is no longer valid and cannot be accepted."
+            in str(messages[0]),
+        )
+
+    def test_user_not_group_leader(self):
+        """
+        Test that a user who is not the group leader cannot approve the request.
+        """
+
+        another_user = User.objects.create_user(
+            email="not_leader@example.com",
+            password="password",
+        )
+
+        another_profile = another_user.profile
+
+        self.group.add_member(another_profile)
+
+        self.client.login(
+            email=another_user.email,
+            password="password",
+        )
+
+        Group.objects.create(
+            leader=another_profile,
+            name="Test Group 2",
+            slug="test-group-2",
+            parent=self.group,
+            description="A test group 2 description.",
+        )
+
+        response = self.client.get(
+            reverse(
+                "core:approve_make_leader_action_notification",
+                kwargs={
+                    "action_approval_id": self.approval_request.pk,
+                },
+            )
+        )
+
+        self.approval_request.refresh_from_db()
+        self.assertEqual(self.approval_request.status, "pending")
+
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            "You cannot complete this action" in str(messages[0]),
+        )

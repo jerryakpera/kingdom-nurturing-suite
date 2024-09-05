@@ -1,12 +1,29 @@
 <nav class="bg-knsLight-300">
   <div class="container-default">
-    <div class="flex flex-wrap justify-between items-center mx-auto py-4">
-      <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-        <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-          <iconify-icon icon="iconamoon:home-fill" class="text-xl text-knsSecondary"></iconify-icon>
-        </span>
-      </a>
-      {% include "core/components/navbar/account_menu.html" %}
+    <div class="flex justify-between items-center py-4">
+
+      <!-- Home Icon -->
+      <div class="flex-shrink-0">
+        <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+          <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
+            <iconify-icon icon="iconamoon:home-fill" class="text-xl text-knsSecondary"></iconify-icon>
+          </span>
+        </a>
+      </div>
+
+      <!-- Spacer to push the menu items to the right -->
+      <div class="flex flex-grow"></div>
+
+      <!-- Notification Drawer and Account Menu -->
+      <div class="flex items-center">
+        <div class="px-2">
+          {% include "core/components/notification_drawer/notification_drawer.html" %}
+        </div>
+        <div>
+          {% include "core/components/navbar/account_menu.html" %}
+        </div>
+      </div>
+
     </div>
   </div>
 </nav>

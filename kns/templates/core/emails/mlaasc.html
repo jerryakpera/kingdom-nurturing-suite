@@ -59,7 +59,7 @@
   <body>
     <div class="container">
       <div class="header">
-        <h1>Request to change role of group member {{ action_approval.status }}</h1>
+        <h1>Request to change role of {{ action_approval.new_leader.get_full_name }} {{ action_approval.status }}</h1>
       </div>
       <div class="content">
         <p>Hi {{ requester.first_name }},</p>
@@ -73,7 +73,7 @@
           </p>
         {% endif %}
 
-        {% if action_approval.status == 'accepted' %}
+        {% if action_approval.status == 'approved' %}
           <p>
             {{ consumer.get_full_name }} has approved your request to promote {{ member.get_full_name }} to a leader role.
           </p>

@@ -13,6 +13,7 @@ from django.utils import timezone
 from django_countries.fields import CountryField
 
 from kns.core import modelmixins
+from kns.core.utils import log_this
 from kns.custom_user.models import User
 
 from . import constants
@@ -592,6 +593,21 @@ class Profile(
             phone_str = f"(+{self.phone_prefix}) {self.phone}"
 
         return phone_str
+
+    def pending_approval_requests(self):
+        """
+        Retrieve all pending leader promotion requests for the group led by this profile.
+
+        This method calls a utility function to return all `MakeLeaderActionApproval` objects
+        with a 'pending' status that are associated with the group this profile is leading.
+
+        Returns
+        -------
+        QuerySet
+            A QuerySet containing all pending `MakeLeaderActionApproval` requests for the group
+            led by this profile.
+        """
+        return model_methods.pending_approval_requests(self)
 
 
 @receiver(post_save, sender=User)
