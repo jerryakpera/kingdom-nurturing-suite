@@ -609,6 +609,29 @@ class Profile(
         """
         return model_methods.pending_approval_requests(self)
 
+    def get_vocations_as_string(self):
+        """
+        Return the profile's vocations as a comma-separated string.
+
+        This method fetches all vocations related to the profile and returns
+        them as a string separated by commas.
+
+        Returns
+        -------
+        str
+            The vocations related to the profile as a comma-separated string.
+            If no vocations are assigned, it returns 'No vocations'.
+        """
+        profile_vocations = self.vocations.all()
+
+        if profile_vocations.exists():
+            return ", ".join(
+                profile_vocation.vocation.title
+                for profile_vocation in profile_vocations
+            )
+
+        return "No vocations"
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

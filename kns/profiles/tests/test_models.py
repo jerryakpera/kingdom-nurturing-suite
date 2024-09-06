@@ -18,6 +18,7 @@ from kns.profiles.models import (
     Profile,
     ProfileEncryption,
 )
+from kns.vocations.models import ProfileVocation, Vocation
 
 
 class TestProfileModel(TestCase):
@@ -494,6 +495,52 @@ class TestProfileModel(TestCase):
         self.assertEqual(
             self.profile.phone_display(),
             "(+234) 8122151744",
+        )
+
+    def test_get_vocations_as_string(self):
+        """
+        Test that the get_vocations_as_string method returns the vocations
+        as a comma-separated string.
+        """
+
+        # Create some sample vocations
+        vocation1 = Vocation.objects.create(
+            title="Teacher",
+            description="Sample description for a vocation",
+            author=self.profile,
+        )
+        vocation2 = Vocation.objects.create(
+            title="Engineer",
+            description="Sample description for a vocation",
+            author=self.profile,
+        )
+
+        # Initially, the profile should have no vocations
+        self.assertEqual(self.profile.get_vocations_as_string(), "No vocations")
+
+        profile_vocation1 = ProfileVocation.objects.create(
+            profile=self.profile,
+            vocation=vocation1,
+        )
+
+        profile_vocation2 = ProfileVocation.objects.create(
+            profile=self.profile,
+            vocation=vocation2,
+        )
+
+        # Test that the vocations are returned as a comma-separated string
+        self.assertEqual(
+            self.profile.get_vocations_as_string(),
+            "Teacher, Engineer",
+        )
+
+        # Remove vocations and test that the method returns "No vocations"
+        profile_vocation1.delete()
+        profile_vocation2.delete()
+
+        self.assertEqual(
+            self.profile.get_vocations_as_string(),
+            "No vocations",
         )
 
 

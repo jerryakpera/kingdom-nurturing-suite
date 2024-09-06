@@ -7,8 +7,25 @@
 {% endblock title %}
 
 {% block profile_base_content %}
-  <section class="space-y-6 px-2 sm:px-0">
-    <h1 class="text-4xl font-bold">Vocations</h1>
+  <section class="space-y-8 px-2 sm:px-0">
+    <div>
+      <div class="flex justify-between items-center border-b border-gray-400 pb-2 mb-2">
+        <h3 class="text-lg font-bold uppercase">Vocations</h3>
+
+        {% if request.user|can_edit_profile:profile %}
+          <a
+            href="{% url "profiles:edit_involvement_details" profile_slug=profile.slug %}"
+            class="px-2 py-1.5 items-center text-xs sm:text-sm text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300"
+          >
+            Edit
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="font-medium">
+        {{ profile.get_vocations_as_string }}
+      </div>
+    </div>
 
     <div class="flex flex-col sm:flex-row gap-x-2">
       <div class="w-full space-y-3">
@@ -26,7 +43,7 @@
         </div>
 
         <div
-          class="p-2 rounded-md border space-y-2 {% if profile.is_movement_training_facilitator %}border-green-300 {% endif %} {% if not profile.is_movement_training_facilitator %}border-red-300{% endif %}">
+          class="p-2 rounded-md border {% if profile.is_movement_training_facilitator %}border-green-300 {% endif %} {% if not profile.is_movement_training_facilitator %}border-red-300{% endif %}">
           <div class="text-md font-semibold flex gap-x-2 items-center">
             {% if profile.is_movement_training_facilitator %}
               <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
@@ -48,7 +65,7 @@
         </div>
 
         <div
-          class="p-2 rounded-md border space-y-2 {% if profile.is_skill_training_facilitator %}border-green-300 {% endif %} {% if not profile.is_skill_training_facilitator %}border-red-300{% endif %}">
+          class="p-2 rounded-md border {% if profile.is_skill_training_facilitator %}border-green-300 {% endif %} {% if not profile.is_skill_training_facilitator %}border-red-300{% endif %}">
           <div class="text-md font-semibold flex gap-x-2 items-center">
             {% if profile.is_skill_training_facilitator %}
               <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
@@ -70,7 +87,7 @@
         </div>
 
         <div
-          class="p-2 rounded-md border space-y-2 {% if profile.is_mentor %}border-green-300 {% endif %} {% if not profile.is_mentor %}border-red-300{% endif %}">
+          class="p-2 rounded-md border {% if profile.is_mentor %}border-green-300 {% endif %} {% if not profile.is_mentor %}border-red-300{% endif %}">
           <div class="text-md font-semibold flex gap-x-2 items-center">
             {% if profile.is_mentor %}
               <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
