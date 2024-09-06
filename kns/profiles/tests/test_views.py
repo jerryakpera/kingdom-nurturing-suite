@@ -13,6 +13,7 @@ from kns.groups.models import Group
 from kns.groups.tests import test_constants
 from kns.profiles.models import Discipleship, EncryptionReason, ProfileEncryption
 from kns.skills.models import ProfileInterest, ProfileSkill, Skill
+from kns.vocations.models import ProfileVocation, Vocation
 
 
 class TestViews(TestCase):
@@ -1650,4 +1651,183 @@ class TestMoveDiscipleshipViews(TestCase):
         self.assertEqual(
             str(messages_list[0]),
             "You cannot complete this action",
+        )
+
+
+class TestEditProfileVocationsView(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Create a user and log them in
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        # Create a profile
+        self.profile = self.user.profile
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.slug = "test-user"
+        self.profile.save()
+
+        # Create vocations
+        self.vocation1 = Vocation.objects.create(
+            title="Teacher",
+            description="Teaches students.",
+            author=self.profile,
+        )
+        self.vocation2 = Vocation.objects.create(
+            title="Engineer",
+            description="Builds systems.",
+            author=self.profile,
+        )
+        self.vocation3 = Vocation.objects.create(
+            title="Doctor",
+            description="Provides medical care.",
+            author=self.profile,
+        )
+
+        # Add one vocation to the profile
+        self.profile_vocation = ProfileVocation.objects.create(
+            profile=self.profile,
+            vocation=self.vocation1,
+        )
+
+    def test_edit_profile_vocations_view_loads_correctly(self):
+        """
+        Test that the view loads correctly and displays the form with initial data.
+        """
+        url = reverse(
+            "profiles:edit_profile_vocations",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response is successful
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the form is in the context and that vocation1 is preselected
+        self.assertIn("profile_vocations_form", response.context)
+
+        form = response.context["profile_vocations_form"]
+
+        # Compare vocation IDs instead of objects
+        self.assertIn(self.vocation1.id, form.initial["vocations"])
+
+    def test_edit_profile_vocations_view_valid_post(self):
+        """
+        Test that submitting valid data updates the profile's vocations correctly.
+        """
+        url = reverse(
+            "profiles:edit_profile_vocations",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        form_data = {
+            "vocations": [self.vocation2.id, self.vocation3.id],
+        }
+
+        response = self.client.post(url, data=form_data)
+
+        # Check if the response redirects to the profile page
+        self.assertEqual(response.status_code, 302)
+
+        # Check if the profile vocations were updated
+        updated_vocations = ProfileVocation.objects.filter(
+            profile=self.profile,
+        )
+        self.assertEqual(updated_vocations.count(), 2)
+        self.assertTrue(
+            ProfileVocation.objects.filter(
+                profile=self.profile,
+                vocation=self.vocation2,
+            ).exists()
+        )
+        self.assertTrue(
+            ProfileVocation.objects.filter(
+                profile=self.profile,
+                vocation=self.vocation3,
+            ).exists()
+        )
+
+        # Check if a success message is shown
+        messages_list = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages_list), 1)
+        self.assertEqual(
+            str(messages_list[0]),
+            "Test User's profile updated.",
+        )
+
+    def test_edit_profile_vocations_view_invalid_post(self):
+        """
+        Test that submitting invalid data does not update the profile's vocations.
+        """
+        url = reverse(
+            "profiles:edit_profile_vocations",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        form_data = {
+            "vocations": [],  # Invalid: no vocations selected
+        }
+
+        response = self.client.post(url, data=form_data)
+
+        # Check that the form is invalid and rendered again
+        self.assertEqual(response.status_code, 200)
+
+        # Check that no vocations were updated (still only one vocation)
+        updated_vocations = ProfileVocation.objects.filter(
+            profile=self.profile,
+        )
+        self.assertEqual(updated_vocations.count(), 1)
+
+    def test_edit_profile_vocations_view_vocation_removal(self):
+        """
+        Test that previously selected vocations are removed if not submitted.
+        """
+        url = reverse(
+            "profiles:edit_profile_vocations",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        form_data = {
+            "vocations": [self.vocation2.id],
+        }
+
+        response = self.client.post(
+            url,
+            data=form_data,
+        )
+
+        # Check if the response redirects
+        self.assertEqual(response.status_code, 302)
+
+        # Check if only vocation2 remains
+        updated_vocations = ProfileVocation.objects.filter(
+            profile=self.profile,
+        )
+
+        self.assertEqual(updated_vocations.count(), 1)
+        self.assertTrue(
+            ProfileVocation.objects.filter(
+                profile=self.profile,
+                vocation=self.vocation2,
+            ).exists()
+        )
+        self.assertFalse(
+            ProfileVocation.objects.filter(
+                profile=self.profile,
+                vocation=self.vocation1,
+            ).exists()
         )

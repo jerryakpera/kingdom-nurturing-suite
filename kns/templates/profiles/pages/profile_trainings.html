@@ -14,7 +14,7 @@
 
         {% if request.user|can_edit_profile:profile %}
           <a
-            href="{% url "profiles:edit_involvement_details" profile_slug=profile.slug %}"
+            href="{% url "profiles:edit_profile_vocations" profile_slug=profile.slug %}"
             class="px-2 py-1.5 items-center text-xs sm:text-sm text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300"
           >
             Edit

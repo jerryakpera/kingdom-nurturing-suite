@@ -18,6 +18,8 @@ from kns.faith_milestones.forms import ProfileFaithMilestonesForm
 from kns.faith_milestones.models import ProfileFaithMilestone
 from kns.skills.forms import ProfileSkillsForm
 from kns.skills.models import ProfileInterest, ProfileSkill
+from kns.vocations.forms import ProfileVocationForm
+from kns.vocations.models import ProfileVocation
 
 from . import constants as profile_constants
 from . import forms as profile_forms
@@ -1091,6 +1093,77 @@ def edit_profile_skills(request, profile_slug):
         "profiles/pages/edit_profile_skills.html",
         {
             "profile_skills_form": profile_skills_form,
+        },
+    )
+
+
+@login_required
+def edit_profile_vocations(request, profile_slug):
+    """
+    Edit the vocations details of a user profile.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to edit.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the edit vocations details template or redirects to the profile
+        detail page with a success message if the form is valid.
+    """
+    profile = Profile.objects.get(slug=profile_slug)
+
+    # Get vocations and interests associated with the profile
+    profile_vocations = profile.vocations.values_list(
+        "vocation",
+        flat=True,
+    )
+
+    # Initialize the form with initial values
+    initial_data = {
+        "vocations": profile_vocations,
+    }
+
+    profile_vocations_form = ProfileVocationForm(
+        request.POST or None,
+        initial=initial_data,
+    )
+
+    if request.method == "POST":
+        if profile_vocations_form.is_valid():
+            # Delete all profile vocations before saving
+            ProfileVocation.objects.filter(profile=profile).delete()
+
+            vocations = profile_vocations_form.cleaned_data.get("vocations")
+
+            for vocation in vocations:
+                profile_vocation_exists = ProfileVocation.objects.filter(
+                    profile=profile,
+                    vocation=vocation,
+                )
+
+                if profile_vocation_exists.count() == 0:
+                    profile_vocation = ProfileVocation.objects.create(
+                        profile=profile, vocation=vocation
+                    )
+                    profile_vocation.save()
+
+            messages.success(
+                request,
+                f"{name_with_apostrophe(profile.get_full_name())} profile updated.",
+            )
+
+            return redirect(profile)
+
+    return render(
+        request,
+        "profiles/pages/edit_profile_vocations.html",
+        {
+            "profile_vocations_form": profile_vocations_form,
         },
     )
 
