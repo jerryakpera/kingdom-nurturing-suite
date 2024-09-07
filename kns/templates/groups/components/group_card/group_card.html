@@ -49,15 +49,19 @@
       </p>
     </div>
 
-    {% if group.leader == request.user.profile %}
-      <div>
-        <a
-          href="{% url "profiles:register_member" %}"
-          class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3.5 py-1.5 w-full block text-center"
-        >
-          Register member
-        </a>
-      </div>
-    {% endif %}
+    <div class="flex space-x-2">
+      {% if group.leader == request.user.profile %}
+        <div class="w-full">
+          <a
+            href="{% url "profiles:register_member" %}"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3.5 py-1.5 w-full block text-center"
+          >
+            Register member
+          </a>
+        </div>
+      {% endif %}
+
+      {% include "groups/components/group_tree/group_tree_modal.html" %}
+    </div>
   </div>
 </div>

@@ -1,0 +1,44 @@
+{% load static %}
+
+<button
+  type="button"
+  id="open-group-tree-modal-button"
+  class="block w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xs px-3.5 py-1.5 text-center"
+>
+  Group Descendants
+</button>
+
+<!-- Extra Large Modal -->
+<div
+  tabindex="-1"
+  id="group-tree-modal"
+  class="fixed left-0 right-0 top-0 z-50 hidden h-[calc(100%-1rem)] max-h-full w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0"
+>
+  <div class="relative w-full max-h-full">
+    <!-- Modal content -->
+    <div class="relative bg-white rounded-lg shadow">
+      <!-- Modal header -->
+      <div class="flex items-center justify-between border-b rounded-t rounded-b border">
+        <h3 class="text-xl font-medium text-gray-900 dark:text-white">
+          Descendants tree
+        </h3>
+
+        <button
+          type="button"
+          id="close-group-tree-modal-button"
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+        >
+          <iconify-icon icon="iconamoon:close-bold" class="text-lg"></iconify-icon>
+          <span class="sr-only">Close modal</span>
+        </button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="flex w-full h-full justify-center">
+        {% include "groups/components/group_tree/group_tree.html" %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{% static "groups/js/group_tree_modal.js" %}"></script>
