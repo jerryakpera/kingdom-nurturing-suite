@@ -7,6 +7,9 @@ from django.core.management.base import BaseCommand
 
 from kns.faith_milestones.db_data import milestones as milestones_data
 from kns.faith_milestones.utils import populate_faith_milestones
+from kns.levels.db_data import levels as levels_data
+from kns.levels.db_data import sublevels as sublevels_data
+from kns.levels.utils import populate_levels, populate_sublevels
 from kns.profiles.db_data import encryption_reasons
 from kns.profiles.utils import populate_encryption_reasons
 from kns.skills.skills_data import skills as skills_data
@@ -44,5 +47,8 @@ class Command(BaseCommand):
         populate_vocations(
             vocations_data=vocations_data,
         )
+
+        populate_levels(levels_data=levels_data)
+        populate_sublevels(sublevels_data=sublevels_data)
 
         print("Database successfully populated.")
