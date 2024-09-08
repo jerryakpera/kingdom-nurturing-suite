@@ -1,8 +1,44 @@
+{% load mptt_tags %}
 {% load static %}
 
 <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 
-<div id="group_tree" class="w-full h-full flex justify-center"></div>
+<div id="group_tree" class="w-full min-h-screen flex justify-center">
+  <ul class="root groupsTreeRoot myUL p-0 px-2" id="groupsTreeRoot">
+    {% recursetree descendants %}
+      <li class="font-serif my-4 p-1">
+        {% if node.is_leaf_node %}
+          <a href="{{ node.get_absolute_url }}">
+            {{ node.name }}
+          </a>
+          {% else %}
+          <span class="caret fw-semibold">
+            <a href="{{ node.get_absolute_url }}">
+              {{ node.name }}
+            </a>
+          </span>
+        {% endif %}
+
+        <div class="flex flex-col border-b-2 border-gray-300">
+          <div class="flex items-center gap-1 mt-0 pt-0 text-muted">
+            <img src="{{ node.location_country.flag }}" alt="{{ node.location_country.name }}" />
+            {{node.location_display}} ({{node.created_at|date:"F j, Y"}})
+          </div>
+
+          <div class="flex flex-wrap p-2 gap-2">
+            {% include "groups/components/group_tree/group_tree_stats.html" %}
+          </div>
+        </div>
+
+        {% if not node.is_leaf_node %}
+          <ul class="nested pl-4 sm:pl-6 md:pl-8">
+            {{ children }}
+          </ul>
+        {% endif %}
+      </li>
+    {% endrecursetree %}
+  </ul>
+</div>
 
 <link rel="stylesheet" href="{% static "groups/css/group_tree.css" %}">
 <script src="{% static "groups/js/group_tree.js" %}"></script>

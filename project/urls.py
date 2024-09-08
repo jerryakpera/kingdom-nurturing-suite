@@ -7,6 +7,7 @@ urlpatterns = [
     path("tinymce/", include("tinymce.urls")),
     path("", include("kns.core.urls")),
     path("admin/", include("admin_honeypot.urls")),
+    path("api/", include("kns.apis.urls")),
     path("control-panel/", admin.site.urls),
     path("accounts/", include("kns.accounts.urls")),
     path("profiles/", include("kns.profiles.urls")),

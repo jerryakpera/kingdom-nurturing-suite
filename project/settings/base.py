@@ -30,6 +30,8 @@ THIRD_PARTY_APPS = [
     "formtools",
     "django_countries",
     "tinymce",
+    "mptt",
+    "rest_framework",
 ]
 
 LOCAL_APPS = [
@@ -40,6 +42,7 @@ LOCAL_APPS = [
     "kns.skills",
     "kns.faith_milestones",
     "kns.vocations",
+    "kns.apis",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

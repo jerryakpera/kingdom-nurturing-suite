@@ -1,24 +1,33 @@
-.node {
+ul,
+#myUL {
+  list-style-type: none;
+}
+
+#myUL {
+  margin: 0;
+  padding: 0;
+}
+
+.caret {
   cursor: pointer;
-  border: 4px solid red;
+  user-select: none;
 }
 
-.node circle {
-  fill: #fff;
-  stroke: steelblue;
-  stroke-width: 1.5px;
+.caret::before {
+  content: '\25B6';
+  color: black;
+  display: inline-block;
+  margin-right: 4px;
 }
 
-.node text {
-  font: 10px sans-serif;
+.caret-down::before {
+  transform: rotate(90deg);
 }
 
-.link {
-  fill: none;
-  stroke: #ccc;
-  stroke-width: 1.5px;
+.nested {
+  display: none;
 }
 
-body {
-  overflow: hidden;
+.active {
+  display: block;
 }

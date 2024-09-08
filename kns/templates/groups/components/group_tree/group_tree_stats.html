@@ -1,0 +1,167 @@
+<div>
+  <div data-tooltip-target="tooltip-descendants">
+    {% with title="Descendant groups" %}
+      {% with value=group.get_descendant_count %}
+        {% with icon="typcn:flow-children" %}
+          {% include "groups/components/group_tree/group_tree_stat_item.html" %}
+        {% endwith %}
+      {% endwith %}
+    {% endwith %}
+  </div>
+
+  <div
+    role="tooltip"
+    id="tooltip-descendants"
+    class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip"
+  >
+    Descendant groups
+    <div class="tooltip-arrow" data-popper-arrow></div>
+  </div>
+</div>
+
+<div>
+  <div data-tooltip-target="tooltip-members">
+    {% with title="Total members in group" %}
+      {% with value=group.members.count %}
+        {% with icon="fluent:people-add-32-light" %}
+          {% include "groups/components/group_tree/group_tree_stat_item.html" %}
+        {% endwith %}
+      {% endwith %}
+    {% endwith %}
+  </div>
+
+  <div
+    role="tooltip"
+    id="tooltip-members"
+    class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip"
+  >
+    Total members in group
+    <div class="tooltip-arrow" data-popper-arrow></div>
+  </div>
+</div>
+
+<div>
+  <div data-tooltip-target="tooltip-male-members">
+    {% with title="Male members" %}
+      {% with value=group.male_count %}
+        {% with icon="fa-solid:male" %}
+          {% include "groups/components/group_tree/group_tree_stat_item.html" %}
+        {% endwith %}
+      {% endwith %}
+    {% endwith %}
+  </div>
+
+  <div
+    role="tooltip"
+    id="tooltip-male-members"
+    class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip"
+  >
+    Male members
+    <div class="tooltip-arrow" data-popper-arrow></div>
+  </div>
+</div>
+
+<div>
+  <div data-tooltip-target="tooltip-female-members">
+    {% with title="Female members" %}
+      {% with value=group.female_count %}
+        {% with icon="fa-solid:female" %}
+          {% include "groups/components/group_tree/group_tree_stat_item.html" %}
+        {% endwith %}
+      {% endwith %}
+    {% endwith %}
+  </div>
+
+  <div
+    role="tooltip"
+    id="tooltip-female-members"
+    class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip"
+  >
+    Female members
+    <div class="tooltip-arrow" data-popper-arrow></div>
+  </div>
+</div>
+
+<div>
+  <div data-tooltip-target="tooltip-leaders">
+    {% with title="Leaders in group" %}
+      {% with value=group.leaders_count %}
+        {% with icon="heroicons:user-group-16-solid" %}
+          {% include "groups/components/group_tree/group_tree_stat_item.html" %}
+        {% endwith %}
+      {% endwith %}
+    {% endwith %}
+  </div>
+
+  <div
+    role="tooltip"
+    id="tooltip-leaders"
+    class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip"
+  >
+    Female members
+    <div class="tooltip-arrow" data-popper-arrow></div>
+  </div>
+</div>
+
+<div>
+  <div data-tooltip-target="tooltip-members-count">
+    {% with title="Members in group" %}
+      {% with value=group.members_count %}
+        {% with icon="iconamoon:profile-light" %}
+          {% include "groups/components/group_tree/group_tree_stat_item.html" %}
+        {% endwith %}
+      {% endwith %}
+    {% endwith %}
+  </div>
+
+  <div
+    role="tooltip"
+    id="tooltip-members-count"
+    class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip"
+  >
+    Members in group
+    <div class="tooltip-arrow" data-popper-arrow></div>
+  </div>
+</div>
+
+<div>
+  <div data-tooltip-target="tooltip-external-persons">
+    {% with title="E. Persons" %}
+      {% with value=group.external_persons_count %}
+        {% with icon="fluent:person-ribbon-24-regular" %}
+          {% include "groups/components/group_tree/group_tree_stat_item.html" %}
+        {% endwith %}
+      {% endwith %}
+    {% endwith %}
+  </div>
+
+  <div
+    role="tooltip"
+    id="tooltip-external-persons"
+    class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip"
+  >
+    External persons in group
+    <div class="tooltip-arrow" data-popper-arrow></div>
+  </div>
+</div>
+
+<div>
+  <div data-tooltip-target="tooltip-mentors">
+    {% with title="Mentors" %}
+      {% with value=group.mentors_count %}
+        {% with icon="hugeicons:teacher" %}
+          {% include "groups/components/group_tree/group_tree_stat_item.html" %}
+        {% endwith %}
+      {% endwith %}
+    {% endwith %}
+  </div>
+
+  <div
+    role="tooltip"
+    id="tooltip-mentors"
+    class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip"
+  >
+    Mentors
+    <div class="tooltip-arrow" data-popper-arrow></div>
+  </div>
+</div>

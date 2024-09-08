@@ -31,6 +31,7 @@ def group_context(request):
     """
 
     group = None
+    descendants = None
     group_slug = (
         request.resolver_match.kwargs.get("group_slug")
         if request.resolver_match
@@ -39,11 +40,13 @@ def group_context(request):
     if group_slug:
         try:
             group = get_object_or_404(Group, slug=group_slug)
+            descendants = group.get_descendants(include_self=True)
         except Http404:
             # Handle not found case if needed
             group = None
 
     return {
         "group": group,
+        "descendants": descendants,
         "group_settings_form": (GroupForm(instance=group) if group else None),
     }
