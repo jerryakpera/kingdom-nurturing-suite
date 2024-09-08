@@ -1,6 +1,6 @@
 <section class="pb-10 pt-4">
   {% if page_obj.paginator.count > 0 %}
-    <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+    <div class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5">
       {% for profile in page_obj %}
         {% include "profiles/components/profiles_list/profiles_list_item.html" %}
       {% endfor %}
