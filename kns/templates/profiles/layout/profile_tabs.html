@@ -5,12 +5,7 @@
       Overview
     </span>
   </a>
-  <a href="{{ profile.get_involvements_url }}" class="{% if request.path == profile.get_involvements_url %}text-knsPrimary font-semibold{% endif %}">
-    <iconify-icon icon="material-symbols:interactive-space-rounded"></iconify-icon>
-    <div class="hidden sm:block">
-      Involvements
-    </div>
-  </a>
+
   <a href="{{ profile.get_trainings_url }}" class="{% if request.path == profile.get_trainings_url %}text-knsPrimary font-semibold{% endif %}">
     <iconify-icon icon="oui:training"></iconify-icon>
     <span class="hidden sm:block">
@@ -18,12 +13,14 @@
     </span>
   </a>
 
-  <a href="{{ profile.get_discipleships_url }}" class="{% if request.path == profile.get_discipleships_url %}text-knsPrimary font-semibold{% endif %}">
-    <iconify-icon icon="mdi:bible"></iconify-icon>
-    <span class="hidden sm:block">
-      Discipleships
-    </span>
-  </a>
+  {% if profile.group_led %}
+    <a href="{{ profile.get_discipleships_url }}" class="{% if request.path == profile.get_discipleships_url %}text-knsPrimary font-semibold{% endif %}">
+      <iconify-icon icon="mdi:bible"></iconify-icon>
+      <span class="hidden sm:block">
+        Discipleships
+      </span>
+    </a>
+  {% endif %}
 
   <a href="{{ profile.get_activities_url }}" class="{% if request.path == profile.get_activities_url %}text-knsPrimary font-semibold{% endif %}">
     <iconify-icon icon="uim:list-ul"></iconify-icon>

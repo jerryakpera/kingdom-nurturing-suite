@@ -43,12 +43,12 @@
         </div>
 
         <div
-          class="p-2 rounded-md border {% if profile.is_movement_training_facilitator %}border-green-300 {% endif %} {% if not profile.is_movement_training_facilitator %}border-red-300{% endif %}">
-          <div class="text-md font-semibold flex gap-x-2 items-center">
+          class="p-3 border-l-4 {% if profile.is_movement_training_facilitator %}border-green-600 bg-green-100 {% endif %} {% if not profile.is_movement_training_facilitator %}border-red-600 bg-red-100{% endif %}">
+          <div class="text-sm font-bold flex gap-x-2 items-center">
             {% if profile.is_movement_training_facilitator %}
-              <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
+              <iconify-icon icon="mdi:thumbs-up" class="text-lg text-green-600"></iconify-icon>
             {% else %}
-              <iconify-icon icon="mdi:thumbs-down" class="text-md text-red-600"></iconify-icon>
+              <iconify-icon icon="mdi:thumbs-down" class="text-lg text-red-600"></iconify-icon>
             {% endif %}
             {% if profile.is_movement_training_facilitator %}Willing {% else %}Not willing{% endif %}
              to facilitate movement trainings
@@ -65,12 +65,12 @@
         </div>
 
         <div
-          class="p-2 rounded-md border {% if profile.is_skill_training_facilitator %}border-green-300 {% endif %} {% if not profile.is_skill_training_facilitator %}border-red-300{% endif %}">
-          <div class="text-md font-semibold flex gap-x-2 items-center">
+          class="p-3 border-l-4 {% if profile.is_skill_training_facilitator %}border-green-600 bg-green-100 {% endif %} {% if not profile.is_skill_training_facilitator %}border-red-600 bg-red-100{% endif %}">
+          <div class="text-sm font-bold flex gap-x-2 items-center">
             {% if profile.is_skill_training_facilitator %}
-              <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
+              <iconify-icon icon="mdi:thumbs-up" class="text-lg text-green-600"></iconify-icon>
             {% else %}
-              <iconify-icon icon="mdi:thumbs-down" class="text-md text-red-600"></iconify-icon>
+              <iconify-icon icon="mdi:thumbs-down" class="text-lg text-red-600"></iconify-icon>
             {% endif %}
             {% if profile.is_skill_training_facilitator %}Willing {% else %}Not willing{% endif %}
              to facilitate skill trainings
@@ -87,12 +87,12 @@
         </div>
 
         <div
-          class="p-2 rounded-md border {% if profile.is_mentor %}border-green-300 {% endif %} {% if not profile.is_mentor %}border-red-300{% endif %}">
-          <div class="text-md font-semibold flex gap-x-2 items-center">
+          class="p-3 border-l-4 {% if profile.is_mentor %}border-green-600 bg-green-100 {% endif %} {% if not profile.is_mentor %}border-red-600 bg-red-100{% endif %}">
+          <div class="text-sm font-bold flex gap-x-2 items-center">
             {% if profile.is_mentor %}
-              <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
+              <iconify-icon icon="mdi:thumbs-up" class="text-lg text-green-600"></iconify-icon>
             {% else %}
-              <iconify-icon icon="mdi:thumbs-down" class="text-md text-red-600"></iconify-icon>
+              <iconify-icon icon="mdi:thumbs-down" class="text-lg text-red-600"></iconify-icon>
             {% endif %}
             {% if profile.is_mentor %}Willing {% else %}Not willing{% endif %}
              to mentor others
@@ -111,10 +111,9 @@
 
     </div>
 
-    <div class="flex flex-col gap-y-4 xs:gap-y-0 sm:gap-y-4 xs:flex-row sm:flex-col md:flex-row sm:gap-x-2">
-
+    <div class="flex flex-col gap-y-4">
       <div class="w-full pr-4">
-        <div class="flex justify-between items-center border-b border-gray-400 pb-2">
+        <div class="flex justify-between items-center border-b border-gray-400 pb-2 mb-2">
           <h3 class="text-lg font-bold uppercase">Skills</h3>
 
           {% if request.user|can_edit_profile:profile %}
@@ -129,15 +128,15 @@
         <div class="flex flex-col space-y-6">
           {% for profile_skill in profile.skills.all %}
             {% with skill=profile_skill.skill %}
-              <div>
+              <div class="pb-1 border-b border-gray-200">
                 <h6 class="font-semibold text-md">
                   {{ skill }}
                 </h6>
                 <p>
-                  {{ skill.content|truncatechars:75 }}
+                  {{ skill.content }}
                   <a
                     href="#"
-                    class="text-md font-semibold text-knsSecondary-700 hover:text-knsSecondary-800"
+                    class="text-sm font-semibold text-blue-700 hover:text-blue-800"
                   >
                     Read more
                   </a>
@@ -153,7 +152,7 @@
       </div>
 
       <div class="w-full pr-4">
-        <div class="flex justify-between items-center border-b border-gray-400 pb-2">
+        <div class="flex justify-between items-center border-b border-gray-400 pb-2 mb-2">
           <h3 class="text-lg font-bold uppercase">Interests</h3>
 
           {% if request.user|can_edit_profile:profile %}
@@ -168,18 +167,20 @@
         <div class="flex flex-col space-y-6">
           {% for profile_interest in profile.interests.all %}
             {% with interest=profile_interest.interest %}
-              <div>
+              <div class="pb-1 border-b border-gray-200">
                 <h6 class="font-semibold text-md">
                   {{ interest }}
                 </h6>
                 <p>
-                  {{ interest.content|truncatechars:75 }}
-                  <a
-                    href="#"
-                    class="text-md font-semibold text-knsSecondary-700 hover:text-knsSecondary-800"
-                  >
-                    Read more
-                  </a>
+                  {{ interest.content }}
+                  <div>
+                    <a
+                      href="#"
+                      class="text-sm font-semibold text-blue-700 hover:text-blue-800"
+                    >
+                      Read more
+                    </a>
+                  </div>
                 </p>
               </div>
             {% endwith %}
