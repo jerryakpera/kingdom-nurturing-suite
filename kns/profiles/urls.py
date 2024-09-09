@@ -51,6 +51,11 @@ urlpatterns = [
         name="edit_profile_faith_milestones",
     ),
     path(
+        "<slug:profile_slug>/edit/level",
+        views.edit_profile_level,
+        name="edit_profile_level",
+    ),
+    path(
         "<slug:profile_slug>/edit/vocations",
         views.edit_profile_vocations,
         name="edit_profile_vocations",

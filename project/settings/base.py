@@ -188,3 +188,5 @@ cloudinary.config(
         default="default_api_secret",
     ),
 )
+
+API_URL = ""

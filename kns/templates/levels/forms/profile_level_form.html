@@ -1,0 +1,11 @@
+{% load static %}
+
+{% with form=profile_level_form %}
+  {% include 'core/components/forms/form_error.html' %}
+{% endwith %}
+
+{% for field in profile_level_form %}
+  {% include "core/components/forms/form_field.html" %}
+{% endfor %}
+
+<script src="{% static "levels/js/profile_level_form.js" %}"></script>

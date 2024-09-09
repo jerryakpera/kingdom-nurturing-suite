@@ -1,22 +1,56 @@
-{% load profiles_custom_tags %}
+<div class="grid grid-cols-1 xs:grid-cols-2 my-4">
+  {% if profile.current_level %}
+    <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100">
+      <div class="uppercase tracking-wider text-gray-600 font-semibold text-xs">Level</div>
+      <h5 class="text-2xl font-bold tracking-tight text-gray-900">
+        {{ profile.current_level.level.title }}
+      </h5>
+      {% if profile.current_level.sublevel %}
+        <h6 class="mb-2 text-lg font-bold tracking-tight text-gray-800">
+          {{ profile.current_level.sublevel.title }}
+        </h6>
+      {% endif %}
+      <div class="space-x-2">
+        <a
+          href="#"
+          class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+        >
+          Read more
+          <iconify-icon icon="mdi:arrow-right-thin" class="text-2xl ml-1"></iconify-icon>
+        </a>
 
-<div class="mt-6">
-  <div class="flex justify-between items-center">
-    <h1 class="text-lg font-semibold">
-      Levels
-    </h1>
+        <a
+          href="{% url "profiles:edit_profile_level" profile_slug=profile.slug %}"
+          class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+        >
+          Update level
+          <iconify-icon icon="mdi:arrow-right-thin" class="text-2xl ml-1"></iconify-icon>
+        </a>
+      </div>
+    </div>
+  {% else %}
+    <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100">
+      <div class="uppercase tracking-wider text-gray-600 font-semibold text-xs">Level</div>
+      <h5 class="text-2xl mb-2 font-bold tracking-tight text-gray-900">
+        {{ profile.get_full_name }} currently has no set level
+      </h5>
+      <div class="space-x-2">
+        <a
+          href="#"
+          class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+        >
+          Read more
+          <iconify-icon icon="mdi:arrow-right-thin" class="text-2xl ml-1"></iconify-icon>
+        </a>
 
-    {% if request.user|is_profiles_group_leader:profile %}
-      <a
-        href="#"
-        class="px-2 py-1.5 items-center text-xs sm:text-sm text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300"
-      >
-        Edit
-      </a>
-    {% endif %}
-  </div>
-
-  <div class="px-2">
-    {% include "profiles/components/levels/profile_levels_list.html" %}
-  </div>
+        <a
+          href="{% url "profiles:edit_profile_level" profile_slug=profile.slug %}"
+          class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+        >
+          Assign level
+          <iconify-icon icon="mdi:arrow-right-thin" class="text-2xl ml-1"></iconify-icon>
+        </a>
+      </div>
+    </div>
+  {% endif %}
 </div>

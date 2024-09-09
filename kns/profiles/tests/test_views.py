@@ -6,11 +6,11 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.core.models import Setting
-from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.models import FaithMilestone, ProfileFaithMilestone
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
+from kns.levels.models import Level, ProfileLevel, Sublevel
 from kns.profiles.models import Discipleship, EncryptionReason, ProfileEncryption
 from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 from kns.vocations.models import ProfileVocation, Vocation
@@ -83,6 +83,28 @@ class TestViews(TestCase):
         self.faith_milestone_2 = FaithMilestone.objects.create(
             title="Completed Discipleship Course",
             description="Sample description for a faith milestone",
+            author=self.profile,
+        )
+
+        # Create Level and ProfileLevel instances
+        self.level1 = Level.objects.create(
+            title="Level 1",
+            content="Content for level 1",
+            author=self.profile,
+        )
+        self.level2 = Level.objects.create(
+            title="Level 2",
+            content="Content for level 2",
+            author=self.profile,
+        )
+        self.sublevel1 = Sublevel.objects.create(
+            title="Sublevel 1",
+            content="Content for sublevel 1",
+            author=self.profile,
+        )
+        self.sublevel2 = Sublevel.objects.create(
+            title="Sublevel 2",
+            content="Content for sublevel 2",
             author=self.profile,
         )
 
@@ -932,6 +954,140 @@ class TestViews(TestCase):
                 profile=self.profile,
                 faith_milestone=self.faith_milestone_2,
             ).exists()
+        )
+
+    def test_edit_profile_level_get(self):
+        """
+        Test the edit_profile_level view renders the form correctly on GET request.
+        """
+        url = reverse(
+            "profiles:edit_profile_level",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/edit_profile_level.html",
+        )
+
+        # Ensure the form is present in the context
+        self.assertIn("profile_level_form", response.context)
+
+    def test_edit_profile_level_post_valid(self):
+        """
+        Test the edit_profile_level view processes and saves valid
+        data correctly on POST request.
+        """
+        url = reverse(
+            "profiles:edit_profile_level",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        data = {
+            "level": self.level1.id,
+            "sublevel": self.sublevel1.id,
+        }
+        response = self.client.post(url, data)
+
+        # Check if the response redirects after saving
+        self.assertEqual(response.status_code, 302)
+
+        # Check if the ProfileLevel was created
+        profile_level = ProfileLevel.objects.get(profile=self.profile)
+        self.assertEqual(profile_level.level, self.level1)
+        self.assertEqual(profile_level.sublevel, self.sublevel1)
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Level updated successfully.")
+
+    def test_edit_profile_level_post_no_sublevel(self):
+        """
+        Test the edit_profile_level view when the selected level has no
+        sublevels and sublevel is set to 'null'.
+        """
+        url = reverse(
+            "profiles:edit_profile_level", kwargs={"profile_slug": self.profile.slug}
+        )
+        data = {
+            "level": self.level1.id,
+            "sublevel": "null",
+        }
+        response = self.client.post(url, data)
+
+        # Check if the response redirects after saving
+        self.assertEqual(response.status_code, 302)
+
+        # Check if the ProfileLevel was created
+        profile_level = ProfileLevel.objects.get(profile=self.profile)
+        self.assertEqual(profile_level.level, self.level1)
+        self.assertIsNone(profile_level.sublevel)
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Level updated successfully.")
+
+    def test_edit_profile_level_post_invalid_level(self):
+        """
+        Test the edit_profile_level view with invalid level data.
+        """
+        url = reverse(
+            "profiles:edit_profile_level",
+            kwargs={"profile_slug": self.profile.slug},
+        )
+        data = {
+            "level": "invalid",  # Invalid level ID
+            "sublevel": "invalid",  # Invalid sublevel ID
+        }
+        response = self.client.post(url, data)
+
+        # Check if the response redirects after error
+        self.assertEqual(response.status_code, 302)
+
+        # Ensure no ProfileLevel was created
+        self.assertFalse(
+            ProfileLevel.objects.filter(profile=self.profile).exists(),
+        )
+
+        # Check for error message in messages
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "Invalid level ID.",
+        )
+
+    def test_edit_profile_level_post_missing_level(self):
+        """
+        Test the edit_profile_level view when no level is provided.
+        """
+        url = reverse(
+            "profiles:edit_profile_level",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        data = {
+            "sublevel": self.sublevel1.id,
+        }
+        response = self.client.post(url, data)
+
+        # Check if the response status code is 400 as expected
+        self.assertEqual(response.status_code, 400)
+
+        # Ensure no ProfileLevel was created
+        self.assertFalse(
+            ProfileLevel.objects.filter(profile=self.profile).exists(),
         )
 
 

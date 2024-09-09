@@ -59,7 +59,7 @@ class TestGroupDescendantsAPI(APITestCase):
         Test retrieving a group and its descendants with a valid group ID.
         """
         url = reverse(
-            "apis:group_descendants",
+            "api:group_descendants",
             kwargs={
                 "pk": self.parent_group.pk,
             },
@@ -88,7 +88,7 @@ class TestGroupDescendantsAPI(APITestCase):
         non_existent_pk = 9999  # Assuming this PK doesn't exist
 
         url = reverse(
-            "apis:group_descendants",
+            "api:group_descendants",
             kwargs={
                 "pk": non_existent_pk,
             },
@@ -113,7 +113,7 @@ class TestGroupDescendantsAPI(APITestCase):
         Test retrieving a group that has no descendants.
         """
         url = reverse(
-            "apis:group_descendants",
+            "api:group_descendants",
             kwargs={
                 "pk": self.grandchild_group.pk,
             },
@@ -137,7 +137,7 @@ class TestGroupDescendantsAPI(APITestCase):
         Test the nested structure of the descendants in the serialized data.
         """
         url = reverse(
-            "apis:group_descendants",
+            "api:group_descendants",
             kwargs={
                 "pk": self.parent_group.pk,
             },
@@ -180,7 +180,7 @@ class TestGroupDescendantsAPI(APITestCase):
         self.client.force_authenticate(user=self.user1)
 
         url = reverse(
-            "apis:group_descendants",
+            "api:group_descendants",
             kwargs={
                 "pk": self.parent_group.pk,
             },
@@ -202,7 +202,7 @@ class TestGroupDescendantsAPI(APITestCase):
         self.client.logout()
 
         url = reverse(
-            "apis:group_descendants",
+            "api:group_descendants",
             kwargs={
                 "pk": self.parent_group.pk,
             },

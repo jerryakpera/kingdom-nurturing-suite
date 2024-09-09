@@ -570,7 +570,7 @@ class TestProfileModel(TestCase):
             author=self.profile,
         )
 
-        # Create a couple of ProfileLevel instances for the profile
+        # Create ProfileLevel instances with different timestamps
         ProfileLevel.objects.create(
             profile=self.profile,
             level=level1,
@@ -585,6 +585,7 @@ class TestProfileModel(TestCase):
 
         # Test that the most recent profile level is returned
         most_recent_level = self.profile.current_level()
+
         assert most_recent_level == profile_level_2
 
         # Add a more recent profile level

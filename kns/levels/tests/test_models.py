@@ -4,7 +4,6 @@ from django.test import TestCase
 
 from kns.custom_user.models import User
 from kns.levels.models import Level, LevelSublevel, ProfileLevel, Sublevel
-from kns.profiles.models import Profile
 
 
 class TestLevelModel(TestCase):

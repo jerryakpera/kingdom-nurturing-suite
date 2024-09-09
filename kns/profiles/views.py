@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Max
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from faker import Faker
 from formtools.wizard.views import SessionWizardView
@@ -16,7 +17,8 @@ from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.forms import ProfileFaithMilestonesForm
 from kns.faith_milestones.models import ProfileFaithMilestone
-from kns.levels.models import ProfileLevel
+from kns.levels.forms import ProfileLevelForm
+from kns.levels.models import Level, ProfileLevel, Sublevel
 from kns.skills.forms import ProfileSkillsForm
 from kns.skills.models import ProfileInterest, ProfileSkill
 from kns.vocations.forms import ProfileVocationForm
@@ -1365,6 +1367,79 @@ def edit_profile_faith_milestones(request, profile_slug):
         {
             "profile_faith_milestones_form": profile_faith_milestones_form,
         },
+    )
+
+
+@login_required
+def edit_profile_level(request, profile_slug):
+    """
+    Edit the profile's level details.
+
+    This view allows updating the level and optional sublevel details of a profile.
+    It processes both GET and POST requests. If the request is POST and the form is valid,
+    the profile is updated with the selected level and sublevel, and a success message
+    is displayed.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to edit.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the edit profile level template or redirects to the profile detail page
+        with a success message if the form is valid.
+    """
+    profile = get_object_or_404(Profile, slug=profile_slug)
+    profile_level_form = ProfileLevelForm(request.POST or None)
+
+    if request.method == "POST":
+        level = request.POST.get("level")
+        sublevel = request.POST.get("sublevel")
+
+        if not level:
+            messages.error(request, "Level ID is required.")
+            return HttpResponseBadRequest("Level ID is required.")
+
+        try:
+            level_instance = get_object_or_404(Level, id=level)
+        except ValueError:
+            messages.error(request, "Invalid level ID.")
+            return redirect(profile)
+
+        sublevels = level_instance.sublevels.count()
+        if sublevels > 0 and sublevel == "null":  # pragma: no cover
+            pass
+        else:
+            new_profile_level = ProfileLevel.objects.create(
+                profile=profile,
+                level=level_instance,
+            )
+
+            try:
+                if sublevel and sublevel != "null":
+                    sublevel_instance = get_object_or_404(Sublevel, id=sublevel)
+                    new_profile_level.sublevel = sublevel_instance
+                    new_profile_level.save()
+
+            except ValueError:  # pragma: no cover
+                messages.error(request, "Invalid sublevel ID.")
+                return redirect(profile)
+
+            messages.success(request, "Level updated successfully.")
+            return redirect(profile)
+
+    context = {
+        "profile_level_form": profile_level_form,
+    }
+
+    return render(
+        request=request,
+        template_name="profiles/pages/edit_profile_level.html",
+        context=context,
     )
 
 
