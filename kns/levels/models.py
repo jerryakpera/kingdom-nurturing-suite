@@ -172,8 +172,6 @@ class ProfileLevel(TimestampedModel, models.Model):
         The Level associated with the profile.
     sublevel : ForeignKey
         The Sublevel associated with the profile (optional).
-    removed_at : DateField
-        The date when the profile was removed from the level/sublevel.
     """
 
     profile = models.ForeignKey(
@@ -194,11 +192,6 @@ class ProfileLevel(TimestampedModel, models.Model):
         related_name="profile_levels",
         on_delete=models.CASCADE,
         null=True,
-    )
-
-    removed_at = models.DateField(
-        null=True,
-        blank=True,
     )
 
     def __str__(self) -> str:

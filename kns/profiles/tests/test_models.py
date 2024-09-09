@@ -575,7 +575,6 @@ class TestProfileModel(TestCase):
             profile=self.profile,
             level=level1,
             created_at=timezone.now() - timedelta(days=10),
-            removed_at=timezone.now() - timedelta(days=5),
         )
 
         profile_level_2 = ProfileLevel.objects.create(
