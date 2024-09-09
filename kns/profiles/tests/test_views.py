@@ -1016,7 +1016,10 @@ class TestViews(TestCase):
         sublevels and sublevel is set to 'null'.
         """
         url = reverse(
-            "profiles:edit_profile_level", kwargs={"profile_slug": self.profile.slug}
+            "profiles:edit_profile_level",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
         )
         data = {
             "level": self.level1.id,
