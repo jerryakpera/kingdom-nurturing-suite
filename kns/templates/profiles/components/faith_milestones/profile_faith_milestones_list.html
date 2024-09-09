@@ -1,11 +1,13 @@
-<div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-  {% for item_faith_milestone in profile.faith_milestones.all %}
-    {% with faith_milestone=item_faith_milestone.faith_milestone %}
-      {% include "faith_milestones/components/faith_milestones_item.html" %}
-    {% endwith %}
-  {% empty %}
-    <div class="p-2 border-l-2 border-black bg-gray-200 font-medium text-sm w-full">
-      Currently no faith milestones to display at the moment.
-    </div>
-  {% endfor %}
-</div>
+{% if profile.faith_milestones.count == 0 %}
+  <div class="p-2 border border-red-400 bg-red-100 rounded-md font-medium text-sm w-full">
+    There are no faith milestones to display at the moment.
+  </div>
+{% else %}
+  <div class="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+    {% for item_faith_milestone in profile.faith_milestones.all %}
+      {% with faith_milestone=item_faith_milestone.faith_milestone %}
+        {% include "faith_milestones/components/faith_milestones_item.html" %}
+      {% endwith %}
+    {% endfor %}
+  </div>
+{% endif %}

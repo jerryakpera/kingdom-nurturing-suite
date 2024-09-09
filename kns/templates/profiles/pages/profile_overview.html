@@ -7,5 +7,38 @@
 {% block profile_base_content %}
   <section>
     {% include "profiles/components/faith_milestones/profiles_faith_milestones.html" %}
+
+    <div class="grid grid-cols-1 xs:grid-cols-2 my-4">
+      {% if profile.current_level %}
+        <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100">
+          <div class="uppercase tracking-wider text-gray-600 font-semibold text-xs">Level</div>
+          <h5 class="text-2xl font-bold tracking-tight text-gray-900">
+            {{ profile.current_level.level.title }}
+          </h5>
+          {% if profile.current_level.sublevel %}
+            <h6 class="mb-2 text-lg font-bold tracking-tight text-gray-800">
+              {{ profile.current_level.sublevel.title }}
+            </h6>
+          {% endif %}
+          <div class="space-x-2">
+            <a
+              href="#"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+            >
+              Read more
+              <iconify-icon icon="mdi:arrow-right-thin" class="text-2xl ml-1"></iconify-icon>
+            </a>
+
+            <a
+              href="#"
+              class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+            >
+              Update level
+              <iconify-icon icon="mdi:arrow-right-thin" class="text-2xl ml-1"></iconify-icon>
+            </a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
   </section>
 {% endblock profile_base_content %}

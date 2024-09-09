@@ -4,7 +4,9 @@ Django admin site configuration for the profiles app.
 
 from django.contrib import admin
 
+from kns.core.utils import log_this
 from kns.faith_milestones.models import ProfileFaithMilestone
+from kns.levels.models import ProfileLevel, Sublevel
 from kns.skills.models import ProfileInterest, ProfileSkill
 from kns.vocations.models import ProfileVocation
 
@@ -104,6 +106,18 @@ class ConsentFormInline(admin.StackedInline):
     extra = 0
 
 
+class ProfileLevelInline(admin.TabularInline):
+    """
+    Inline admin interface for the ProfileLevel model.
+
+    This allows the levels and sublevels associated with a profile to be
+    edited directly within the Profile admin interface.
+    """
+
+    extra = 1
+    model = ProfileLevel
+
+
 class ProfileAdmin(admin.ModelAdmin):
     """
     Admin interface for the Profile model.
@@ -126,6 +140,7 @@ class ProfileAdmin(admin.ModelAdmin):
         ProfileFaithMilestoneInline,
         ProfileDisciplesInline,
         ProfileVocationInline,
+        ProfileLevelInline,
     ]
 
 

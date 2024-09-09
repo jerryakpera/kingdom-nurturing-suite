@@ -16,6 +16,7 @@ from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.forms import ProfileFaithMilestonesForm
 from kns.faith_milestones.models import ProfileFaithMilestone
+from kns.levels.models import ProfileLevel
 from kns.skills.forms import ProfileSkillsForm
 from kns.skills.models import ProfileInterest, ProfileSkill
 from kns.vocations.forms import ProfileVocationForm
@@ -273,8 +274,15 @@ def profile_overview(request, profile_slug):
     Profile.DoesNotExist
         If no Profile with the given slug exists.
     """
+    profile = get_object_or_404(Profile, slug=profile_slug)
 
-    context = {}
+    profile_levels = ProfileLevel.objects.filter(
+        profile=profile,
+    ).order_by("-created_at")
+
+    context = {
+        "profile_levels": profile_levels,
+    }
 
     return render(
         request=request,

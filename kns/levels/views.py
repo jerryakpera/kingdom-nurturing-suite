@@ -1,3 +1,3 @@
 """
-Views for the `levels` application.
+Views for the `levels` app.
 """

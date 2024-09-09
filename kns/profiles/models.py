@@ -632,6 +632,31 @@ class Profile(
 
         return "No vocations"
 
+    def current_level(self):
+        """
+        Return the most recent profile level for the profile.
+
+        This method fetches all profile levels associated with the profile,
+        sorts them by their creation timestamp in descending order, and returns
+        the most recent one. If there are no profile levels associated, it
+        returns None.
+
+        Returns
+        -------
+        ProfileLevel or None
+            The most recent ProfileLevel instance if available, otherwise None.
+        """
+        profile_levels = self.profile_levels.all()
+
+        if profile_levels.exists():
+            most_recent_level = profile_levels.order_by(
+                "-created_at",
+            ).first()
+
+            return most_recent_level
+        else:
+            return None
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

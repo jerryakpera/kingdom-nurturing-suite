@@ -134,13 +134,13 @@ class LevelSublevel(models.Model):
 
     level = models.ForeignKey(
         Level,
-        related_name="level_sublevels",
+        related_name="sublevels",
         on_delete=models.CASCADE,
     )
 
     sublevel = models.ForeignKey(
         Sublevel,
-        related_name="sublevel_levels",
+        related_name="levels",
         on_delete=models.CASCADE,
     )
 
