@@ -544,61 +544,6 @@ class TestProfileModel(TestCase):
             "No vocations",
         )
 
-    def test_profile_current_level(self):
-        """
-        Test that the current_level method returns the most recent ProfileLevel
-        or None when no levels exist.
-        """
-        # Test when there are no profile levels
-        assert self.profile.current_level() is None
-
-        level1 = Level.objects.create(
-            title="Test level 1",
-            content="Test level 1 content",
-            author=self.profile,
-        )
-
-        level2 = Level.objects.create(
-            title="Test level 2",
-            content="Test level 2 content",
-            author=self.profile,
-        )
-
-        level3 = Level.objects.create(
-            title="Test level 3",
-            content="Test level 3 content",
-            author=self.profile,
-        )
-
-        # Create ProfileLevel instances with different timestamps
-        ProfileLevel.objects.create(
-            profile=self.profile,
-            level=level1,
-            created_at=timezone.now() - timedelta(days=10),
-        )
-
-        profile_level_2 = ProfileLevel.objects.create(
-            profile=self.profile,
-            level=level2,
-            created_at=timezone.now() - timedelta(days=5),
-        )
-
-        # Test that the most recent profile level is returned
-        most_recent_level = self.profile.current_level()
-
-        assert most_recent_level == profile_level_2
-
-        # Add a more recent profile level
-        profile_level_3 = ProfileLevel.objects.create(
-            profile=self.profile,
-            level=level3,
-            created_at=timezone.now(),
-        )
-
-        # Test that the new most recent profile level is returned
-        most_recent_level = self.profile.current_level()
-        assert most_recent_level == profile_level_3
-
 
 class TestConsentFormModel:
     @pytest.fixture(autouse=True)

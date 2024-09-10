@@ -1,0 +1,74 @@
+{% extends "profiles/profile_base.html" %}
+
+{% block title %}
+  Profile levels | {{ profile.get_full_name }}
+{% endblock title %}
+
+{% block profile_base_content %}
+  <section class="space-y-4">
+    <div>
+      <h1 class="text-xl md:text-2xl font-bold">Understanding Levels</h1>
+      <p>Levels represent different stages within an individual's spiritual journey. They help us understand and support individuals as they grow or become more involved.</p>
+    </div>
+
+    <label>
+      <input class="peer/showLabel absolute scale-0" type="checkbox" />
+      <span class="block max-h-14 w-full overflow-hidden py-4 px-2 transition-all duration-300 peer-checked/showLabel:max-h-64 border border-knsPrimary-300 shadow-md rounded-md mt-3">
+        <div class="flex justify-between">
+          <h3 class="flex h-full cursor-pointer items-center text-knsPrimary-600 font-medium mb-4">Learn more about levels</h3>
+          <div class="text-2xl transform transition-transform duration-300 peer-checked/showLabel:rotate-180">
+            <iconify-icon icon="mdi:caret"></iconify-icon>
+          </div>
+        </div>
+        <div class="text-sm space-y-4">
+          <p>
+            Sublevels are specific categories within each Level, offering additional details. For instance, a Level might include Sublevels like "Unreached Person," referring to individuals from groups that haven't yet received the message, or "Believing Team Member," which denotes those who have embraced their faith and are on a journey of growth.
+          </p>
+
+          <p>
+            Levels can encompass multiple Sublevels, providing more granular insight into someone's stage or role. Each person can be linked to a Level and optionally a Sublevel, which helps in tracking their growth and involvement. This framework is crucial for personal growth as it allows group leaders to see the progress and areas for improvement for their team members.
+          </p>
+
+          <p>
+            Additionally, you can view the history and timeline of a profile's levels on this page, providing a comprehensive look at their journey and changes over time.
+          </p>
+        </div>
+      </span>
+    </label>
+
+
+    <ol class="relative border-s border-gray-200">
+      {% for profile_level in profile_levels  %}
+        <li class="mb-10 ms-4">
+          <div
+            class="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white"
+          ></div>
+          <time class="text-sm font-normal leading-none text-gray-600">
+            {{ profile_level.created_at|date:"F j, Y" }}
+          </time>
+          <h3 class="text-md font-bold text-gray-900">
+            {{ profile_level.level.title }}
+          </h3>
+          <p class="text-sm font-normal">
+            {{ profile_level.level.content|safe }}
+          </p>
+
+          {% if profile_level.sublevel %}
+            <div class="mt-2">
+              <h4 class="text-sm font-semibold text-gray-900">
+                {{ profile_level.sublevel.title }}
+              </h4>
+              <p class="text-sm font-normal">
+                {{ profile_level.sublevel.content|safe }}
+              </p>
+            </div>
+          {% endif %}
+
+          {% comment %} <a href="#" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:outline-none focus:ring-gray-100 focus:text-blue-700">
+            Learn more {% endcomment %}
+          </a>
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+{% endblock profile_base_content %}

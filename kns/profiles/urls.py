@@ -121,6 +121,11 @@ urlpatterns = [
         name="profile_discipleships",
     ),
     path(
+        "<slug:profile_slug>/levels",
+        views.profile_levels,
+        name="profile_levels",
+    ),
+    path(
         "<slug:profile_slug>/",
         views.profile_overview,
         name="profile_overview",

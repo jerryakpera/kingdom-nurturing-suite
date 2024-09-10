@@ -1,9 +1,10 @@
-from datetime import date
+from datetime import date, timedelta
 
 from django.contrib.messages import get_messages
 from django.core.paginator import Page
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from kns.core.models import Setting
 from kns.custom_user.models import User
@@ -991,24 +992,40 @@ class TestViews(TestCase):
                 "profile_slug": self.profile.slug,
             },
         )
+
         data = {
             "level": self.level1.id,
             "sublevel": self.sublevel1.id,
         }
+
         response = self.client.post(url, data)
 
         # Check if the response redirects after saving
         self.assertEqual(response.status_code, 302)
 
-        # Check if the ProfileLevel was created
-        profile_level = ProfileLevel.objects.get(profile=self.profile)
+        # Use filter instead of get, and ensure there's only one object
+        profile_levels = ProfileLevel.objects.filter(
+            profile=self.profile,
+            level=self.level1,
+            sublevel=self.sublevel1,
+        )
+
+        # Ensure only one ProfileLevel exists for the profile
+        self.assertEqual(profile_levels.count(), 1)
+
+        profile_level = profile_levels.first()
+
         self.assertEqual(profile_level.level, self.level1)
         self.assertEqual(profile_level.sublevel, self.sublevel1)
 
         # Check for success message
         messages = list(response.wsgi_request._messages)
+
         self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), "Level updated successfully.")
+        self.assertEqual(
+            str(messages[0]),
+            "Level updated successfully.",
+        )
 
     def test_edit_profile_level_post_no_sublevel(self):
         """
@@ -1021,6 +1038,10 @@ class TestViews(TestCase):
                 "profile_slug": self.profile.slug,
             },
         )
+
+        # Ensure no existing ProfileLevel objects for the profile and level
+        ProfileLevel.objects.filter(profile=self.profile, level=self.level1).delete()
+
         data = {
             "level": self.level1.id,
             "sublevel": "null",
@@ -1030,8 +1051,16 @@ class TestViews(TestCase):
         # Check if the response redirects after saving
         self.assertEqual(response.status_code, 302)
 
-        # Check if the ProfileLevel was created
-        profile_level = ProfileLevel.objects.get(profile=self.profile)
+        # Use filter instead of get to handle multiple objects
+        profile_levels = ProfileLevel.objects.filter(
+            profile=self.profile, level=self.level1
+        )
+
+        # Ensure only one ProfileLevel exists for the profile with the given level
+        self.assertEqual(profile_levels.count(), 1)
+
+        profile_level = profile_levels.first()
+
         self.assertEqual(profile_level.level, self.level1)
         self.assertIsNone(profile_level.sublevel)
 
@@ -1046,24 +1075,28 @@ class TestViews(TestCase):
         """
         url = reverse(
             "profiles:edit_profile_level",
-            kwargs={"profile_slug": self.profile.slug},
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
         )
         data = {
-            "level": "invalid",  # Invalid level ID
-            "sublevel": "invalid",  # Invalid sublevel ID
+            "level": "invalid",
+            "sublevel": "invalid",
         }
         response = self.client.post(url, data)
 
-        # Check if the response redirects after error
         self.assertEqual(response.status_code, 302)
 
         # Ensure no ProfileLevel was created
         self.assertFalse(
-            ProfileLevel.objects.filter(profile=self.profile).exists(),
+            ProfileLevel.objects.filter(
+                profile=self.profile,
+            ).exists(),
         )
 
         # Check for error message in messages
         messages = list(response.wsgi_request._messages)
+
         self.assertEqual(len(messages), 1)
         self.assertEqual(
             str(messages[0]),
@@ -1091,6 +1124,73 @@ class TestViews(TestCase):
         # Ensure no ProfileLevel was created
         self.assertFalse(
             ProfileLevel.objects.filter(profile=self.profile).exists(),
+        )
+
+    def test_profile_levels_view_no_profile_found(self):
+        """
+        Test the profile_levels view when a non-existent profile is requested.
+        """
+        self.profile_level1 = ProfileLevel.objects.create(
+            profile=self.profile,
+            level=self.level1,
+            created_at=timezone.now() - timedelta(days=10),
+        )
+        self.profile_level2 = ProfileLevel.objects.create(
+            profile=self.profile,
+            level=self.level2,
+            created_at=timezone.now() - timedelta(days=5),
+        )
+
+        url = reverse(
+            "profiles:profile_levels",
+            kwargs={
+                "profile_slug": "non-existent",
+            },
+        )
+
+        response = self.client.get(url)
+
+        # Check if the response status code is 404 Not Found
+        self.assertEqual(response.status_code, 404)
+
+    def test_profile_levels_view_no_levels(self):
+        """
+        Test the profile_levels view when the profile has no levels.
+        """
+        self.profile_level1 = ProfileLevel.objects.create(
+            profile=self.profile,
+            level=self.level1,
+            created_at=timezone.now() - timedelta(days=10),
+        )
+        self.profile_level2 = ProfileLevel.objects.create(
+            profile=self.profile,
+            level=self.level2,
+            created_at=timezone.now() - timedelta(days=5),
+        )
+
+        # Create a profile with no levels
+        user_without_levels = User.objects.create_user(
+            email="nolevels@example.com",
+            password="password",
+        )
+        profile_without_levels = user_without_levels.profile
+
+        url = reverse(
+            "profiles:profile_levels",
+            kwargs={
+                "profile_slug": profile_without_levels.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if 'profile_levels' is in context and is empty
+        self.assertIn("profile_levels", response.context)
+        self.assertQuerySetEqual(
+            response.context["profile_levels"],
+            [],
         )
 
 

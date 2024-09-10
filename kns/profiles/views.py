@@ -276,15 +276,7 @@ def profile_overview(request, profile_slug):
     Profile.DoesNotExist
         If no Profile with the given slug exists.
     """
-    profile = get_object_or_404(Profile, slug=profile_slug)
-
-    profile_levels = ProfileLevel.objects.filter(
-        profile=profile,
-    ).order_by("-created_at")
-
-    context = {
-        "profile_levels": profile_levels,
-    }
+    context = {}
 
     return render(
         request=request,
@@ -328,6 +320,46 @@ def profile_involvements(request, profile_slug):
     return render(
         request=request,
         template_name="profiles/pages/profile_involvements.html",
+        context=context,
+    )
+
+
+@login_required
+def profile_levels(request, profile_slug):  # pragma: no cover
+    """
+    View to render a page displaying levels history for a specific profile.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The request object used to generate the response.
+    profile_slug : str
+        The slug of the profile to retrieve.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template with the levels history of the specified
+        profile.
+
+    Raises
+    ------
+    Profile.DoesNotExist
+        If no Profile with the given slug exists.
+    """
+    profile = get_object_or_404(Profile, slug=profile_slug)
+
+    profile_levels = ProfileLevel.objects.filter(
+        profile=profile,
+    ).order_by("-created_at")
+
+    context = {
+        "profile_levels": profile_levels,
+    }
+
+    return render(
+        request=request,
+        template_name="levels/pages/profile_levels.html",
         context=context,
     )
 

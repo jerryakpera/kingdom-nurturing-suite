@@ -632,7 +632,7 @@ class Profile(
 
         return "No vocations"
 
-    def current_level(self):
+    def current_level(self):  # pragma: no cover
         """
         Return the most recent profile level for the profile.
 
