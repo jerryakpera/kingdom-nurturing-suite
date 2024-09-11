@@ -45,7 +45,12 @@ class Classification(
         editable=False,
     )
     content = tinymce_models.HTMLField()
-    order = models.IntegerField(unique=True)
+    order = models.IntegerField(
+        null=True,
+        blank=True,
+        default=0,
+        unique=True,
+    )
     author = models.ForeignKey(
         Profile,
         related_name="classifications_created",

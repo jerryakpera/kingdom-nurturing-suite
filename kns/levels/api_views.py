@@ -1,5 +1,5 @@
 """
-Views for the level apis app.
+Views for the `levels` apis app.
 """
 
 from django.http import JsonResponse

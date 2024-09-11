@@ -15,4 +15,8 @@ urlpatterns = [
         "",
         include("kns.levels.api_urls"),
     ),
+    path(
+        "",
+        include("kns.classifications.api_urls"),
+    ),
 ]
