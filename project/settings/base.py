@@ -44,6 +44,7 @@ LOCAL_APPS = [
     "kns.vocations",
     "kns.apis",
     "kns.levels",
+    "kns.classifications",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
