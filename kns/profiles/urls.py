@@ -6,22 +6,22 @@ app_name = "profiles"
 
 urlpatterns = [
     path(
-        "discpleships/<int:discipleship_id>/group-member/",
+        "discipleships/<int:discipleship_id>/group-member/",
         views.move_to_group_member,
         name="move_to_group_member",
     ),
     path(
-        "discpleships/<int:discipleship_id>/first-12/",
+        "discipleships/<int:discipleship_id>/first-12/",
         views.move_to_first_12,
         name="move_to_first_12",
     ),
     path(
-        "discpleships/<int:discipleship_id>/first-3/",
+        "discipleships/<int:discipleship_id>/first-3/",
         views.move_to_first_3,
         name="move_to_first_3",
     ),
     path(
-        "discpleships/<int:discipleship_id>/send-forth/",
+        "discipleships/<int:discipleship_id>/send-forth/",
         views.move_to_sent_forth,
         name="move_to_sent_forth",
     ),
@@ -54,6 +54,11 @@ urlpatterns = [
         "<slug:profile_slug>/edit/level",
         views.edit_profile_level,
         name="edit_profile_level",
+    ),
+    path(
+        "<slug:profile_slug>/edit/edit_profile_classifications/<int:profile_classification_no>",
+        views.edit_profile_classifications,
+        name="edit_profile_classifications",
     ),
     path(
         "<slug:profile_slug>/edit/vocations",

@@ -1,0 +1,11 @@
+{% load static %}
+
+{% with form=profile_classifications_form %}
+  {% include 'core/components/forms/form_error.html' %}
+{% endwith %}
+
+{% for field in profile_classifications_form %}
+  {% include "core/components/forms/form_field.html" %}
+{% endfor %}
+
+<script src="{% static "classifications/js/classifications_form.js" %}"></script>

@@ -13,7 +13,12 @@ from faker import Faker
 from formtools.wizard.views import SessionWizardView
 
 from kns.accounts import emails as account_emails
-from kns.classifications.models import ProfileClassification
+from kns.classifications.forms import ProfileClassificationForm
+from kns.classifications.models import (
+    Classification,
+    ProfileClassification,
+    Subclassification,
+)
 from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.forms import ProfileFaithMilestonesForm
@@ -295,9 +300,22 @@ def profile_overview(request, profile_slug):
         ]
     )
 
+    profile_classifications = ProfileClassification.objects.filter(
+        profile=profile,
+    ).order_by(
+        "-created_at",
+    )
+
+    profile_classification_no = 1
+
+    if len(profile_classifications) > 0:
+        profile_classification = profile_classifications.first()
+        profile_classification_no = profile_classification.no + 1
+
     context = {
         "classifications": classifications,
         "subclassifications": subclassifications,
+        "profile_classification_no": profile_classification_no,
     }
 
     return render(
@@ -1549,6 +1567,131 @@ def edit_profile_level(request, profile_slug):
     return render(
         request=request,
         template_name="profiles/pages/edit_profile_level.html",
+        context=context,
+    )
+
+
+@login_required
+def edit_profile_classifications(request, profile_slug, profile_classification_no):
+    """
+    Edit the profile's classification details.
+
+    This view allows updating the classification and optional subclassification
+    of a profile. It handles both GET and POST requests. In a POST request,
+    it updates the profile's classification with the selected classification
+    and subclassification if provided. A success or error message is displayed
+    based on the outcome.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to be edited.
+    profile_classification_no : int
+        The profile classification number to edit.
+
+    Returns
+    -------
+    HttpResponse
+        - If the request is GET, renders the edit profile classification form.
+        - If the request is POST and valid, updates the profile's classification and
+          subclassification and returns to the classification edit page
+          with a success message.
+        - If a similar classification exists or if the form data is invalid,
+        an error message is displayed.
+    """
+    profile = get_object_or_404(Profile, slug=profile_slug)
+    profile_classifications_form = ProfileClassificationForm(
+        request.POST or None,
+    )
+
+    profile_classifications = ProfileClassification.objects.filter(
+        profile=profile,
+        no=profile_classification_no,
+    )
+
+    context = {
+        "profile_classifications": profile_classifications,
+        "profile_classification_no": profile_classification_no,
+        "profile_classifications_form": profile_classifications_form,
+    }
+
+    if request.method == "POST":
+        classification = request.POST.get("classification")
+        subclassification = request.POST.get("subclassification")
+
+        classification_instance = get_object_or_404(
+            Classification,
+            id=classification,
+        )
+        classification_subclassifications = (
+            classification_instance.classification_subclassifications.count()
+        )
+
+        if (
+            classification_subclassifications > 0 and subclassification == "null"
+        ):  # pragma: no cover
+            pass
+        else:
+            # Check if a similar profile classification already exists
+            similar_profile_classification = ProfileClassification.objects.filter(
+                profile=profile,
+                no=profile_classification_no,
+                classification=classification_instance,
+            ).exists()
+
+            if subclassification:
+                subclassification_instance = get_object_or_404(
+                    Subclassification,
+                    id=subclassification,
+                )
+
+                similar_profile_classification = ProfileClassification.objects.filter(
+                    profile=profile,
+                    no=profile_classification_no,
+                    classification=classification_instance,
+                    subclassification=subclassification_instance,
+                ).exists()
+
+            if not similar_profile_classification:
+                new_profile_classification = ProfileClassification.objects.create(
+                    profile=profile,
+                    no=profile_classification_no,
+                    classification=classification_instance,
+                )
+
+                if subclassification:
+                    subclassification_instance = get_object_or_404(
+                        Subclassification,
+                        id=subclassification,
+                    )
+
+                    new_profile_classification.subclassification = (
+                        subclassification_instance
+                    )
+                    new_profile_classification.save()
+
+                messages.success(
+                    request=request,
+                    message="Classification updated successfully.",
+                )
+
+                return render(
+                    request=request,
+                    template_name="classifications/pages/edit_profile_classifications.html",
+                    context=context,
+                )
+
+            else:
+                messages.error(
+                    request=request,
+                    message="A similar classification has already been assigned to this user",
+                )
+
+    return render(
+        request=request,
+        template_name="classifications/pages/edit_profile_classifications.html",
         context=context,
     )
 

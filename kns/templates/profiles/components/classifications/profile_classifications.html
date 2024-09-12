@@ -21,7 +21,7 @@
       </a>
 
       <a
-        href="#"
+        href="{% url "profiles:edit_profile_classifications" profile_slug=profile.slug profile_classification_no=profile_classification_no %}"
         class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
       >
         Update classification
@@ -46,7 +46,7 @@
       </a>
 
       <a
-        href="#"
+        href="{% url "profiles:edit_profile_classifications" profile_slug=profile.slug profile_classification_no=profile_classification_no %}"
         class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
       >
         Assign classification

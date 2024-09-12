@@ -6,6 +6,12 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from kns.classifications.forms import ProfileClassificationForm
+from kns.classifications.models import (
+    Classification,
+    ProfileClassification,
+    Subclassification,
+)
 from kns.core.models import Setting
 from kns.custom_user.models import User
 from kns.faith_milestones.models import FaithMilestone, ProfileFaithMilestone
@@ -179,22 +185,68 @@ class TestViews(TestCase):
         """
         Test the profile_overview view to ensure it renders the specific profile.
         """
+        self.classification1 = Classification.objects.create(
+            title="Classification 1",
+            content="Content for classification 1",
+            author=self.profile,
+            order=1,
+        )
+        self.subclassification1 = Subclassification.objects.create(
+            title="Subclassification 1",
+            content="Content for subclassification 1",
+            author=self.profile,
+        )
+
+        profile_classification = ProfileClassification.objects.create(
+            profile=self.profile,
+            classification=self.classification1,
+            subclassification=self.subclassification1,
+            no=1,
+        )
+
+        # Reverse the URL for the profile overview view
         url = reverse(
             "profiles:profile_overview",
             kwargs={
                 "profile_slug": self.profile.slug,
             },
         )
+
+        # Make a GET request to the view
         response = self.client.get(url)
 
         # Check if the response status code is 200 OK
         self.assertEqual(response.status_code, 200)
 
         # Check if the correct template is used
-        self.assertTemplateUsed(response, "profiles/pages/profile_overview.html")
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/profile_overview.html",
+        )
 
-        # Ensure the profile details are present
+        # Ensure the profile details are present in the response content
         self.assertIn("Test User", response.content.decode())
+
+        # Check if classifications are present in the context
+        self.assertIn("classifications", response.context)
+        self.assertEqual(
+            response.context["classifications"],
+            "Classification 1",
+        )
+
+        # Check if subclassifications are present in the context
+        self.assertIn("subclassifications", response.context)
+        self.assertEqual(
+            response.context["subclassifications"],
+            "Subclassification 1",
+        )
+
+        # Check if profile_classification_no is correctly set
+        self.assertIn("profile_classification_no", response.context)
+        self.assertEqual(
+            response.context["profile_classification_no"],
+            profile_classification.no + 1,
+        )
 
     def test_profile_involvements_view(self):
         """
@@ -2089,4 +2141,182 @@ class TestEditProfileVocationsView(TestCase):
                 profile=self.profile,
                 vocation=self.vocation1,
             ).exists()
+        )
+
+
+class EditProfileClassificationsTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
+        self.client.login(
+            email="testuser@example.com",
+            password="oldpassword",
+        )
+
+        self.profile = self.user.profile
+
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+
+        self.profile.save()
+
+        # Create classifications and subclassifications
+        self.classification1 = Classification.objects.create(
+            title="Classification 1",
+            content="Content for classification 1",
+            author=self.profile,
+            order=1,
+        )
+        self.subclassification1 = Subclassification.objects.create(
+            title="Subclassification 1",
+            content="Content for subclassification 1",
+            author=self.profile,
+        )
+
+        # Create a profile classification
+        self.profile_classification = ProfileClassification.objects.create(
+            profile=self.profile,
+            classification=self.classification1,
+            subclassification=self.subclassification1,
+            no=1,
+        )
+
+    def test_get_edit_profile_classifications(self):
+        url = reverse(
+            "profiles:edit_profile_classifications",
+            kwargs={
+                "profile_slug": self.profile.slug,
+                "profile_classification_no": 1,
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "classifications/pages/edit_profile_classifications.html",
+        )
+
+        self.assertIn(
+            "profile_classifications_form",
+            response.context,
+        )
+        self.assertIsInstance(
+            response.context["profile_classifications_form"],
+            ProfileClassificationForm,
+        )
+        self.assertEqual(
+            response.context["profile_classification_no"],
+            self.profile_classification.no,
+        )
+
+    def test_post_create_profile_classification(self):
+        url = reverse(
+            "profiles:edit_profile_classifications",
+            kwargs={
+                "profile_slug": self.profile.slug,
+                "profile_classification_no": 2,
+            },
+        )
+
+        data = {
+            "classification": self.classification1.id,
+            "subclassification": self.subclassification1.id,
+        }
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "classifications/pages/edit_profile_classifications.html",
+        )
+
+        # Check if the new profile classification was created
+        new_profile_classification = ProfileClassification.objects.get(
+            profile=self.profile,
+            no=2,
+        )
+
+        self.assertEqual(
+            new_profile_classification.classification,
+            self.classification1,
+        )
+        self.assertEqual(
+            new_profile_classification.subclassification,
+            self.subclassification1,
+        )
+
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(
+            str(messages[0]),
+            "Classification updated successfully.",
+        )
+
+    def test_post_duplicate_profile_classification(self):
+        url = reverse(
+            "profiles:edit_profile_classifications",
+            kwargs={
+                "profile_slug": self.profile.slug,
+                "profile_classification_no": self.profile_classification.no,
+            },
+        )
+        data = {
+            "classification": self.classification1.id,
+            "subclassification": self.subclassification1.id,
+        }
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "classifications/pages/edit_profile_classifications.html",
+        )
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            "A similar classification has already been assigned to this user",
+        )
+
+    def test_post_without_subclassification(self):
+        url = reverse(
+            "profiles:edit_profile_classifications",
+            kwargs={
+                "profile_slug": self.profile.slug,
+                "profile_classification_no": 2,
+            },
+        )
+        data = {
+            "classification": self.classification1.id,
+            "subclassification": "",
+        }
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "classifications/pages/edit_profile_classifications.html",
+        )
+
+        # Check if the new profile classification was created without subclassification
+        new_profile_classification = ProfileClassification.objects.get(
+            profile=self.profile,
+            no=2,
+        )
+        self.assertEqual(
+            new_profile_classification.classification,
+            self.classification1,
+        )
+        self.assertIsNone(
+            new_profile_classification.subclassification,
+        )
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            str(messages[0]),
+            "Classification updated successfully.",
         )
