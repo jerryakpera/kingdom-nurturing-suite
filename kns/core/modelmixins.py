@@ -6,6 +6,8 @@ fields and functionality across different Django models.
 from django.db import models
 from django_countries.fields import CountryField
 
+from . import constants
+
 
 class TimestampedModel(models.Model):
     """
@@ -61,6 +63,32 @@ class ModelWithLocation(models.Model):
         max_length=50,
         null=True,
         blank=True,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class ModelWithStatus(models.Model):
+    """
+    An abstract Django model that provides a status field for models
+    that require a state or status indicator.
+
+    This abstract model includes the following field:
+    - `status`: A CharField that stores the status of the model.
+      It uses `STATUS_CHOICES` from the constants module to define
+      the available options. The default value is "published" and the
+      maximum length is 10 characters.
+
+    Subclasses of this model will inherit this field and can use it to
+    track the status of an object. Like all abstract models, this class
+    cannot be used directly to create database tables.
+    """
+
+    status = models.CharField(
+        choices=constants.STATUS_CHOICES,
+        default="published",
+        max_length=10,
     )
 
     class Meta:
