@@ -4,9 +4,9 @@ Django admin site configuration for the profiles app.
 
 from django.contrib import admin
 
-from kns.core.utils import log_this
+from kns.classifications.models import ProfileClassification
 from kns.faith_milestones.models import ProfileFaithMilestone
-from kns.levels.models import ProfileLevel, Sublevel
+from kns.levels.models import ProfileLevel
 from kns.skills.models import ProfileInterest, ProfileSkill
 from kns.vocations.models import ProfileVocation
 
@@ -118,6 +118,18 @@ class ProfileLevelInline(admin.TabularInline):
     model = ProfileLevel
 
 
+class ProfileClassificationInline(admin.TabularInline):
+    """
+    Inline admin interface for the ProfileClassification model.
+
+    This allows the classifications and subclassifications associated with a profile to be
+    edited directly within the Profile admin interface.
+    """
+
+    extra = 1
+    model = ProfileClassification
+
+
 class ProfileAdmin(admin.ModelAdmin):
     """
     Admin interface for the Profile model.
@@ -141,6 +153,7 @@ class ProfileAdmin(admin.ModelAdmin):
         ProfileDisciplesInline,
         ProfileVocationInline,
         ProfileLevelInline,
+        ProfileClassificationInline,
     ]
 
 

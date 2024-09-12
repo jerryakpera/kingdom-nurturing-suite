@@ -13,6 +13,7 @@ from faker import Faker
 from formtools.wizard.views import SessionWizardView
 
 from kns.accounts import emails as account_emails
+from kns.classifications.models import ProfileClassification
 from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.forms import ProfileFaithMilestonesForm
@@ -276,7 +277,28 @@ def profile_overview(request, profile_slug):
     Profile.DoesNotExist
         If no Profile with the given slug exists.
     """
-    context = {}
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    classifications = ", ".join(
+        [pc.classification.title for pc in profile.current_classifications()]
+    )
+
+    # Get comma-separated string of subclassifications
+    subclassifications = ", ".join(
+        [
+            pc.subclassification.title
+            for pc in profile.current_classifications()
+            if pc.subclassification
+        ]
+    )
+
+    context = {
+        "classifications": classifications,
+        "subclassifications": subclassifications,
+    }
 
     return render(
         request=request,
@@ -360,6 +382,62 @@ def profile_levels(request, profile_slug):  # pragma: no cover
     return render(
         request=request,
         template_name="levels/pages/profile_levels.html",
+        context=context,
+    )
+
+
+@login_required
+def profile_classifications(request, profile_slug):  # pragma: no cover
+    """
+    View to render a page displaying classifications history for a specific profile.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The request object used to generate the response.
+    profile_slug : str
+        The slug of the profile to retrieve.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template with the classifications history of the specified
+        profile.
+
+    Raises
+    ------
+    Profile.DoesNotExist
+        If no Profile with the given slug exists.
+    """
+    profile = get_object_or_404(Profile, slug=profile_slug)
+
+    profile_classifications = ProfileClassification.objects.filter(
+        profile=profile,
+    )
+
+    classification_nos = []
+    for pc in profile_classifications:
+        classification_nos.append(pc.no)
+
+    classification_nos = list(set(classification_nos))
+    classification_nos.sort(reverse=True)
+
+    profile_classifications_group = []
+
+    for no in classification_nos:
+        profile_classification_group = ProfileClassification.objects.filter(
+            profile=profile,
+            no=no,
+        )
+        profile_classifications_group.append(profile_classification_group)
+
+    context = {
+        "profile_classifications_group": profile_classifications_group,
+    }
+
+    return render(
+        request=request,
+        template_name="classifications/pages/profile_classifications.html",
         context=context,
     )
 

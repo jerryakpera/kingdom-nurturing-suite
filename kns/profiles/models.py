@@ -657,6 +657,36 @@ class Profile(
         else:
             return None
 
+    def current_classifications(self):  # pragma: no cover
+        """
+        Return the most recent profile classification for the profile.
+
+        This method fetches all profile classifications associated with the profile,
+        sorts them by their creation timestamp in descending order, and returns
+        the most recent one. If there are no profile classifications associated, it
+        returns None.
+
+        Returns
+        -------
+        ProfileClassification or None
+            The most recent ProfileClassification instance if available,
+            otherwise None.
+        """
+        if self.profile_classifications.count() == 0:
+            return []
+
+        current_classification_no = (
+            self.profile_classifications.order_by(
+                "-no",
+            )
+            .first()
+            .no
+        )
+
+        return self.profile_classifications.filter(
+            no=current_classification_no,
+        )
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

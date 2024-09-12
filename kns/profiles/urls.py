@@ -126,6 +126,11 @@ urlpatterns = [
         name="profile_levels",
     ),
     path(
+        "<slug:profile_slug>/classifications",
+        views.profile_classifications,
+        name="profile_classifications",
+    ),
+    path(
         "<slug:profile_slug>/",
         views.profile_overview,
         name="profile_overview",

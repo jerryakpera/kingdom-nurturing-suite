@@ -1,0 +1,67 @@
+{% extends "profiles/profile_base.html" %}
+
+{% block title %}
+{{ profile.get_full_name }} classifications
+{% endblock title %}
+
+{% block profile_base_content %}
+  <section class="space-y-4">
+    <div>
+      <h1 class="text-xl md:text-2xl font-bold">Classifications and Subclassifications</h1>
+      <p>The classifications and subclassifications represent the different stages of personal and social status, as well as challenges or achievements that individuals may face. This framework helps in understanding and supporting them in their journey.</p>
+    </div>
+
+    <label>
+      <input class="peer/showLabel absolute scale-0" type="checkbox" />
+      <span class="block max-h-14 w-full overflow-hidden py-4 px-2 transition-all duration-300 peer-checked/showLabel:max-h-64 border border-knsPrimary-300 shadow-md rounded-md mt-3">
+        <div class="flex justify-between">
+          <h3 class="flex h-full cursor-pointer items-center text-knsPrimary-600 font-medium mb-4">Learn more about classifications</h3>
+          <div class="text-2xl transform transition-transform duration-300 peer-checked/showLabel:rotate-180">
+            <iconify-icon icon="mdi:caret"></iconify-icon>
+          </div>
+        </div>
+        <div class="text-sm space-y-4">
+          <p>
+            Classifications represent broad categories such as “Other Religions,” “Businessperson or Entrepreneur,” and “Underprivileged,” while subclassifications provide more detailed insights into specific conditions, such as “Unemployed with no skills” or “Vulnerable to substance abuse.”
+          </p>
+          <p>
+            This classification system helps leaders and support teams understand each individual’s situation and identify areas of support and potential growth.
+          </p>
+        </div>
+      </span>
+    </label>
+
+    <ol class="relative border-s border-gray-200">
+      {% for pcg in profile_classifications_group %}
+        <li class="mb-10 ms-4">
+          <div class="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -start-1.5 border border-white"></div>
+          {% with first_pc=pcg|first %}
+            <time class="text-sm font-normal leading-none text-gray-600">
+              {{ first_pc.created_at|date:"F j, Y" }}
+            </time>
+          {% endwith %}
+
+          <div class="space-y-2">
+            {% for pc in pcg %}
+              <div>
+                <h3 class="text-md font-bold text-gray-900">
+                  {{ pc.classification.title }}
+                  {% if pc.subclassification %}
+                    <span class="font-medium text-gray-800">
+                      ({{ pc.subclassification.title }})
+                    </span>
+                  {% endif %}
+                </h3>
+
+                <p class="text-sm font-normal">{{ pc.classification.content|safe }}</p>
+                {% if pc.subclassification %}
+                  <p class="text-sm font-normal">{{ pc.subclassification.content|safe }}</p>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+  </section>
+{% endblock profile_base_content %}
