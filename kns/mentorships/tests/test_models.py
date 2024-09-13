@@ -528,8 +528,9 @@ class TestMentorshipMentorshipGoalModel(TestCase):
 
         expected_str = (
             f"{self.mentorship_goal.title} - {self.mentorship.mentor.get_full_name()} "
-            "mentoring {self.mentorship.mentee.get_full_name()}"
+            f"mentoring {self.mentorship.mentee.get_full_name()}"
         )
+
         self.assertEqual(str(relationship), expected_str)
 
     def test_unique_together_constraint(self):
