@@ -10,6 +10,8 @@ from kns.faith_milestones.utils import populate_faith_milestones
 from kns.levels.db_data import levels as levels_data
 from kns.levels.db_data import sublevels as sublevels_data
 from kns.levels.utils import populate_levels, populate_sublevels
+from kns.mentorships.db_data import mentorship_areas, mentorship_goals
+from kns.mentorships.utils import populate_mentorship_areas, populate_mentorship_goals
 from kns.profiles.db_data import encryption_reasons
 from kns.profiles.utils import populate_encryption_reasons
 from kns.skills.skills_data import skills as skills_data
@@ -50,5 +52,8 @@ class Command(BaseCommand):
 
         populate_levels(levels_data=levels_data)
         populate_sublevels(sublevels_data=sublevels_data)
+
+        populate_mentorship_areas(mentorship_areas_data=mentorship_areas)
+        populate_mentorship_goals(mentorship_goals_data=mentorship_goals)
 
         print("Database successfully populated.")
