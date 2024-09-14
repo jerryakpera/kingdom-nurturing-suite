@@ -2,12 +2,10 @@
 Models for the `mentorships` app.
 """
 
-from datetime import timedelta
 from uuid import uuid4
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.utils import timezone
 from tinymce import models as tinymce_models
 
 from kns.core.constants import MENTORSHIP_GOAL_TYPES, MENTORSHIP_STATUS_CHOICES

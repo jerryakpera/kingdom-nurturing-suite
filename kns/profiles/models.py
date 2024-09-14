@@ -687,6 +687,23 @@ class Profile(
             no=current_classification_no,
         )
 
+    def get_mentorship_areas_as_str(self) -> str:
+        """
+        Return the mentorship areas for the profile as a comma-separated string.
+        If the profile has no mentorship areas, return '---'.
+
+        Returns
+        -------
+        str
+            A comma-separated string of mentorship area titles or
+            '---' if none exist.
+        """
+        mentorship_areas = self.mentorship_areas.all()
+        if mentorship_areas.exists():
+            return ", ".join([area.mentorship_area.title for area in mentorship_areas])
+
+        return "---"
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
