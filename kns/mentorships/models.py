@@ -223,64 +223,6 @@ class ProfileMentorshipArea(models.Model):
         unique_together = ("profile", "mentorship_area")
 
 
-class ProfileMentorshipAreaInterest(models.Model):
-    """
-    A model representing the interest of a user profile in a mentorship area.
-
-    The `ProfileMentorshipAreaInterest` model links a specific user profile to a specific
-    mentorship area, indicating that the profile has expressed interest in the area. It
-    includes foreign key relationships to both `Profile` and `MentorshipArea` models. This
-    model also tracks the creation and last modification times of the interest records.
-
-    Methods
-    -------
-    __str__():
-        Return a string representation of the ProfileMentorshipAreaInterest instance, which
-        includes the name of the profile and the title of the mentorship area.
-    """
-
-    profile = models.ForeignKey(
-        Profile,
-        related_name="mentorship_areas_interests",
-        on_delete=models.CASCADE,
-    )
-    mentorship_area = models.ForeignKey(
-        MentorshipArea,
-        related_name="profiles_interested",
-        on_delete=models.CASCADE,
-    )
-
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        editable=False,
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        editable=False,
-    )
-
-    def __str__(self) -> str:
-        """
-        Return a string representation of the ProfileMentorshipAreaInterest instance.
-
-        This method returns a formatted string that includes the name of the profile and
-        the title of the mentorship area associated with this interest.
-
-        Returns
-        -------
-        str
-            A string combining the name of the profile and the title of the mentorship area,
-            formatted as "ProfileName MentorshipAreaTitle".
-        """
-        return f"{self.profile.get_full_name()} {self.mentorship_area.title}"
-
-    class Meta:
-        unique_together = (
-            "profile",
-            "mentorship_area",
-        )
-
-
 class Mentorship(TimestampedModel, ModelWithStatus, models.Model):
     """
     A model representing a mentorship relationship between a mentor and a mentee.

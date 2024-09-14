@@ -17,7 +17,6 @@ from kns.mentorships.models import (
     MentorshipGoal,
     MentorshipMentorshipGoal,
     ProfileMentorshipArea,
-    ProfileMentorshipAreaInterest,
 )
 
 
@@ -297,76 +296,6 @@ class TestProfileMentorshipAreaModel(TestCase):
 
         with pytest.raises(IntegrityError) as excinfo:
             ProfileMentorshipArea.objects.create(
-                profile=self.profile,
-                mentorship_area=self.mentorship_area,
-            )
-
-        assert "UNIQUE constraint failed" in str(excinfo.value)
-
-
-class TestProfileMentorshipAreaInterestModel(TestCase):
-    def setUp(self):
-        """
-        Setup method to create a Profile instance and a MentorshipArea instance.
-        """
-        self.user = User.objects.create_user(
-            email="jane.doe@example.com",
-            password="password",
-        )
-
-        self.profile = self.user.profile
-        self.profile.first_name = "Jane"
-        self.profile.last_name = "Doe"
-        self.profile.save()
-
-        # Create MentorshipArea instance
-        self.mentorship_area = MentorshipArea.objects.create(
-            title="Software Engineering",
-            content="<p>Advanced concepts in software development.</p>",
-            author=self.profile,
-        )
-
-    def test_profile_mentorship_area_interest_creation(self):
-        """
-        Test that a ProfileMentorshipAreaInterest instance can be created
-        and is properly saved.
-        """
-        interest = ProfileMentorshipAreaInterest.objects.create(
-            profile=self.profile,
-            mentorship_area=self.mentorship_area,
-        )
-
-        self.assertEqual(interest.profile, self.profile)
-        self.assertEqual(
-            interest.mentorship_area,
-            self.mentorship_area,
-        )
-
-    def test_profile_mentorship_area_interest_str_method(self):
-        """
-        Test that the __str__ method returns the correct string representation
-        of the ProfileMentorshipAreaInterest instance.
-        """
-        interest = ProfileMentorshipAreaInterest.objects.create(
-            profile=self.profile,
-            mentorship_area=self.mentorship_area,
-        )
-
-        expected_str = f"{self.profile.get_full_name()} {self.mentorship_area.title}"
-        self.assertEqual(str(interest), expected_str)
-
-    def test_unique_together_constraint(self):
-        """
-        Test that the unique_together constraint on profile and
-        mentorship_area is enforced.
-        """
-        ProfileMentorshipAreaInterest.objects.create(
-            profile=self.profile,
-            mentorship_area=self.mentorship_area,
-        )
-
-        with pytest.raises(IntegrityError) as excinfo:
-            ProfileMentorshipAreaInterest.objects.create(
                 profile=self.profile,
                 mentorship_area=self.mentorship_area,
             )

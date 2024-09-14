@@ -7,6 +7,7 @@ from django.contrib import admin
 from kns.classifications.models import ProfileClassification
 from kns.faith_milestones.models import ProfileFaithMilestone
 from kns.levels.models import ProfileLevel
+from kns.mentorships.models import ProfileMentorshipArea
 from kns.skills.models import ProfileInterest, ProfileSkill
 from kns.vocations.models import ProfileVocation
 
@@ -29,6 +30,16 @@ class ProfileEncryptionInline(admin.TabularInline):
 
     extra = 0
     model = ProfileEncryption
+    fk_name = "profile"
+
+
+class ProfileMentorshipAreaInline(admin.TabularInline):
+    """
+    Inline admin interface for the ProfileMentorshipArea model.
+    """
+
+    extra = 0
+    model = ProfileMentorshipArea
     fk_name = "profile"
 
 
@@ -147,6 +158,7 @@ class ProfileAdmin(admin.ModelAdmin):
     inlines = [
         ProfileSkillInline,
         ProfileInterestInline,
+        ProfileMentorshipAreaInline,
         ConsentFormInline,
         ProfileEncryptionInline,
         ProfileFaithMilestoneInline,
