@@ -2,6 +2,8 @@
 Views for the profiles app.
 """
 
+from datetime import date, timedelta
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -194,17 +196,23 @@ class NewMemberView(SessionWizardView):  # pragma: no cover
 @login_required
 def index(request):
     """
-    View to render a page displaying a list of all profiles.
+    View to render a list of profiles with various filtering options.
+
+    This view retrieves profiles from the database and applies filters
+    based on user-provided criteria. It displays profiles related to
+    the user's group and its descendant groups if applicable. The
+    view also paginates the profiles for easier navigation.
 
     Parameters
     ----------
     request : HttpRequest
-        The request object used to generate the response.
+        The HTTP request object that contains metadata about the request.
 
     Returns
     -------
     HttpResponse
-        The rendered template with a list of profiles.
+        An HTTP response object with the rendered template containing the
+        filtered profiles and any relevant filter forms.
     """
     profiles = (
         Profile.objects.filter(
@@ -215,7 +223,7 @@ def index(request):
             first_name="",
             last_name="",
         )
-        .order_by("-created_at")
+        .order_by("created_at")
     )
 
     # Get the current user's group
@@ -239,6 +247,32 @@ def index(request):
             group_in__group__in=descendant_groups,
         )
 
+    # Initialize filter forms
+    basic_info_form = profile_forms.BasicInfoFilterForm(request.GET or None)
+    # mentorship_form = profile_forms.MentorshipFilterForm(request.GET or None)
+    # activity_training_form = profile_forms.ActivityTrainingFilterForm(
+    #     request.GET or None,
+    # )
+    # education_experience_form = profile_forms.EducationExperienceFilterForm(
+    #     request.GET or None,
+    # )
+
+    # Apply filters based on form data
+    if request.method == "GET":
+        if basic_info_form.is_valid():
+            role = basic_info_form.cleaned_data.get("role")
+            gender = basic_info_form.cleaned_data.get("gender")
+            min_age = basic_info_form.cleaned_data.get("min_age")
+
+            if role:
+                profiles = profiles.filter(role=role)
+            if gender:
+                profiles = profiles.filter(gender=gender)
+            if min_age:
+                today = date.today()
+                min_birth_date = today - timedelta(days=min_age * 365)
+                profiles = profiles.filter(date_of_birth__lte=min_birth_date)
+
     # Pagination
     paginator = Paginator(profiles, 12)
     page = request.GET.get("page")
@@ -252,6 +286,10 @@ def index(request):
 
     context = {
         "page_obj": page_obj,
+        "basic_info_form": basic_info_form,
+        # "mentorship_form": mentorship_form,
+        # "activity_training_form": activity_training_form,
+        # "education_experience_form": education_experience_form,
     }
 
     return render(

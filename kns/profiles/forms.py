@@ -825,3 +825,155 @@ class GroupMemberDiscipleForm(forms.ModelForm):
                 user__verified=True,
                 user__agreed_to_terms=True,
             )
+
+
+class BasicInfoFilterForm(forms.Form):
+    """
+    Filter profiles based on basic information such as
+    gender, age, place of birth, and role.
+
+    Attributes
+    ----------
+    gender : ChoiceField
+        Filter based on gender (e.g., Male, Female).
+    min_age : IntegerField
+        Filter profiles with a minimum age.
+    place_of_birth_country : CountryField
+        Filter based on the place of birth (country).
+    place_of_birth_city : CharField
+        Filter based on the place of birth (city).
+    role : ChoiceField
+        Filter profiles based on their role (e.g., Leader, Member).
+    location_country : CountryField
+        Filter based on current location (country).
+    location_city : CharField
+        Filter based on current location (city).
+    """
+
+    gender = forms.ChoiceField(
+        label="Gender",
+        choices=[("", "---------")] + profile_constants.GENDER_OPTIONS,
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 "
+                    "text-sm rounded-lg focus:ring-blue-500 "
+                    "focus:border-blue-500 block w-full p-2.5"
+                ),
+            }
+        ),
+    )
+
+    min_age = forms.IntegerField(
+        label="Minimum Age",
+        required=False,
+        min_value=15,
+        max_value=85,
+        widget=forms.NumberInput(
+            attrs={
+                "placeholder": "Enter minimum age",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    place_of_birth_country = CountryField().formfield(
+        label="Place of Birth (Country)",
+        required=False,
+        widget=CountrySelectWidget(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    place_of_birth_city = forms.CharField(
+        label="Place of Birth (City)",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Enter city",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    role = forms.ChoiceField(
+        label="Role",
+        choices=[("", "---------")] + profile_constants.PROFILE_ROLE_OPTIONS,
+        required=False,
+        widget=forms.Select(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    location_country = CountryField().formfield(
+        label="Location (Country)",
+        required=False,
+        widget=CountrySelectWidget(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    location_city = forms.CharField(
+        label="Location (City)",
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "placeholder": "Enter city",
+                "class": (
+                    "bg-gray-50 border border-gray-300"
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
+                    "focus:border-blue-500 block w-full p-2.5 "
+                ),
+            }
+        ),
+    )
+
+    def clean_min_age(self):
+        """
+        Validate the 'min_age' field to ensure the minimum age does
+        not exceed the current date.
+
+        Returns
+        -------
+        int or None
+            The cleaned minimum age value or None.
+        """
+        min_age = self.cleaned_data.get("min_age")
+
+        if min_age is not None:
+            today = date.today()
+            min_birth_date = today - timedelta(days=min_age * 365)
+
+            if min_birth_date > today:
+                raise forms.ValidationError(
+                    "Minimum age cannot exceed current date.",
+                )
+
+        return min_age

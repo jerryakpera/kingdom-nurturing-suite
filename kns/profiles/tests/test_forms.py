@@ -8,6 +8,7 @@ from kns.groups.models import Group
 from kns.groups.tests import test_constants
 from kns.profiles import constants as profile_constants
 from kns.profiles.forms import (
+    BasicInfoFilterForm,
     BioDetailsForm,
     ContactDetailsForm,
     GroupMemberDiscipleForm,
@@ -661,3 +662,86 @@ class TestGroupMemberDiscipleForm(TestCase):
         )
 
         self.assertFalse(form.is_valid())
+
+
+class TestBasicInfoFilterForm(TestCase):
+    def setUp(self):
+        """
+        Set up test data for filtering.
+        """
+        # Create users and their profiles
+        self.user1 = User.objects.create_user(
+            email="user1@example.com", password="password"
+        )
+        self.user2 = User.objects.create_user(
+            email="user2@example.com", password="password"
+        )
+
+        self.profile1 = self.user1.profile
+        self.profile2 = self.user2.profile
+
+        # Set different attributes for filtering
+        self.profile1.gender = "male"
+        self.profile1.save()
+
+        self.profile2.gender = "female"
+        self.profile2.save()
+
+    def test_form_initialization(self):
+        """
+        Test that the form initializes correctly with no errors.
+        """
+        form = BasicInfoFilterForm()
+        self.assertIsInstance(form, BasicInfoFilterForm)
+
+    def test_form_valid_gender_filter(self):
+        """
+        Test that filtering by gender returns the correct profiles.
+        """
+        form_data = {"gender": "female"}
+        form = BasicInfoFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["gender"], "female")
+
+    def test_form_invalid_min_age(self):
+        """
+        Test that an invalid minimum age (greater than the current age)
+        raises a validation error.
+        """
+        future_age = 200
+        form_data = {"min_age": future_age}
+        form = BasicInfoFilterForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("min_age", form.errors)
+
+    def test_form_valid_min_age(self):
+        """
+        Test that a valid minimum age passes validation.
+        """
+        valid_age = 25
+        form_data = {"min_age": valid_age}
+        form = BasicInfoFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["min_age"], valid_age)
+
+    def test_form_filter_by_location(self):
+        """
+        Test that filtering by location (city and country) works correctly.
+        """
+        form_data = {"location_country": "US", "location_city": "New York"}
+        form = BasicInfoFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["location_country"], "US")
+        self.assertEqual(form.cleaned_data["location_city"], "New York")
+
+    def test_form_empty_filter(self):
+        """
+        Test that an empty form does not raise validation errors.
+        """
+        form = BasicInfoFilterForm(data={})
+
+        self.assertTrue(form.is_valid())
