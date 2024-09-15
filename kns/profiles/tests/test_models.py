@@ -11,7 +11,7 @@ from kns.core.models import Setting
 from kns.custom_user.models import User
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
-from kns.levels.models import Level, ProfileLevel, Sublevel
+from kns.mentorships.models import MentorshipArea, ProfileMentorshipArea
 from kns.profiles.models import (
     ConsentForm,
     Discipleship,
@@ -543,6 +543,61 @@ class TestProfileModel(TestCase):
             self.profile.get_vocations_as_string(),
             "No vocations",
         )
+
+    def test_get_mentorship_areas_as_str_no_areas(self):
+        """
+        Test that get_mentorship_areas_as_str returns '---' when there are no mentorship areas.
+        """
+        assert self.profile.get_mentorship_areas_as_str() == "---"
+
+    def test_get_mentorship_areas_as_str_with_one_area(self):
+        """
+        Test that get_mentorship_areas_as_str returns the title of the mentorship area
+        when there is one mentorship area.
+        """
+        area = MentorshipArea.objects.create(
+            title="Software Engineering",
+            content="Mentorship on software engineering topics",
+            author=self.profile,
+        )
+
+        ProfileMentorshipArea.objects.create(
+            profile=self.profile,
+            mentorship_area=area,
+        )
+
+        assert self.profile.get_mentorship_areas_as_str() == "Software Engineering"
+
+    def test_get_mentorship_areas_as_str_with_multiple_areas(self):
+        """
+        Test that get_mentorship_areas_as_str returns a comma-separated string
+        of mentorship area titles when there are multiple mentorship areas.
+        """
+        area1 = MentorshipArea.objects.create(
+            title="Software Engineering",
+            content="Mentorship on software engineering topics",
+            author=self.profile,
+        )
+
+        area2 = MentorshipArea.objects.create(
+            title="Data Science",
+            content="Mentorship on data science topics",
+            author=self.profile,
+        )
+
+        ProfileMentorshipArea.objects.create(
+            profile=self.profile,
+            mentorship_area=area1,
+        )
+
+        ProfileMentorshipArea.objects.create(
+            profile=self.profile,
+            mentorship_area=area2,
+        )
+
+        expected_result = "Software Engineering, Data Science"
+
+        assert self.profile.get_mentorship_areas_as_str() == expected_result
 
 
 class TestConsentFormModel:
