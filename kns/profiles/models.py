@@ -260,6 +260,21 @@ class Profile(
         """
         return model_methods.get_trainings_url(self)
 
+    def get_mentorships_url(self):
+        """
+        Get the URL for the profile's mentorships view.
+
+        This method uses the `get_mentorships_url` function from
+        `model_methods` to generate the URL for the profile's mentorships
+        view.
+
+        Returns
+        -------
+        str
+            The URL for the profile's mentorships view.
+        """
+        return model_methods.get_mentorships_url(self)
+
     def get_activities_url(self):
         """
         Get the URL for the profile's activities view.

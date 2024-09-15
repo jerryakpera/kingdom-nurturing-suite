@@ -128,9 +128,8 @@ class ProfileMentorshipAreasFormTests(TestCase):
             "mentorship_areas": [],
         }
         form = ProfileMentorshipAreasForm(data=data)
-        self.assertTrue(
-            form.is_valid()
-        )  # It's valid because mentorship_areas is not required
+
+        self.assertFalse(form.is_valid())
 
     def test_form_initial_data(self):
         """

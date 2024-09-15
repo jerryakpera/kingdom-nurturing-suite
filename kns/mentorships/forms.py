@@ -85,8 +85,15 @@ class ProfileMentorshipAreasForm(forms.Form):
         cleaned_data = super().clean()
         mentorship_areas = cleaned_data.get("mentorship_areas", [])
 
-        settings = Setting.objects.all().first()
+        settings = Setting.get_or_create_setting()
 
+        # Ensure at least one mentorship area is selected
+        if not mentorship_areas:
+            self.add_error(
+                "mentorship_areas", "At least one mentorship area is required."
+            )
+
+        # Check for the maximum limit of selected mentorship areas
         if len(mentorship_areas) > settings.max_mentorship_areas_per_user:
             error_msg = (
                 "You can select up to "

@@ -86,6 +86,11 @@ urlpatterns = [
         name="edit_bio_details",
     ),
     path(
+        "<slug:profile_slug>/edit/mentorship-details",
+        views.edit_profile_mentorship_areas,
+        name="edit_profile_mentorship_areas",
+    ),
+    path(
         "<slug:profile_slug>/make-leader-page",
         views.make_leader_page,
         name="make_leader_page",
@@ -134,6 +139,11 @@ urlpatterns = [
         "<slug:profile_slug>/classifications",
         views.profile_classifications,
         name="profile_classifications",
+    ),
+    path(
+        "<slug:profile_slug>/mentorships",
+        views.profile_mentorships,
+        name="profile_mentorships",
     ),
     path(
         "<slug:profile_slug>/",

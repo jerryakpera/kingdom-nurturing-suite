@@ -13,6 +13,13 @@
     </span>
   </a>
 
+  <a href="{{ profile.get_mentorships_url }}" class="{% if request.path == profile.get_mentorships_url %}text-knsPrimary font-semibold{% endif %}">
+    <iconify-icon icon="hugeicons:mentor"></iconify-icon>
+    <span class="hidden sm:block">
+      Mentorships
+    </span>
+  </a>
+
   {% if profile.group_led %}
     <a href="{{ profile.get_discipleships_url }}" class="{% if request.path == profile.get_discipleships_url %}text-knsPrimary font-semibold{% endif %}">
       <iconify-icon icon="mdi:bible"></iconify-icon>

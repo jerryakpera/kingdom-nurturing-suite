@@ -1,5 +1,5 @@
 {% if profile.current_level %}
-  <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100 flex flex-col h-full">
+  <div class="p-3 border border-gray-200 rounded-lg flex flex-col h-full">
     <div class="flex-grow">
       <div class="uppercase tracking-wider text-gray-600 font-semibold text-xs">Level</div>
       <h5 class="text-2xl font-bold tracking-tight text-gray-900">
@@ -14,23 +14,21 @@
     <div class="space-x-2 mt-auto">
       <a
         href="{% url "profiles:profile_levels" profile_slug=profile.slug %}"
-        class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+        class="text-sm font-medium text-blue-700 hover:text-blue-800"
       >
         Read more
-        <iconify-icon icon="mdi:arrow-right-thin" class="text-2xl ml-1"></iconify-icon>
       </a>
 
       <a
         href="{% url "profiles:edit_profile_level" profile_slug=profile.slug %}"
-        class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+        class="text-sm font-medium text-blue-700 hover:text-blue-800"
       >
         Update level
-        <iconify-icon icon="mdi:arrow-right-thin" class="text-2xl ml-1"></iconify-icon>
       </a>
     </div>
   </div>
 {% else %}
-  <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-100">
+  <div class="block p-3 border border-gray-200 rounded-lg shadow-sm">
     <div class="uppercase tracking-wider text-gray-600 font-semibold text-xs">Level</div>
     <h5 class="text-2xl mb-2 font-bold tracking-tight text-gray-900">
       {{ profile.get_full_name }} currently has no set level
@@ -38,18 +36,16 @@
     <div class="space-x-2">
       <a
         href="{% url "profiles:profile_levels" profile_slug=profile.slug %}"
-        class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+        class="text-sm font-medium text-blue-700 hover:text-blue-800"
       >
         Read more
-        <iconify-icon icon="mdi:arrow-right-thin" class="text-2xl ml-1"></iconify-icon>
       </a>
 
       <a
         href="{% url "profiles:edit_profile_level" profile_slug=profile.slug %}"
-        class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
+        class="text-sm font-medium text-blue-700 hover:text-blue-800"
       >
         Assign level
-        <iconify-icon icon="mdi:arrow-right-thin" class="text-2xl ml-1"></iconify-icon>
       </a>
     </div>
   </div>

@@ -1,0 +1,16 @@
+{% load profiles_custom_tags %}
+
+<div class="grid grid-cols-1 xs:grid-cols-2 gap-x-2 gap-y-2">
+  {% for pma in profile.mentorship_areas.all %}
+    <div class="p-3 bg-white border border-gray-200 rounded-sm flex flex-col">
+      <a href="#">
+        <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900">
+          {{ pma.mentorship_area.title }}
+        </h5>
+      </a>
+      <p class="mb-3 font-normal text-gray-700 text-sm flex-grow">
+        {{ pma.mentorship_area.content|safe }}
+      </p>
+    </div>
+  {% endfor %}
+</div>

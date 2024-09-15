@@ -25,6 +25,8 @@ from kns.faith_milestones.forms import ProfileFaithMilestonesForm
 from kns.faith_milestones.models import ProfileFaithMilestone
 from kns.levels.forms import ProfileLevelForm
 from kns.levels.models import Level, ProfileLevel, Sublevel
+from kns.mentorships.forms import ProfileMentorshipAreasForm
+from kns.mentorships.models import ProfileMentorshipArea
 from kns.skills.forms import ProfileSkillsForm
 from kns.skills.models import ProfileInterest, ProfileSkill
 from kns.vocations.forms import ProfileVocationForm
@@ -1890,3 +1892,111 @@ def move_to_sent_forth(request, discipleship_id):
     )
 
     return redirect(discipleship.discipler.get_discipleships_url())
+
+
+@login_required
+def profile_mentorships(request, profile_slug):  # pragma: no cover
+    """
+    Display the mentorships for a specific profile.
+
+    This view retrieves a profile based on the provided slug and renders
+    the mentorships page for that profile. The context is currently empty
+    but can be extended to include relevant profile mentorship data.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile whose mentorships are to be displayed.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the mentorships page for the specified profile.
+    """
+    get_object_or_404(Profile, slug=profile_slug)
+
+    context = {}
+
+    return render(
+        request=request,
+        template_name="mentorships/pages/profile_mentorships_page.html",
+        context=context,
+    )
+
+
+@login_required
+def edit_profile_mentorship_areas(request, profile_slug):
+    """
+    Edit the mentorship areas for a specific profile.
+
+    This view allows users to update the mentorship areas for a profile. It retrieves the
+    current mentorship areas for the profile and initializes a form with this data. When
+    the form is submitted, it validates the input, updates the mentorship areas, and
+    displays a success message if the update is successful. If the user is not authorized
+    to make changes, they are redirected with an error message.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile whose mentorship areas are to be edited.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the edit profile mentorship areas page or redirects to the mentorships
+        page of the profile's discipler if the form is successfully submitted.
+    """
+    profile = get_object_or_404(Profile, slug=profile_slug)
+
+    profile_mentorship_areas = profile.mentorship_areas.values_list(
+        "mentorship_area",
+        flat=True,
+    )
+
+    initial_data = {
+        "mentorship_areas": profile_mentorship_areas,
+    }
+
+    profile_mentorship_areas_form = ProfileMentorshipAreasForm(
+        request.POST or None,
+        initial=initial_data,
+    )
+
+    if request.method == "POST":
+        if profile_mentorship_areas_form.is_valid():
+            ProfileMentorshipArea.objects.filter(profile=profile).delete()
+            mentorship_areas = profile_mentorship_areas_form.cleaned_data.get(
+                "mentorship_areas"
+            )
+            for mentorship_area in mentorship_areas:
+                if not ProfileMentorshipArea.objects.filter(
+                    profile=profile, mentorship_area=mentorship_area
+                ).exists():
+                    ProfileMentorshipArea.objects.create(
+                        profile=profile, mentorship_area=mentorship_area
+                    )
+
+            messages.success(
+                request=request,
+                message=(
+                    (
+                        f"{name_with_apostrophe(profile.get_full_name())} mentorship "
+                        "areas have been updated"
+                    )
+                ),
+            )
+            return redirect(profile.get_mentorships_url())
+
+    context = {
+        "profile_mentorship_areas_form": profile_mentorship_areas_form,
+    }
+
+    return render(
+        request=request,
+        template_name="mentorships/pages/edit_profile_mentorships.html",
+        context=context,
+    )

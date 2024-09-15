@@ -1,0 +1,34 @@
+{% extends "profiles/profile_base.html" %}
+
+{% block title %}
+  {{ profile.get_full_name }} | Edit mentorship details
+{% endblock title %}
+
+{% block profile_base_content %}
+  <section>
+    <form
+      method="POST"
+      id="form-container"
+      action="{% url "profiles:edit_profile_mentorship_areas" profile_slug=profile.slug %}"
+    >
+      {% csrf_token %}
+
+      <div class="mb-4">
+        {% include "mentorships/forms/profile_mentorship_areas_form.html" %}
+      </div>
+
+      <div class="card-footer">
+        <div class="flex justify-end space-x-2">
+          {% include "core/components/globals/cancel_button.html" %}
+
+          <button
+            type="submit"
+            class="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </form>
+  </section>
+{% endblock profile_base_content %}

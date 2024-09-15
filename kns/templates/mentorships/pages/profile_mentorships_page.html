@@ -1,0 +1,107 @@
+{% extends "profiles/profile_base.html" %}
+
+{% load profiles_custom_tags %}
+
+{% block title %}
+  {{ profile.get_full_name }} | Mentorship areas
+{% endblock title %}
+
+{% block profile_base_content %}
+  <section>
+    <div class="space-y-4">
+      <div class="border-b mb-3 flex justify-between items-center">
+        <div>
+          <h1 class="text-md font-bold">Mentorship areas</h1>
+          <h6 class="text-sm text-gray-700">
+            {{ profile.get_full_name }} is able to mentor others in the following mentorship areas
+          </h6>
+        </div>
+
+        {% if request.user|can_edit_profile:profile %}
+          <a
+            href="{% url "profiles:edit_profile_mentorship_areas" profile_slug=profile.slug %}"
+            class="px-2 py-1.5 items-center text-xs sm:text-sm text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300"
+          >
+            Edit
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% include "mentorships/components/mentorship_areas_list/profile_mentorship_areas_list.html" %}
+
+    <div class="space-y-6 mt-6">
+      <div>
+        <h1 class="font-bold text-lg">
+          Goals for Each Mentorship Area
+        </h1>
+
+        A section detailing the mentorship goals for each mentorship area. This can show the relationship between mentorship areas and goals.
+      </div>
+
+      <div>
+        <h1 class="font-bold text-lg">
+          Profile's Mentorship Areas
+        </h1>
+
+        A section displaying the mentorship areas associated with the user's profile, possibly showing a list of areas they mentor in.
+      </div>
+
+      <div>
+        <h1 class="font-bold text-lg">
+          Mentorship Relationships
+        </h1>
+
+        A section to show active mentorship relationships involving the user, including their role as a mentor or mentee.
+      </div>
+
+      <div>
+        <h1 class="font-bold text-lg">
+          Mentorship History
+        </h1>
+
+        A section listing the completed or canceled mentorships, including details like start and end dates, mentor and mentee names.
+      </div>
+
+      <div>
+        <h1 class="font-bold text-lg">
+          Mentorship Area Details
+        </h1>
+
+        A section providing more information about a selected mentorship area, including its title, content, and author (profile).
+      </div>
+
+      <div>
+        <h1 class="font-bold text-lg">
+          Add or Edit Mentorship Areas
+        </h1>
+
+        A section allowing users to manage their mentorship areas by adding new ones or editing existing ones.
+      </div>
+
+      <div>
+        <h1 class="font-bold text-lg">
+          Mentorship Goals Overview
+        </h1>
+
+        A section providing an overview of all goals associated with different mentorship areas and the progress on these goals.
+      </div>
+
+      <div>
+        <h1 class="font-bold text-lg">
+          Mentorship Area Settings
+        </h1>
+
+        A section showing any settings or limitations for mentorship areas, such as the number of areas a user can be involved with.
+      </div>
+
+      <div>
+        <h1 class="font-bold text-lg">
+          Mentorship Requests
+        </h1>
+
+        A section where users can view or manage requests to start a mentorship in a specific area or goal.
+      </div>
+    </div>
+  </section>
+{% endblock profile_base_content %}

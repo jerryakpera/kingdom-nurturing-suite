@@ -13,12 +13,15 @@ from kns.classifications.models import (
     Subclassification,
 )
 from kns.core.models import Setting
+from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.models import FaithMilestone, ProfileFaithMilestone
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
 from kns.levels.models import Level, ProfileLevel, Sublevel
+from kns.mentorships.models import MentorshipArea, ProfileMentorshipArea
 from kns.profiles.models import Discipleship, EncryptionReason, ProfileEncryption
+from kns.profiles.utils import name_with_apostrophe
 from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 from kns.vocations.models import ProfileVocation, Vocation
 
@@ -2320,3 +2323,269 @@ class EditProfileClassificationsTests(TestCase):
             str(messages[0]),
             "Classification updated successfully.",
         )
+
+
+class TestProfileMentorshipsView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.slug = "test-user"
+        self.profile.save()
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="password",
+        )
+        self.other_user.save()
+        self.other_profile = self.other_user.profile
+
+        # Create some mentorship areas for testing
+        self.mentorship_area = MentorshipArea.objects.create(
+            title="Software Engineering",
+            content="Mentorship in Software Engineering.",
+            author=self.profile,
+            status="published",
+        )
+        self.mentorship_area2 = MentorshipArea.objects.create(
+            title="Data Science",
+            content="Mentorship in Data Science.",
+            author=self.profile,
+            status="published",
+        )
+
+    def test_profile_mentorships_view_loads_correctly(self):
+        """
+        Test that the profile_mentorships view loads correctly
+        and renders the page.
+        """
+        url = reverse(
+            "profiles:profile_mentorships",
+            kwargs={"profile_slug": self.profile.slug},
+        )
+        response = self.client.get(url)
+
+        ProfileMentorshipArea.objects.create(
+            profile=self.profile,
+            mentorship_area=self.mentorship_area,
+        )
+
+        ProfileMentorshipArea.objects.create(
+            profile=self.profile,
+            mentorship_area=self.mentorship_area2,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "mentorships/pages/profile_mentorships_page.html",
+        )
+        # Add more checks based on the expected context or content
+        self.assertIn("profile", response.context)
+
+        self.assertEqual(response.context["profile"], self.profile)
+        self.assertEqual(response.context["profile"].mentorship_areas.count(), 2)
+
+    def test_profile_mentorships_view_with_invalid_slug(self):
+        """
+        Test that the profile_mentorships view returns a 404 error
+        when the profile slug does not exist.
+        """
+        url = reverse(
+            "profiles:profile_mentorships",
+            kwargs={"profile_slug": "invalid-slug"},
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+
+
+class TestEditProfileMentorshipAreasView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.slug = "test-user"
+        self.profile.save()
+
+        # Create mentorship areas for testing
+        self.mentorship_area = MentorshipArea.objects.create(
+            title="Software Engineering",
+            content="Mentorship in Software Engineering.",
+            author=self.profile,
+            status="published",
+        )
+        self.mentorship_area2 = MentorshipArea.objects.create(
+            title="Data Science",
+            content="Mentorship in Data Science.",
+            author=self.profile,
+            status="published",
+        )
+
+        # Create initial ProfileMentorshipArea associations
+        ProfileMentorshipArea.objects.create(
+            profile=self.profile,
+            mentorship_area=self.mentorship_area,
+        )
+        ProfileMentorshipArea.objects.create(
+            profile=self.profile,
+            mentorship_area=self.mentorship_area2,
+        )
+
+    def test_edit_profile_mentorship_areas_view_loads_correctly(self):
+        """
+        Test that the edit_profile_mentorship_areas view loads correctly
+        and renders the page with the correct initial data.
+        """
+        url = reverse(
+            "profiles:edit_profile_mentorship_areas",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "mentorships/pages/edit_profile_mentorships.html",
+        )
+        self.assertIn(
+            "profile_mentorship_areas_form",
+            response.context,
+        )
+        form = response.context["profile_mentorship_areas_form"]
+        self.assertTrue(
+            form.initial["mentorship_areas"],
+            [self.mentorship_area.id, self.mentorship_area2.id],
+        )
+
+    def test_edit_profile_mentorship_areas_form_submission(self):
+        """
+        Test that submitting the form in the edit_profile_mentorship_areas view
+        updates the profile mentorship areas correctly.
+        """
+        url = reverse(
+            "profiles:edit_profile_mentorship_areas",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        new_mentorship_area = MentorshipArea.objects.create(
+            title="Machine Learning",
+            content="Mentorship in Machine Learning.",
+            author=self.profile,
+            status="published",
+        )
+
+        response = self.client.post(
+            url,
+            data={
+                "mentorship_areas": [
+                    self.mentorship_area.id,
+                    new_mentorship_area.id,
+                ],
+            },
+        )
+
+        # Check if the profile mentorship areas have been updated
+        self.assertEqual(
+            ProfileMentorshipArea.objects.filter(profile=self.profile).count(),
+            2,
+        )
+        self.assertTrue(
+            ProfileMentorshipArea.objects.filter(
+                profile=self.profile, mentorship_area=new_mentorship_area
+            ).exists()
+        )
+
+        # Check for success message
+        messages_list = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(len(messages_list), 1)
+        self.assertEqual(
+            str(messages_list[0]),
+            (
+                f"{name_with_apostrophe(self.profile.get_full_name())} "
+                "mentorship areas have been updated"
+            ),
+        )
+
+        # Check redirection
+        self.assertRedirects(
+            response,
+            reverse(
+                "profiles:profile_mentorships",
+                kwargs={
+                    "profile_slug": self.profile.slug,
+                },
+            ),
+        )
+
+    def test_edit_profile_mentorship_areas_view_with_invalid_slug(self):
+        """
+        Test that the view returns a 404 error when the profile slug does not exist.
+        """
+        url = reverse(
+            "profiles:edit_profile_mentorship_areas",
+            kwargs={
+                "profile_slug": "invalid-slug",
+            },
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_edit_profile_mentorship_areas_form_invalid_data(self):
+        """
+        Test that submitting invalid form data does not update the
+        profile mentorship areas and stays on the same page.
+        """
+        url = reverse(
+            "profiles:edit_profile_mentorship_areas",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        response = self.client.post(
+            url,
+            data={
+                "mentorship_areas": [],  # Invalid data
+            },
+        )
+
+        # Check that the profile mentorship areas have not been updated
+        self.assertEqual(
+            ProfileMentorshipArea.objects.filter(profile=self.profile).count(),
+            2,
+        )
+
+        # Check for form errors
+        self.assertEqual(response.status_code, 200)
+
+        form = response.context["profile_mentorship_areas_form"]
+
+        self.assertFalse(form.is_valid())
