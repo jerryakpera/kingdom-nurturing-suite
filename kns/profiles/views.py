@@ -271,6 +271,7 @@ def index(request):
             if min_age:
                 today = date.today()
                 min_birth_date = today - timedelta(days=min_age * 365)
+
                 profiles = profiles.filter(date_of_birth__lte=min_birth_date)
 
     # Pagination

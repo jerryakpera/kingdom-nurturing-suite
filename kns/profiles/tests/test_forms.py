@@ -745,3 +745,18 @@ class TestBasicInfoFilterForm(TestCase):
         form = BasicInfoFilterForm(data={})
 
         self.assertTrue(form.is_valid())
+
+    def test_form_raises_validation_error_for_exceeding_min_age(self):
+        """
+        Test that a ValidationError is raised when min_age is too low,
+        resulting in an unrealistic birthdate.
+        """
+        form_data = {"min_age": 0}  # Age is too low to be realistic
+        form = BasicInfoFilterForm(data=form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("min_age", form.errors)
+        self.assertEqual(
+            form.errors["min_age"],
+            ["Ensure this value is greater than or equal to 15."],
+        )

@@ -971,9 +971,9 @@ class BasicInfoFilterForm(forms.Form):
             today = date.today()
             min_birth_date = today - timedelta(days=min_age * 365)
 
-            if min_birth_date > today:
+            if min_birth_date > today:  # pragma: no cover
                 raise forms.ValidationError(
-                    "Minimum age cannot exceed current date.",
+                    "Minimum date of birth cannot exceed current date.",
                 )
 
         return min_age

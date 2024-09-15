@@ -13,7 +13,6 @@ from kns.classifications.models import (
     Subclassification,
 )
 from kns.core.models import Setting
-from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.models import FaithMilestone, ProfileFaithMilestone
 from kns.groups.models import Group
@@ -2589,3 +2588,171 @@ class TestEditProfileMentorshipAreasView(TestCase):
         form = response.context["profile_mentorship_areas_form"]
 
         self.assertFalse(form.is_valid())
+
+
+class TestIndexView(TestCase):
+    def setUp(self):
+        """
+        Set up test data for the index view.
+        """
+        self.client = Client()
+
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.user2 = User.objects.create_user(
+            email="testuser2@example.com",
+            password="testpassword",
+        )
+        self.user3 = User.objects.create_user(
+            email="testuser3@example.com",
+            password="testpassword",
+        )
+
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile1 = self.user.profile
+        self.profile2 = self.user2.profile
+        self.profile3 = self.user3.profile
+
+        self.profile1.first_name = "John"
+        self.profile1.last_name = "Doe"
+        self.profile1.gender = "male"
+        self.profile1.role = "leader"
+        self.profile1.save()
+
+        self.profile2.first_name = "Jane"
+        self.profile2.last_name = "Smith"
+        self.profile2.role = "member"
+        self.profile2.gender = "female"
+        self.profile2.save()
+
+        self.profile3.first_name = "Jack"
+        self.profile3.last_name = "Reacher"
+        self.profile3.role = "member"
+        self.profile3.gender = "male"
+        self.profile3.date_of_birth = "2002-08-08"
+        self.profile3.save()
+
+        # Create a group
+        self.group = Group.objects.create(
+            leader=self.profile1,
+            name="Test Group",
+            slug="test-group",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.group.add_member(self.profile2)
+        self.group.add_member(self.profile3)
+
+    def test_view_filters_by_gender(self):
+        """
+        Test that profiles can be filtered by gender.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "gender": "female",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Jane Smith")
+        self.assertNotContains(response, "Jack Reacher")
+
+    def test_view_renders_correct_template(self):
+        """
+        Test that the index view renders the correct template.
+        """
+
+        response = self.client.get(reverse("profiles:index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/index.html",
+        )
+
+    def test_view_filters_by_role(self):
+        """
+        Test that profiles can be filtered by role.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "role": "leader",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "John Doe")
+        self.assertNotContains(response, "Jack Reacher")
+
+    def test_view_filters_by_min_age(self):
+        """
+        Test that profiles can be filtered by minimum age.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "min_age": 30,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "John Doe")
+        self.assertNotContains(response, "Jack Reacher")
+
+    def test_pagination(self):
+        """
+        Test that pagination works correctly when more profiles exist.
+        """
+        # Create more profiles to trigger pagination
+        for i in range(15):
+            user_instance = User.objects.create_user(
+                email=f"user{i}@example.com",
+                password="password",
+            )
+
+            profile_instance = user_instance.profile
+
+            profile_instance.first_name = f"Firstname {i}"
+            profile_instance.last_name = f"Lastname {i}"
+
+        response = self.client.get(reverse("profiles:index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            len(response.context["page_obj"]),
+            3,
+        )
+
+        # Test second page
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "page": 2,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["page_obj"]), 3)
+
+    def test_empty_form_does_not_filter(self):
+        """
+        Test that an empty form does not apply any filters.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "John Doe")
+        self.assertContains(response, "Jane Smith")
