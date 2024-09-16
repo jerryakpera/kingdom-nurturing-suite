@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Reusable function to handle modal open and close events
-  const initModal = (
+  window.initModal = (
     openButtonId,
     closeButtonId,
     modalElementId,
@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const openButton = document.getElementById(openButtonId);
     const closeButton = document.getElementById(closeButtonId);
     const $targetEl = document.getElementById(modalElementId);
+
+    if (!openButton || !closeButton || !$targetEl) {
+      return;
+    }
 
     // Default modal options
     const defaultOptions = {
@@ -27,15 +31,4 @@ document.addEventListener('DOMContentLoaded', () => {
     openButton.addEventListener('click', () => modal.show());
     closeButton.addEventListener('click', () => modal.hide());
   };
-
-  initModal(
-    'open-filter-profiles-modal-button',
-    'close-filter-profiles-modal-button',
-    'filter-profiles-modal',
-    {
-      placement: 'top-left',
-      backdrop: 'static', // Dynamic options for filter profiles modal
-      closable: true,
-    }
-  );
 });

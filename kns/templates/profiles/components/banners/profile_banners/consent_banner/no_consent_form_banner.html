@@ -1,4 +1,4 @@
-<div id="verified_banner" class="p-4 text-black bg-red-200 border border-red-200 rounded-md" role="alert">
+{% comment %} <div id="verified_banner" class="p-4 text-black bg-red-200 border border-red-200 rounded-md" role="alert">
   <div class="flex flex-col space-y-4">
     <div class="flex items-center">
       <iconify-icon icon="heroicons:exclaimation-circle-solid" class="text-xl"></iconify-icon>
@@ -15,6 +15,36 @@
         class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
       >
         Submit consent form
+      </a>
+
+      {% include "./consent_form_modal.html" %}
+    </div>
+  </div>
+</div> {% endcomment %}
+
+<div id="verified_banner" class="p-2 text-black bg-red-100 border border-red-200 rounded-sm" role="alert">
+  <div class="flex flex-col space-y-2">
+    <div class="flex items-start">
+      <iconify-icon icon="heroicons:exclaimation-circle-solid" class="text-xl"></iconify-icon>
+      <span class="sr-only">Info</span>
+
+      <div>
+        <div class="ms-3 text-sm font-bold uppercase">
+          Missing consent form
+        </div>
+        <div class="ms-3 text-sm font-medium">
+          {% comment %} **Missing Consent Form** {% endcomment %}
+          <p>We require a consent form from users under the age of {{ settings.adult_age }} to ensure compliance with our terms. {% include "profiles/components/banners/profile_banners/consent_banner/consent_form_read_more_modal.html" %}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col space-y-2 xs:flex-row xs:space-y-0 xs:justify-end xs:space-x-2">
+      <a
+        href="{% url "profiles:upload_consent_form" profile_slug=profile.slug %}"
+        class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      >
+        Submit Consent Form
       </a>
 
       {% include "./consent_form_modal.html" %}
