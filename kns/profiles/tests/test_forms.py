@@ -4,15 +4,20 @@ from django.test import TestCase
 
 from kns.core.models import Setting
 from kns.custom_user.models import User
+from kns.faith_milestones.forms import FaithMilestone
+from kns.faith_milestones.models import ProfileFaithMilestone
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
+from kns.mentorships.models import MentorshipArea, ProfileMentorshipArea
 from kns.profiles import constants as profile_constants
 from kns.profiles.forms import (
     BasicInfoFilterForm,
     BioDetailsForm,
     ContactDetailsForm,
+    FaithMilestoneFilterForm,
     GroupMemberDiscipleForm,
     InvolvementFilterForm,
+    MentorshipFilterForm,
     ProfileEncryptionForm,
     ProfileInvolvementForm,
     ProfileSettingsForm,
@@ -970,5 +975,168 @@ class TestSkillsFilterForm(TestCase):
         Test that an empty form does not raise validation errors.
         """
         form = SkillsFilterForm(data={})
+
+        self.assertTrue(form.is_valid())
+
+
+class TestMentorshipFilterForm(TestCase):
+    def setUp(self):
+        """
+        Set up test data for filtering by mentorship areas and mentorship areas of interest.
+        """
+        # Create users and assign mentorship areas
+        self.user1 = User.objects.create_user(
+            email="user1@example.com",
+            password="password",
+        )
+        self.user2 = User.objects.create_user(
+            email="user2@example.com",
+            password="password",
+        )
+
+        self.profile1 = self.user1.profile
+        self.profile2 = self.user2.profile
+
+        # Create sample Mentorship Areas
+        self.mentorship_area1 = MentorshipArea.objects.create(
+            title="Career Coaching",
+            content="First mentorship area",
+            author=self.profile1,
+            status="published",
+        )
+
+        self.mentorship_area2 = MentorshipArea.objects.create(
+            title="Leadership Training",
+            content="Second mentorship area",
+            author=self.profile2,
+            status="published",
+        )
+
+        self.mentorship_area3 = MentorshipArea.objects.create(
+            title="Unpublished Area",
+            content="Third mentorship area",
+            author=self.profile1,
+            status="unpublished",
+        )
+
+        # Assign mentorship areas to profiles
+        ProfileMentorshipArea.objects.create(
+            profile=self.profile1,
+            mentorship_area=self.mentorship_area1,
+        )
+
+        ProfileMentorshipArea.objects.create(
+            profile=self.profile2,
+            mentorship_area=self.mentorship_area2,
+        )
+
+    def test_form_initialization(self):
+        """
+        Test that the form initializes correctly with no errors.
+        """
+        form = MentorshipFilterForm()
+
+        self.assertIsInstance(form, MentorshipFilterForm)
+
+    def test_form_valid_mentorship_areas_filter(self):
+        """
+        Test that filtering by mentorship areas returns the correct profiles.
+        """
+        form_data = {
+            "mentorship_areas": [self.mentorship_area1.id],
+        }
+
+        form = MentorshipFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertIn(
+            self.mentorship_area1,
+            form.cleaned_data["mentorship_areas"],
+        )
+
+    def test_form_empty_filter(self):
+        """
+        Test that an empty form does not raise validation errors.
+        """
+        form = MentorshipFilterForm(data={})
+
+        self.assertTrue(form.is_valid())
+
+
+class TestFaithMilestoneFilterForm(TestCase):
+    def setUp(self):
+        """
+        Set up test data for filtering by faith milestones.
+        """
+        # Create users and assign faith milestones to profiles
+        self.user1 = User.objects.create_user(
+            email="user1@example.com",
+            password="password",
+        )
+        self.user2 = User.objects.create_user(
+            email="user2@example.com",
+            password="password",
+        )
+
+        self.profile1 = self.user1.profile
+        self.profile2 = self.user2.profile
+
+        # Create sample Faith Milestones
+        self.faith_milestone1 = FaithMilestone.objects.create(
+            author=self.profile1,
+            title="Milestone 1",
+            type="profile",
+            description="First faith milestone",
+        )
+        self.faith_milestone2 = FaithMilestone.objects.create(
+            author=self.profile1,
+            title="Milestone 2",
+            type="profile",
+            description="Second faith milestone",
+        )
+        self.faith_milestone3 = FaithMilestone.objects.create(
+            author=self.profile1,
+            title="Unrelated Milestone",
+            type="other",
+            description="Milestone not related to profile",
+        )
+
+        # Assign faith milestones to profiles
+        ProfileFaithMilestone.objects.create(
+            faith_milestone=self.faith_milestone1,
+            profile=self.profile1,
+        )
+
+        ProfileFaithMilestone.objects.create(
+            faith_milestone=self.faith_milestone2,
+            profile=self.profile1,
+        )
+
+    def test_form_initialization(self):
+        """
+        Test that the form initializes correctly with no errors.
+        """
+        form = FaithMilestoneFilterForm()
+
+        self.assertIsInstance(form, FaithMilestoneFilterForm)
+
+    def test_form_valid_faith_milestones_filter(self):
+        """
+        Test that filtering by faith milestones returns the correct profiles.
+        """
+        form_data = {"faith_milestones": [self.faith_milestone1.id]}
+        form = FaithMilestoneFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertIn(
+            self.faith_milestone1,
+            form.cleaned_data["faith_milestones"],
+        )
+
+    def test_form_empty_filter(self):
+        """
+        Test that an empty form does not raise validation errors.
+        """
+        form = FaithMilestoneFilterForm(data={})
 
         self.assertTrue(form.is_valid())

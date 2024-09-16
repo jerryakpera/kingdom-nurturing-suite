@@ -2969,3 +2969,92 @@ class TestIndexView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.profile2.get_full_name())
         self.assertNotContains(response, self.profile3.get_full_name())
+
+    def test_view_filters_by_mentorship_areas(self):
+        """
+        Test that profiles can be filtered by mentorship areas.
+        """
+        # Create mentorship areas
+        mentorship_area1 = MentorshipArea.objects.create(
+            title="Area 1",
+            content="Description for mentorship area 1",
+            author=self.profile1,
+        )
+        mentorship_area2 = MentorshipArea.objects.create(
+            title="Area 2",
+            content="Description for mentorship area 2",
+            author=self.profile1,
+        )
+
+        # Assign mentorship areas to profiles
+        ProfileMentorshipArea.objects.create(
+            mentorship_area=mentorship_area1,
+            profile=self.profile1,
+        )
+        ProfileMentorshipArea.objects.create(
+            mentorship_area=mentorship_area2,
+            profile=self.profile2,
+        )
+
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "mentorship_areas": [mentorship_area1.id],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "John Doe")
+        self.assertNotContains(response, "Jane Smith")
+
+    def test_view_filters_by_faith_milestones(self):
+        """
+        Test that profiles can be filtered by faith milestones.
+        """
+        # Create faith milestones
+        faith_milestone1 = FaithMilestone.objects.create(
+            title="Milestone 1",
+            type="profile",
+            description="First faith milestone",
+            author=self.profile1,
+        )
+        faith_milestone2 = FaithMilestone.objects.create(
+            title="Milestone 2",
+            type="profile",
+            description="Second faith milestone",
+            author=self.profile1,
+        )
+
+        # Assign faith milestones to profiles
+        ProfileFaithMilestone.objects.create(
+            faith_milestone=faith_milestone1,
+            profile=self.profile1,
+        )
+        ProfileFaithMilestone.objects.create(
+            faith_milestone=faith_milestone2,
+            profile=self.profile2,
+        )
+
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "faith_milestones": [faith_milestone1.id],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.profile1.get_full_name())
+        self.assertNotContains(response, self.profile2.get_full_name())
+        self.assertNotContains(response, self.profile3.get_full_name())
+
+    def test_view_no_filters(self):
+        """
+        Test that the view displays all profiles when no filters are applied.
+        """
+        response = self.client.get(reverse("profiles:index"))
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "John Doe")
+        self.assertContains(response, "Jane Smith")
+        self.assertContains(response, "Jack Reacher")

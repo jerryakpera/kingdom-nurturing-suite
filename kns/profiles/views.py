@@ -249,7 +249,8 @@ def index(request):
 
     # Initialize filter forms
     basic_info_form = profile_forms.BasicInfoFilterForm(request.GET or None)
-    # mentorship_form = profile_forms.MentorshipFilterForm(request.GET or None)
+    mentorship_form = profile_forms.MentorshipFilterForm(request.GET or None)
+    faith_milestones_form = profile_forms.FaithMilestoneFilterForm(request.GET or None)
     involvement_filter_form = profile_forms.InvolvementFilterForm(
         request.GET or None,
     )
@@ -352,6 +353,27 @@ def index(request):
                     vocations__vocation__in=vocations,
                 ).distinct()
 
+        if mentorship_form.is_valid():
+            # Process mentorship filter form data
+            mentorship_areas = mentorship_form.cleaned_data.get(
+                "mentorship_areas",
+            )
+
+            if mentorship_areas:
+                profiles = profiles.filter(
+                    mentorship_areas__mentorship_area__in=mentorship_areas,
+                )
+
+        if faith_milestones_form.is_valid():
+            faith_milestones = faith_milestones_form.cleaned_data.get(
+                "faith_milestones",
+            )
+
+            if faith_milestones:
+                profiles = profiles.filter(
+                    faith_milestones__faith_milestone__in=faith_milestones,
+                )
+
     # Pagination
     paginator = Paginator(profiles, 12)
     page = request.GET.get("page")
@@ -366,8 +388,9 @@ def index(request):
     context = {
         "page_obj": page_obj,
         "basic_info_form": basic_info_form,
+        "mentorship_form": mentorship_form,
         "skills_filter_form": skills_filter_form,
-        # "mentorship_form": mentorship_form,
+        "faith_milestones_form": faith_milestones_form,
         "involvement_filter_form": involvement_filter_form,
     }
 

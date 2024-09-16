@@ -12,7 +12,7 @@
 
 <!-- Main modal -->
 <div id="filter-profiles-modal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-  <form class="relative w-full max-w-7xl min-h-full" method="GET" action="{% url 'profiles:index' %}">
+  <form class="relative w-full min-h-full" method="GET" action="{% url 'profiles:index' %}">
     <!-- Modal content -->
     <div class="relative bg-white rounded-lg shadow min-h-full">
       <!-- Modal header -->
@@ -36,8 +36,20 @@
           {% include "profiles/components/filter_profiles/basic_info_filter.html" %}
         </div>
 
-        <div id="accordion-collapse" data-accordion="collapse">
-          {% include "profiles/components/filter_profiles/activity_training_filter.html" %}
+        <div id="accordion-collapse1" data-accordion="collapse">
+          {% include "profiles/components/filter_profiles/involvement_filter.html" %}
+        </div>
+
+        <div id="accordion-collapse2" data-accordion="collapse">
+          {% include "profiles/components/filter_profiles/skills_filter.html" %}
+        </div>
+
+        <div id="accordion-collapse3" data-accordion="collapse">
+          {% include "profiles/components/filter_profiles/mentorship_areas_filter.html" %}
+        </div>
+
+        <div id="accordion-collapse4" data-accordion="collapse">
+          {% include "profiles/components/filter_profiles/faith_milestones_filter.html" %}
         </div>
       </div>
 

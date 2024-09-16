@@ -12,6 +12,8 @@ from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 
 from kns.core.models import Setting
+from kns.faith_milestones.models import FaithMilestone
+from kns.mentorships.models import MentorshipArea
 from kns.skills.models import Skill
 from kns.vocations.models import Vocation
 
@@ -1090,5 +1092,63 @@ class SkillsFilterForm(forms.Form):
                     "focus:border-blue-500 block w-full p-2.5"
                 ),
             }
+        ),
+    )
+
+
+class MentorshipFilterForm(forms.Form):
+    """
+    Form to filter profiles based on mentorship areas and mentorship areas of interest.
+
+    Attributes
+    ----------
+    mentorship_areas : ModelMultipleChoiceField
+        A list of mentorship areas that the user is involved in.
+    mentorship_areas_interests : ModelMultipleChoiceField
+        A list of mentorship areas that the user is interested in.
+    """
+
+    mentorship_areas = forms.ModelMultipleChoiceField(
+        label="Mentorship Areas",
+        queryset=MentorshipArea.objects.all(),
+        required=False,
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 "
+                    "text-sm rounded-lg focus:ring-blue-500 "
+                    "focus:border-blue-500 block w-full p-2.5"
+                ),
+            }
+        ),
+    )
+
+
+class FaithMilestoneFilterForm(forms.Form):
+    """
+    Filter profiles based on faith milestones.
+
+    Attributes
+    ----------
+    faith_milestones : ModelMultipleChoiceField
+        A list of faith milestones that profiles have achieved.
+    """
+
+    faith_milestones = forms.ModelMultipleChoiceField(
+        label="Faith Milestones",
+        queryset=FaithMilestone.objects.filter(type="profile"),
+        required=False,
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 "
+                    "text-sm rounded-lg focus:ring-blue-500 "
+                    "focus:border-blue-500 block w-full p-2.5"
+                ),
+            }
+        ),
+        help_text=(
+            "Select the faith milestones that profiles should have achieved. "
+            "Hold Ctrl to select multiple milestones."
         ),
     )
