@@ -8,16 +8,19 @@ from kns.groups.models import Group
 from kns.groups.tests import test_constants
 from kns.profiles import constants as profile_constants
 from kns.profiles.forms import (
-    ActivityTrainingFilterForm,
     BasicInfoFilterForm,
     BioDetailsForm,
     ContactDetailsForm,
     GroupMemberDiscipleForm,
+    InvolvementFilterForm,
     ProfileEncryptionForm,
     ProfileInvolvementForm,
     ProfileSettingsForm,
+    SkillsFilterForm,
 )
 from kns.profiles.models import EncryptionReason
+from kns.skills.models import ProfileInterest, ProfileSkill, Skill
+from kns.vocations.models import ProfileVocation, Vocation
 
 
 class TestProfileSettingsForm(TestCase):
@@ -763,7 +766,7 @@ class TestBasicInfoFilterForm(TestCase):
         )
 
 
-class TestActivityTrainingFilterForm(TestCase):
+class TestInvolvementFilterForm(TestCase):
     def setUp(self):
         """
         Set up test data for filtering by activity and training.
@@ -796,15 +799,15 @@ class TestActivityTrainingFilterForm(TestCase):
         """
         Test that the form initializes correctly with no errors.
         """
-        form = ActivityTrainingFilterForm()
-        self.assertIsInstance(form, ActivityTrainingFilterForm)
+        form = InvolvementFilterForm()
+        self.assertIsInstance(form, InvolvementFilterForm)
 
     def test_form_valid_movement_training_filter(self):
         """
         Test that filtering by 'movement training facilitator' returns the correct profiles.
         """
         form_data = {"is_movement_training_facilitator": True}
-        form = ActivityTrainingFilterForm(data=form_data)
+        form = InvolvementFilterForm(data=form_data)
 
         self.assertTrue(form.is_valid())
         self.assertEqual(
@@ -817,7 +820,7 @@ class TestActivityTrainingFilterForm(TestCase):
         Test that filtering by 'skill training facilitator' returns the correct profiles.
         """
         form_data = {"is_skill_training_facilitator": True}
-        form = ActivityTrainingFilterForm(data=form_data)
+        form = InvolvementFilterForm(data=form_data)
 
         self.assertTrue(form.is_valid())
         self.assertEqual(
@@ -830,7 +833,7 @@ class TestActivityTrainingFilterForm(TestCase):
         Test that filtering by 'mentor' returns the correct profiles.
         """
         form_data = {"is_mentor": True}
-        form = ActivityTrainingFilterForm(data=form_data)
+        form = InvolvementFilterForm(data=form_data)
 
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data["is_mentor"], True)
@@ -839,6 +842,133 @@ class TestActivityTrainingFilterForm(TestCase):
         """
         Test that an empty form does not raise validation errors.
         """
-        form = ActivityTrainingFilterForm(data={})
+        form = InvolvementFilterForm(data={})
+
+        self.assertTrue(form.is_valid())
+
+
+class TestSkillsFilterForm(TestCase):
+    def setUp(self):
+        """
+        Set up test data for filtering by education and experience.
+        """
+
+        # Create users and assign skills/vocations to profiles
+        self.user1 = User.objects.create_user(
+            email="user1@example.com",
+            password="password",
+        )
+        self.user2 = User.objects.create_user(
+            email="user2@example.com",
+            password="password",
+        )
+
+        self.profile1 = self.user1.profile
+        self.profile2 = self.user2.profile
+
+        # Create sample Skills and Vocations
+        self.skill1 = Skill.objects.create(
+            title="Leadership",
+            content="First skill",
+            author=self.profile1,
+        )
+        self.skill2 = Skill.objects.create(
+            title="Communication",
+            content="Second skill",
+            author=self.profile1,
+        )
+        self.skill3 = Skill.objects.create(
+            title="Unpublished Skill",
+            content="Third skill",
+            author=self.profile2,
+        )
+
+        self.vocation1 = Vocation.objects.create(
+            title="Engineering",
+            description="First vocation",
+            author=self.profile2,
+        )
+        self.vocation2 = Vocation.objects.create(
+            title="Education",
+            description="Second vocation",
+            author=self.profile2,
+        )
+
+        ProfileSkill.objects.create(
+            profile=self.profile1,
+            skill=self.skill1,
+        )
+        ProfileVocation.objects.create(
+            profile=self.profile1,
+            vocation=self.vocation1,
+        )
+
+        ProfileSkill.objects.create(
+            profile=self.profile2,
+            skill=self.skill2,
+        )
+        ProfileVocation.objects.create(
+            profile=self.profile2,
+            vocation=self.vocation2,
+        )
+
+    def test_form_initialization(self):
+        """
+        Test that the form initializes correctly with no errors.
+        """
+
+        form = SkillsFilterForm()
+
+        self.assertIsInstance(form, SkillsFilterForm)
+
+    def test_form_valid_skills_filter(self):
+        """
+        Test that filtering by skills returns the correct profiles.
+        """
+        form_data = {"skills": [self.skill1.id]}
+        form = SkillsFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertIn(
+            self.skill1,
+            form.cleaned_data["skills"],
+        )
+
+    def test_form_valid_interests_filter(self):
+        """
+        Test that filtering by interests returns the correct profiles.
+        """
+        form_data = {
+            "interests": [self.skill2.id],
+        }
+        form = SkillsFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertIn(
+            self.skill2,
+            form.cleaned_data["interests"],
+        )
+
+    def test_form_valid_vocations_filter(self):
+        """
+        Test that filtering by vocations returns the correct profiles.
+        """
+        form_data = {
+            "vocations": [self.vocation1.id],
+        }
+
+        form = SkillsFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertIn(
+            self.vocation1,
+            form.cleaned_data["vocations"],
+        )
+
+    def test_form_empty_filter(self):
+        """
+        Test that an empty form does not raise validation errors.
+        """
+        form = SkillsFilterForm(data={})
 
         self.assertTrue(form.is_valid())

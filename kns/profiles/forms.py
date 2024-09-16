@@ -13,6 +13,7 @@ from django_countries.widgets import CountrySelectWidget
 
 from kns.core.models import Setting
 from kns.skills.models import Skill
+from kns.vocations.models import Vocation
 
 from . import constants as profile_constants
 from . import utils as profile_utils
@@ -979,7 +980,7 @@ class BasicInfoFilterForm(forms.Form):
         return min_age
 
 
-class ActivityTrainingFilterForm(forms.Form):
+class InvolvementFilterForm(forms.Form):
     """
     Filter profiles based on activity and training willingness.
 
@@ -1028,6 +1029,66 @@ class ActivityTrainingFilterForm(forms.Form):
                     "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 "
                     "rounded focus:ring-blue-500"
                 )
+            }
+        ),
+    )
+
+
+class SkillsFilterForm(forms.Form):
+    """
+    Filter profiles based on skills, interests, and vocations.
+
+    Attributes
+    ----------
+    skills : ModelMultipleChoiceField
+        A list of skills that a profile has.
+    interests : ModelMultipleChoiceField
+        A list of interests that a profile has.
+    vocations : ModelMultipleChoiceField
+        A list of vocations that a profile has.
+    """
+
+    skills = forms.ModelMultipleChoiceField(
+        label="Skills",
+        required=False,
+        queryset=Skill.objects.all(),
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 "
+                    "text-sm rounded-lg focus:ring-blue-500 "
+                    "focus:border-blue-500 block w-full p-2.5"
+                ),
+            }
+        ),
+    )
+
+    interests = forms.ModelMultipleChoiceField(
+        required=False,
+        label="Interests",
+        queryset=Skill.objects.all(),
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 "
+                    "text-sm rounded-lg focus:ring-blue-500 "
+                    "focus:border-blue-500 block w-full p-2.5"
+                ),
+            }
+        ),
+    )
+
+    vocations = forms.ModelMultipleChoiceField(
+        required=False,
+        label="Vocations",
+        queryset=Vocation.objects.all(),
+        widget=forms.SelectMultiple(
+            attrs={
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 "
+                    "text-sm rounded-lg focus:ring-blue-500 "
+                    "focus:border-blue-500 block w-full p-2.5"
+                ),
             }
         ),
     )
