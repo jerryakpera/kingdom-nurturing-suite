@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   initModal(
-    'open-consent-form-modal',
-    'close-consent-form-modal',
-    'consent-form-modal',
+    'open-filter-profiles-modal-button',
+    'close-filter-profiles-modal-button',
+    'filter-profiles-modal',
     {
       placement: 'top-left',
       backdrop: 'static',
