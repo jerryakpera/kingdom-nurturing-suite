@@ -2623,12 +2623,20 @@ class TestIndexView(TestCase):
         self.profile1.last_name = "Doe"
         self.profile1.gender = "male"
         self.profile1.role = "leader"
+        self.profile1.place_of_birth_country = "US"
+        self.profile1.place_of_birth_city = "New York"
+        self.profile1.location_country = "US"
+        self.profile1.location_city = "Los Angeles"
         self.profile1.save()
 
         self.profile2.first_name = "Jane"
         self.profile2.last_name = "Smith"
         self.profile2.role = "member"
         self.profile2.gender = "female"
+        self.profile2.place_of_birth_country = "CA"
+        self.profile2.place_of_birth_city = "Toronto"
+        self.profile2.location_country = "CA"
+        self.profile2.location_city = "Vancouver"
         self.profile2.save()
 
         self.profile3.first_name = "Jack"
@@ -2636,6 +2644,10 @@ class TestIndexView(TestCase):
         self.profile3.role = "member"
         self.profile3.gender = "male"
         self.profile3.date_of_birth = "2002-08-08"
+        self.profile3.place_of_birth_country = "US"
+        self.profile3.place_of_birth_city = "San Francisco"
+        self.profile3.location_country = "US"
+        self.profile3.location_city = "San Diego"
         self.profile3.save()
 
         # Create a group
@@ -2756,3 +2768,64 @@ class TestIndexView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "John Doe")
         self.assertContains(response, "Jane Smith")
+
+    def test_view_filters_by_place_of_birth_country(self):
+        """
+        Test that profiles can be filtered by place of birth country.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "place_of_birth_country": "US",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "John Doe")
+        self.assertContains(response, "Jack Reacher")
+        self.assertNotContains(response, "Jane Smith")
+
+    def test_view_filters_by_place_of_birth_city(self):
+        """
+        Test that profiles can be filtered by place of birth city.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "place_of_birth_city": "San Francisco",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Jack Reacher")
+        self.assertNotContains(response, "Jane Smith")
+
+    def test_view_filters_by_location_country(self):
+        """
+        Test that profiles can be filtered by location country.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "location_country": "CA",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Jane Smith")
+        self.assertNotContains(response, "Jack Reacher")
+
+    def test_view_filters_by_location_city(self):
+        """
+        Test that profiles can be filtered by location city.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "location_city": "Vancouver",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Jane Smith")
+        self.assertNotContains(response, "Jack Reacher")

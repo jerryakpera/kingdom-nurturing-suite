@@ -263,6 +263,16 @@ def index(request):
             role = basic_info_form.cleaned_data.get("role")
             gender = basic_info_form.cleaned_data.get("gender")
             min_age = basic_info_form.cleaned_data.get("min_age")
+            place_of_birth_country = basic_info_form.cleaned_data.get(
+                "place_of_birth_country",
+            )
+            place_of_birth_city = basic_info_form.cleaned_data.get(
+                "place_of_birth_city",
+            )
+            location_country = basic_info_form.cleaned_data.get(
+                "location_country",
+            )
+            location_city = basic_info_form.cleaned_data.get("location_city")
 
             if role:
                 profiles = profiles.filter(role=role)
@@ -273,6 +283,30 @@ def index(request):
                 min_birth_date = today - timedelta(days=min_age * 365)
 
                 profiles = profiles.filter(date_of_birth__lte=min_birth_date)
+
+            # Apply place_of_birth_country filter
+            if place_of_birth_country:
+                profiles = profiles.filter(
+                    place_of_birth_country=place_of_birth_country,
+                )
+
+            # Apply place_of_birth_city filter
+            if place_of_birth_city:
+                profiles = profiles.filter(
+                    place_of_birth_city__icontains=place_of_birth_city,
+                )
+
+            # Apply location_country filter
+            if location_country:
+                profiles = profiles.filter(
+                    location_country=location_country,
+                )
+
+            # Apply location_city filter
+            if location_city:
+                profiles = profiles.filter(
+                    location_city__icontains=location_city,
+                )
 
     # Pagination
     paginator = Paginator(profiles, 12)
