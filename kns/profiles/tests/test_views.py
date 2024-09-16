@@ -2888,3 +2888,84 @@ class TestIndexView(TestCase):
         self.assertContains(response, "John Doe")
         self.assertNotContains(response, "Jane Smith")
         self.assertNotContains(response, "Jack Reacher")
+
+    def test_view_filters_by_skills(self):
+        """
+        Test that profiles can be filtered by skills.
+        """
+        # Assign skills to profiles
+        skill = Skill.objects.create(
+            title="Leadership",
+            content="Leadership skill",
+            author=self.profile1,
+        )
+
+        ProfileSkill.objects.create(
+            skill=skill,
+            profile=self.profile2,
+        )
+
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "skills": [skill.id],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.profile2.get_full_name())
+        self.assertNotContains(response, self.profile3.get_full_name())
+
+    def test_view_filters_by_interests(self):
+        """
+        Test that profiles can be filtered by interests.
+        """
+        # Assign interests to profiles
+        interest = Skill.objects.create(
+            title="Running",
+            content="Running interest",
+            author=self.profile1,
+        )
+
+        ProfileInterest.objects.create(
+            interest=interest,
+            profile=self.profile2,
+        )
+
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "interests": [interest.id],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.profile2.get_full_name())
+        self.assertNotContains(response, self.profile3.get_full_name())
+
+    def test_view_filters_by_vocations(self):
+        """
+        Test that profiles can be filtered by vocations.
+        """
+        # Assign vocations to profiles
+        vocation = Vocation.objects.create(
+            title="Engineering",
+            description="Engineering vocation",
+            author=self.profile1,
+        )
+
+        ProfileVocation.objects.create(
+            vocation=vocation,
+            profile=self.profile2,
+        )
+
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "vocations": [vocation.id],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.profile2.get_full_name())
+        self.assertNotContains(response, self.profile3.get_full_name())

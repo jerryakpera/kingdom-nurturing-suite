@@ -253,9 +253,9 @@ def index(request):
     involvement_filter_form = profile_forms.InvolvementFilterForm(
         request.GET or None,
     )
-    # education_experience_form = profile_forms.EducationExperienceFilterForm(
-    #     request.GET or None,
-    # )
+    skills_filter_form = profile_forms.SkillsFilterForm(
+        request.GET or None,
+    )
 
     # Apply filters based on form data
     if request.method == "GET":
@@ -333,6 +333,25 @@ def index(request):
                     is_mentor=True,
                 )
 
+        if skills_filter_form.is_valid():
+            # Process education and experience filter form data
+            skills = skills_filter_form.cleaned_data.get("skills")
+            interests = skills_filter_form.cleaned_data.get("interests")
+            vocations = skills_filter_form.cleaned_data.get("vocations")
+
+            if skills:
+                profiles = profiles.filter(
+                    skills__skill__in=skills,
+                ).distinct()
+            if interests:
+                profiles = profiles.filter(
+                    interests__interest__in=interests,
+                ).distinct()
+            if vocations:
+                profiles = profiles.filter(
+                    vocations__vocation__in=vocations,
+                ).distinct()
+
     # Pagination
     paginator = Paginator(profiles, 12)
     page = request.GET.get("page")
@@ -347,9 +366,9 @@ def index(request):
     context = {
         "page_obj": page_obj,
         "basic_info_form": basic_info_form,
+        "skills_filter_form": skills_filter_form,
         # "mentorship_form": mentorship_form,
         "involvement_filter_form": involvement_filter_form,
-        # "education_experience_form": education_experience_form,
     }
 
     return render(
