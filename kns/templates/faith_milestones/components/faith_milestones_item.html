@@ -1,13 +1,13 @@
 {% load groups_custom_tags %}
 
-<div class="bg-green-50 border rounded-md p-2 border-green-600 flex items-start justify-between space-y-1">
-  <div class="font-serif font-medium text-md text-black leading-5 flex gap-x-2 items-start">
+<div class="bg-green-50 border rounded-md p-2 border-green-300 flex items-start justify-between space-y-1">
+  <div class="font-medium text-sm text-green-900 leading-5 flex gap-x-2 items-start">
     {% if faith_milestone.type == 'group' %}
-      <iconify-icon icon="lets-icons:group-fill" class="text-black text-lg"></iconify-icon>
+      <iconify-icon icon="lets-icons:group-fill" class="text-green-900 text-lg"></iconify-icon>
     {% endif %}
 
     {% if faith_milestone.type == 'profile' %}
-      <iconify-icon icon="mdi:check-all" class="text-black text-lg"></iconify-icon>
+      <iconify-icon icon="mdi:check-all" class="text-green-900 text-lg"></iconify-icon>
     {% endif %}
 
     {{ faith_milestone.title }}
@@ -16,7 +16,7 @@
   {% if request.user|is_leader_of_parent_group:group and faith_milestone.type == 'group' %}
     <a
       href="{% url "groups:remove_group_milestone" milestone_id=item_faith_milestone.id %}"
-      class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center inline-flex items-center"
+      class="text-white bg-red-700 hover:bg-red-900 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center inline-flex items-center"
     >
       <iconify-icon icon="line-md:remove" class="text-sm"></iconify-icon>
       <span class="sr-only">Icon description</span>
