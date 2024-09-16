@@ -250,9 +250,9 @@ def index(request):
     # Initialize filter forms
     basic_info_form = profile_forms.BasicInfoFilterForm(request.GET or None)
     # mentorship_form = profile_forms.MentorshipFilterForm(request.GET or None)
-    # activity_training_form = profile_forms.ActivityTrainingFilterForm(
-    #     request.GET or None,
-    # )
+    activity_training_form = profile_forms.ActivityTrainingFilterForm(
+        request.GET or None,
+    )
     # education_experience_form = profile_forms.EducationExperienceFilterForm(
     #     request.GET or None,
     # )
@@ -306,6 +306,31 @@ def index(request):
             if location_city:
                 profiles = profiles.filter(
                     location_city__icontains=location_city,
+                )
+
+        if activity_training_form.is_valid():
+            # Process activity training filter form data
+            is_movement_training_facilitator = activity_training_form.cleaned_data.get(
+                "is_movement_training_facilitator"
+            )
+            is_skill_training_facilitator = activity_training_form.cleaned_data.get(
+                "is_skill_training_facilitator"
+            )
+            is_mentor = activity_training_form.cleaned_data.get(
+                "is_mentor",
+            )
+
+            if is_movement_training_facilitator:
+                profiles = profiles.filter(
+                    is_movement_training_facilitator=True,
+                )
+            if is_skill_training_facilitator:
+                profiles = profiles.filter(
+                    is_skill_training_facilitator=True,
+                )
+            if is_mentor:
+                profiles = profiles.filter(
+                    is_mentor=True,
                 )
 
     # Pagination

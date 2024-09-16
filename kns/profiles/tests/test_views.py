@@ -2829,3 +2829,62 @@ class TestIndexView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Jane Smith")
         self.assertNotContains(response, "Jack Reacher")
+
+    def test_view_filters_by_is_movement_training_facilitator(self):
+        """
+        Test that profiles can be filtered by 'movement training facilitator' status.
+        """
+        # Set the 'is_movement_training_facilitator' status
+        self.profile1.is_movement_training_facilitator = True
+        self.profile1.save()
+
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "is_movement_training_facilitator": "on",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "John Doe")
+        self.assertNotContains(response, "Jane Smith")
+        self.assertNotContains(response, "Jack Reacher")
+
+    def test_view_filters_by_is_skill_training_facilitator(self):
+        """
+        Test that profiles can be filtered by 'skill training facilitator' status.
+        """
+        # Set the 'is_skill_training_facilitator' status
+        self.profile2.is_skill_training_facilitator = True
+        self.profile2.save()
+
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "is_skill_training_facilitator": "on",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Jane Smith")
+        self.assertNotContains(response, "Jack Reacher")
+
+    def test_view_filters_by_is_mentor(self):
+        """
+        Test that profiles can be filtered by 'mentor' status.
+        """
+        # Set the 'is_mentor' status
+        self.profile1.is_mentor = True
+        self.profile1.save()
+
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "is_mentor": "on",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "John Doe")
+        self.assertNotContains(response, "Jane Smith")
+        self.assertNotContains(response, "Jack Reacher")

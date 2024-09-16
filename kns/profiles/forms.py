@@ -977,3 +977,57 @@ class BasicInfoFilterForm(forms.Form):
                 )
 
         return min_age
+
+
+class ActivityTrainingFilterForm(forms.Form):
+    """
+    Filter profiles based on activity and training willingness.
+
+    Attributes
+    ----------
+    is_movement_training_facilitator : BooleanField
+        Indicates if the person is willing to facilitate movement trainings.
+    is_skill_training_facilitator : BooleanField
+        Indicates if the person is willing to facilitate skill trainings.
+    is_mentor : BooleanField
+        Indicates if the person is willing to mentor others.
+    """
+
+    is_movement_training_facilitator = forms.BooleanField(
+        label="Willing to facilitate movement trainings",
+        required=False,
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": (
+                    "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 "
+                    "rounded focus:ring-blue-500"
+                )
+            }
+        ),
+    )
+
+    is_skill_training_facilitator = forms.BooleanField(
+        label="Willing to facilitate skill trainings",
+        required=False,
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": (
+                    "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 "
+                    "rounded focus:ring-blue-500"
+                )
+            }
+        ),
+    )
+
+    is_mentor = forms.BooleanField(
+        label="Willing to mentor others",
+        required=False,
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": (
+                    "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 "
+                    "rounded focus:ring-blue-500"
+                )
+            }
+        ),
+    )

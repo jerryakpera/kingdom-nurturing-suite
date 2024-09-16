@@ -8,6 +8,7 @@ from kns.groups.models import Group
 from kns.groups.tests import test_constants
 from kns.profiles import constants as profile_constants
 from kns.profiles.forms import (
+    ActivityTrainingFilterForm,
     BasicInfoFilterForm,
     BioDetailsForm,
     ContactDetailsForm,
@@ -760,3 +761,84 @@ class TestBasicInfoFilterForm(TestCase):
             form.errors["min_age"],
             ["Ensure this value is greater than or equal to 15."],
         )
+
+
+class TestActivityTrainingFilterForm(TestCase):
+    def setUp(self):
+        """
+        Set up test data for filtering by activity and training.
+        """
+        # Create users and their profiles
+        self.user1 = User.objects.create_user(
+            email="user1@example.com",
+            password="password",
+        )
+        self.user2 = User.objects.create_user(
+            email="user2@example.com",
+            password="password",
+        )
+
+        self.profile1 = self.user1.profile
+        self.profile2 = self.user2.profile
+
+        # Set different attributes for filtering
+        self.profile1.is_movement_training_facilitator = True
+        self.profile1.is_skill_training_facilitator = False
+        self.profile1.is_mentor = True
+        self.profile1.save()
+
+        self.profile2.is_movement_training_facilitator = False
+        self.profile2.is_skill_training_facilitator = True
+        self.profile2.is_mentor = False
+        self.profile2.save()
+
+    def test_form_initialization(self):
+        """
+        Test that the form initializes correctly with no errors.
+        """
+        form = ActivityTrainingFilterForm()
+        self.assertIsInstance(form, ActivityTrainingFilterForm)
+
+    def test_form_valid_movement_training_filter(self):
+        """
+        Test that filtering by 'movement training facilitator' returns the correct profiles.
+        """
+        form_data = {"is_movement_training_facilitator": True}
+        form = ActivityTrainingFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(
+            form.cleaned_data["is_movement_training_facilitator"],
+            True,
+        )
+
+    def test_form_valid_skill_training_filter(self):
+        """
+        Test that filtering by 'skill training facilitator' returns the correct profiles.
+        """
+        form_data = {"is_skill_training_facilitator": True}
+        form = ActivityTrainingFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(
+            form.cleaned_data["is_skill_training_facilitator"],
+            True,
+        )
+
+    def test_form_valid_mentor_filter(self):
+        """
+        Test that filtering by 'mentor' returns the correct profiles.
+        """
+        form_data = {"is_mentor": True}
+        form = ActivityTrainingFilterForm(data=form_data)
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["is_mentor"], True)
+
+    def test_form_empty_filter(self):
+        """
+        Test that an empty form does not raise validation errors.
+        """
+        form = ActivityTrainingFilterForm(data={})
+
+        self.assertTrue(form.is_valid())
