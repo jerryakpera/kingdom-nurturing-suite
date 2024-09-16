@@ -348,7 +348,7 @@ def index(request):
         "page_obj": page_obj,
         "basic_info_form": basic_info_form,
         # "mentorship_form": mentorship_form,
-        # "activity_training_form": activity_training_form,
+        "activity_training_form": activity_training_form,
         # "education_experience_form": education_experience_form,
     }
 
