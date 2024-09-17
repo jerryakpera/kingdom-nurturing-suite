@@ -5,7 +5,6 @@ from django.test import TestCase
 
 from kns.core.utils import log_this
 from kns.custom_user.models import User
-from kns.profiles.models import Profile
 from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 
 
