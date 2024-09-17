@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from faker import Faker
@@ -260,6 +260,14 @@ def index(request):
 
     # Apply filters based on form data
     if request.method == "GET":
+        # Search functionality
+        search_query = request.GET.get("search")
+        if search_query:
+            profiles = profiles.filter(
+                Q(first_name__icontains=search_query)
+                | Q(last_name__icontains=search_query)
+            )
+
         if basic_info_form.is_valid():
             role = basic_info_form.cleaned_data.get("role")
             gender = basic_info_form.cleaned_data.get("gender")
@@ -387,6 +395,7 @@ def index(request):
 
     context = {
         "page_obj": page_obj,
+        "search_query": search_query,
         "basic_info_form": basic_info_form,
         "mentorship_form": mentorship_form,
         "skills_filter_form": skills_filter_form,

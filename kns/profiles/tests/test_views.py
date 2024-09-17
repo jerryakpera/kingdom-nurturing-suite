@@ -3058,3 +3058,49 @@ class TestIndexView(TestCase):
         self.assertContains(response, "John Doe")
         self.assertContains(response, "Jane Smith")
         self.assertContains(response, "Jack Reacher")
+
+    def test_view_search_by_first_name(self):
+        """
+        Test that profiles can be searched by first name.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "search": "Jane",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Jane Smith")
+        self.assertNotContains(response, "Jack Reacher")
+
+    def test_view_search_by_last_name(self):
+        """
+        Test that profiles can be searched by last name.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "search": "Reacher",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Jack Reacher")
+        self.assertNotContains(response, "Jane Smith")
+
+    def test_view_search_by_full_name(self):
+        """
+        Test that profiles can be searched by full name.
+        """
+        response = self.client.get(
+            reverse("profiles:index"),
+            {
+                "search": "John Doe",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "John Doe")
+        self.assertNotContains(response, "Jane Smith")
+        self.assertNotContains(response, "Jack Reacher")
