@@ -41,6 +41,7 @@ class TestViews(TestCase):
 
         self.profile.first_name = "Test"
         self.profile.last_name = "User"
+        self.profile.is_onboarded = True
 
         self.profile.save()
 
@@ -1263,6 +1264,7 @@ class TestProfileEncryption(TestCase):
 
         self.profile = self.user.profile
 
+        self.profile.is_onboarded = True
         self.profile.first_name = "Test"
         self.profile.last_name = "User"
         self.profile.gender = "male"
@@ -1481,6 +1483,7 @@ class TestProfileDiscipleshipsView(TestCase):
         self.profile.first_name = "Test"
         self.profile.last_name = "User"
         self.profile.slug = "test-user"
+        self.profile.is_onboarded = True
 
         self.other_user = User.objects.create_user(
             email="otheruser@example.com",
@@ -1699,6 +1702,8 @@ class TestMoveDiscipleshipViews(TestCase):
         )
 
         self.profile = self.user.profile
+        self.profile.is_onboarded = True
+        self.profile.save()
 
         self.other_user = User.objects.create_user(
             email="otheruser@example.com",
@@ -1863,6 +1868,10 @@ class TestMoveDiscipleshipViews(TestCase):
         )
 
     def test_move_to_group_member_not_author(self):
+        self.other_profile = self.other_user.profile
+        self.other_profile.is_onboarded = True
+        self.other_profile.save()
+
         self.client.login(
             email=self.other_user.email,
             password="password",
@@ -1889,6 +1898,10 @@ class TestMoveDiscipleshipViews(TestCase):
         )
 
     def test_move_to_first_12_not_author(self):
+        self.other_profile = self.other_user.profile
+        self.other_profile.is_onboarded = True
+        self.other_profile.save()
+
         self.client.login(
             email=self.other_user.email,
             password="password",
@@ -1908,6 +1921,7 @@ class TestMoveDiscipleshipViews(TestCase):
 
         # Check if the success message is in the messages
         messages_list = list(get_messages(response.wsgi_request))
+
         self.assertEqual(len(messages_list), 1)
         self.assertEqual(
             str(messages_list[0]),
@@ -1915,6 +1929,10 @@ class TestMoveDiscipleshipViews(TestCase):
         )
 
     def test_move_to_first_3_not_author(self):
+        self.other_profile = self.other_user.profile
+        self.other_profile.is_onboarded = True
+        self.other_profile.save()
+
         self.client.login(
             email=self.other_user.email,
             password="password",
@@ -1941,10 +1959,18 @@ class TestMoveDiscipleshipViews(TestCase):
         )
 
     def test_move_to_sent_forth_not_author(self):
+        self.other_profile = self.other_user.profile
+        self.other_profile.is_onboarded = True
+        self.other_profile.save()
+
         self.client.login(
             email=self.other_user.email,
             password="password",
         )
+
+        self.other_profile = self.other_user.profile
+        self.other_profile.is_onboarded = True
+        self.other_profile.save()
 
         url = reverse(
             "profiles:move_to_sent_forth",
@@ -1983,9 +2009,12 @@ class TestEditProfileVocationsView(TestCase):
 
         # Create a profile
         self.profile = self.user.profile
+
+        self.profile.is_onboarded = True
         self.profile.first_name = "Test"
         self.profile.last_name = "User"
         self.profile.slug = "test-user"
+
         self.profile.save()
 
         # Create vocations
@@ -2160,6 +2189,7 @@ class EditProfileClassificationsTests(TestCase):
 
         self.profile = self.user.profile
 
+        self.profile.is_onboarded = True
         self.profile.first_name = "Test"
         self.profile.last_name = "User"
 
@@ -2337,9 +2367,12 @@ class TestProfileMentorshipsView(TestCase):
         )
 
         self.profile = self.user.profile
+
+        self.profile.is_onboarded = True
         self.profile.first_name = "Test"
         self.profile.last_name = "User"
         self.profile.slug = "test-user"
+
         self.profile.save()
 
         self.other_user = User.objects.create_user(
@@ -2422,9 +2455,12 @@ class TestEditProfileMentorshipAreasView(TestCase):
         )
 
         self.profile = self.user.profile
+
+        self.profile.is_onboarded = True
         self.profile.first_name = "Test"
         self.profile.last_name = "User"
         self.profile.slug = "test-user"
+
         self.profile.save()
 
         # Create mentorship areas for testing
@@ -2619,6 +2655,7 @@ class TestIndexView(TestCase):
         self.profile2 = self.user2.profile
         self.profile3 = self.user3.profile
 
+        self.profile1.is_onboarded = True
         self.profile1.first_name = "John"
         self.profile1.last_name = "Doe"
         self.profile1.gender = "male"

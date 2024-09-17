@@ -13,7 +13,6 @@ from django.utils import timezone
 from django_countries.fields import CountryField
 
 from kns.core import modelmixins
-from kns.core.utils import log_this
 from kns.custom_user.models import User
 
 from . import constants
@@ -35,6 +34,10 @@ class Profile(
         on_delete=models.CASCADE,
     )
 
+    is_onboarded = models.BooleanField(
+        default=False,
+        choices=constants.BOOLEAN_CHOICES,
+    )
     email = models.EmailField(
         unique=True,
         null=True,

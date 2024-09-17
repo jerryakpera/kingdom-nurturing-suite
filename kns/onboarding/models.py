@@ -11,6 +11,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 
+from kns.onboarding.constants import ONBOARDING_STEPS
 from kns.profiles.models import Profile
 
 
@@ -76,15 +77,15 @@ class ProfileOnboarding(models.Model):
 
         if not steps:
             steps = [
-                settings.ONBOARDING_STEPS["profile"],
-                settings.ONBOARDING_STEPS["agree"],
+                ONBOARDING_STEPS["profile"],
+                ONBOARDING_STEPS["agree"],
             ]
 
             # Include additional steps based on the profile's role
             if not getattr(profile, "is_visitor", False):
-                steps.insert(1, settings.ONBOARDING_STEPS["involvement"])
+                steps.insert(1, ONBOARDING_STEPS["involvement"])
                 if getattr(profile, "role", "member") == "leader":
-                    steps.insert(2, settings.ONBOARDING_STEPS["group"])
+                    steps.insert(2, ONBOARDING_STEPS["group"])
 
             cache.set(cache_key, steps, timeout=3600)  # Cache for 1 hour
 

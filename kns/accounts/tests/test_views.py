@@ -32,6 +32,11 @@ class AuthenticationViewsTests(TestCase):
         self.user.is_active = True
         self.user.save()
 
+        self.profile = self.user.profile
+        self.profile.is_onboarded = True
+
+        self.profile.save()
+
         self.token = generate_verification_token(self.user)
         self.uidb64 = urlsafe_base64_encode(
             force_bytes(self.user.pk),
@@ -181,6 +186,7 @@ class AuthenticationViewsTests(TestCase):
         Test that the change password view renders the form correctly.
         """
         response = self.client.get(reverse("accounts:change_password"))
+
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "accounts/pages/change_password.html")
         self.assertIsInstance(
@@ -386,6 +392,11 @@ class VerificationEmailTests(TestCase):
             password="oldpassword",
         )
 
+        self.profile = self.user.profile
+
+        self.profile.is_onboarded = True
+        self.profile.save()
+
     @patch("kns.accounts.views.send_verification_email")
     def test_verification_email_failure(
         self,
@@ -430,6 +441,11 @@ class AgreeToTermsViewTests(TestCase):
             password="oldpassword",
             is_active=True,
         )
+
+        self.profile = self.user.profile
+
+        self.profile.is_onboarded = True
+        self.profile.save()
 
         self.client.login(
             email="testuser@example.com",
@@ -564,9 +580,19 @@ class SetPasswordViewTests(TestCase):
             is_active=True,
         )
 
+        self.profile = self.user.profile
+
+        self.profile.is_onboarded = True
+        self.profile.save()
+
         self.member_user = User.objects.create_user(
             email="memberuser@example.com",
         )
+
+        self.member_profile = self.member_user.profile
+
+        self.member_profile.is_onboarded = True
+        self.member_profile.save()
 
         self.token = generate_verification_token(self.member_user)
         self.uidb64 = urlsafe_base64_encode(

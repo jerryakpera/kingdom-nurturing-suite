@@ -19,6 +19,10 @@ class TestGroupViews(TestCase):
             password="password123",
         )
 
+        self.profile = self.user.profile
+        self.profile.is_onboarded = True
+        self.profile.save()
+
         # Create a group
         self.group = Group.objects.create(
             leader=self.user.profile,
@@ -279,6 +283,9 @@ class TestRegisterGroupView(TestCase):
         )
         self.profile = self.user.profile
 
+        self.profile.is_onboarded = True
+        self.profile.save()
+
         # Log the user in
         self.client.login(
             email="testuser@example.com",
@@ -534,10 +541,19 @@ class TestEditGroupView(TestCase):
             password="password123",
         )
 
+        self.profile = self.user.profile
+        self.profile.is_onboarded = True
+
+        self.profile.save()
+
         self.other_user = User.objects.create_user(
             email="otheruser@example.com",
             password="password123",
         )
+
+        self.other_profile = self.other_user.profile
+        self.other_profile.is_onboarded = True
+        self.other_profile.save()
 
         # Create a group led by the user
         self.group = Group.objects.create(
@@ -735,6 +751,9 @@ class TestEditGroupMilestonesView(TestCase):
 
         self.profile = self.user.profile
 
+        self.profile.is_onboarded = True
+        self.profile.save()
+
         self.group = Group.objects.create(
             leader=self.user.profile,
             name="Test Group",
@@ -895,6 +914,8 @@ class TestRemoveGroupMilestoneView(TestCase):
         )
 
         self.profile = self.user.profile
+        self.profile.is_onboarded = True
+        self.profile.save()
 
         self.client.login(
             email="testuser@example.com",
