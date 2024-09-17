@@ -8,7 +8,7 @@ from kns.groups.tests.factories import GroupFactory
 from kns.profiles.context_processors import profile_context
 
 
-class ContextProcessorsTest(TestCase):
+class TestContextProcessors(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
 

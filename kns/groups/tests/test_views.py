@@ -36,6 +36,7 @@ class TestGroupViews(TestCase):
             email="testuser@example.com",
             password="password123",
         )
+
         response = self.client.get(reverse("groups:index"))
 
         # Check if the response status code is 200 OK

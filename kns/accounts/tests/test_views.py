@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.hashers import make_password
 from django.contrib.messages import get_messages
 from django.core import mail
 from django.test import Client, TestCase
