@@ -55,7 +55,7 @@ ONBOARDING_STEPS = {  # pragma: no cover
         ],
         "link": "/onboarding/group",
         "url_name": "onboarding:group",
-        "template_name": "onboarding/group_onboarding.html",
+        "template_name": "onboarding/register_group_onboarding.html",
     },
     "agree": {
         "no": 4,

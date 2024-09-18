@@ -134,7 +134,7 @@ class TestProfileOnboardingModel(TestCase):
         """
         Test that `is_last_step` correctly identifies if the current step is the last step.
         """
-        self.onboarding.current_step = 4
+        self.onboarding.current_step = 5
         self.onboarding.save()
 
         self.assertTrue(self.onboarding.is_last_step(self.profile))

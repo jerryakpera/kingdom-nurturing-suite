@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block base_content %}
+  <section class="text-gray-600 body-font">
+    <div class="container-default py-4 md:py-18">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-x-2">
+        <div class="col-span-1 md:col-span-4 lg:col-span-3">
+          {% include "onboarding/components/onboarding_sidebar.html" %}
+        </div>
+        <div class="col-span-1 md:col-span-8 lg:col-span-9 h-full">
+          <div class="border-l h-full">
+            {% block onboarding_content %}{% endblock onboarding_content %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock base_content %}

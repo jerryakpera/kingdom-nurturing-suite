@@ -14,4 +14,29 @@ urlpatterns = [
         view=views.index,
         name="index",
     ),
-]  # pragma: no cover
+    path(
+        route="back/",
+        view=views.back,
+        name="back",
+    ),
+    path(
+        route="involvement",
+        view=views.involvement,
+        name="involvement",
+    ),
+    path(
+        route="involvement",
+        view=views.involvement,
+        name="involvement",
+    ),
+    path(
+        route="group",
+        view=views.group,
+        name="group",
+    ),
+    path(
+        route="agree",
+        view=views.agree,
+        name="agree",
+    ),
+]

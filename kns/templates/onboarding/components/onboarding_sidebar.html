@@ -1,0 +1,23 @@
+<div class="card" id="sidebar">
+  <div class="card-body p-4 md:p-6 space-y-4">
+    <div class="space-y-2">
+      <h1 class="font-black text-knsSecondary-600 text-2xl md:text-3xl">
+        {{ onboarding_data.title }}
+      </h1>
+      <h3 class="font-medium font-serif text-lg text-black leading-5">
+        {{ onboarding_data.subtitle }}
+      </h3>
+    </div>
+    <hr class="my-2 md:my-4">
+    <p class="text-sm md:text-base text-gray-800">
+      {{ onboarding_data.description }}
+    </p>
+    <ol class="list-decimal ml-6 mt-2 space-y-2 text-black">
+      {% for item in onboarding_data.items %}
+        <li class="text-xs md:text-sm">
+          {{ item }}
+        </li>
+      {% endfor %}
+    </ol>
+  </div>
+</div>

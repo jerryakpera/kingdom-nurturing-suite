@@ -1,0 +1,11 @@
+{% load static %}
+
+{% with form=agree_form %}
+  {% include 'core/components/forms/form_error.html' %}
+{% endwith %}
+
+<div>
+  {% with field=agree_form.agreed_to_terms %}
+    {% include "core/components/forms/form_checkbox.html" %}
+  {% endwith %}
+</div>

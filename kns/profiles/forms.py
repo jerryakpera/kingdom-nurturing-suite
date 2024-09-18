@@ -1152,3 +1152,36 @@ class FaithMilestoneFilterForm(forms.Form):
             "Hold Ctrl to select multiple milestones."
         ),
     )
+
+
+class AgreeToTermsForm(forms.ModelForm):
+    """
+    A form to capture user agreement to terms and conditions.
+
+    This form presents a checkbox to the user for agreeing to the terms
+    and conditions of the application. The user's agreement is recorded
+    in the profile model.
+
+    Attributes
+    ----------
+    agreed_to_terms : BooleanField
+        A required field representing the user's agreement to the terms
+        and conditions. It is presented as a checkbox input.
+    """
+
+    class Meta:
+        model = Profile
+        fields = ["agreed_to_terms"]
+
+    agreed_to_terms = forms.BooleanField(
+        required=True,
+        label="I agree to the terms and conditions",
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": (
+                    "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 "
+                    "rounded focus:ring-blue-500"
+                )
+            }
+        ),
+    )

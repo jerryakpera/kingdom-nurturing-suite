@@ -7,7 +7,6 @@ role and visitor status, and steps can be navigated through the `next` and
 `back` methods.
 """
 
-from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 
@@ -76,6 +75,7 @@ class ProfileOnboarding(models.Model):
         steps = cache.get(cache_key)
 
         if not steps:
+            # Start with the default steps
             steps = [
                 ONBOARDING_STEPS["profile"],
                 ONBOARDING_STEPS["agree"],
@@ -83,11 +83,25 @@ class ProfileOnboarding(models.Model):
 
             # Include additional steps based on the profile's role
             if not getattr(profile, "is_visitor", False):
-                steps.insert(1, ONBOARDING_STEPS["involvement"])
-                if getattr(profile, "role", "member") == "leader":
+                if ONBOARDING_STEPS["involvement"] not in steps:
+                    steps.insert(
+                        1,
+                        ONBOARDING_STEPS["involvement"],
+                    )
+
+                if (
+                    getattr(
+                        profile,
+                        "role",
+                        "member",
+                    )
+                    == "leader"
+                    and ONBOARDING_STEPS["group"] not in steps
+                ):
                     steps.insert(2, ONBOARDING_STEPS["group"])
 
-            cache.set(cache_key, steps, timeout=3600)  # Cache for 1 hour
+            # Set cache
+            cache.set(cache_key, steps, timeout=3600)
 
         return steps
 
@@ -107,6 +121,10 @@ class ProfileOnboarding(models.Model):
             details such as the title, description, and template name.
         """
         onboarding_steps_list = self.get_onboarding_steps_list(profile)
+
+        if self.is_last_step(profile):
+            return onboarding_steps_list[len(onboarding_steps_list) - 1]
+
         return onboarding_steps_list[self.current_step - 1]
 
     def is_last_step(self, profile):
@@ -125,4 +143,5 @@ class ProfileOnboarding(models.Model):
             True if the current step is the last, False otherwise.
         """
         onboarding_steps_list = self.get_onboarding_steps_list(profile)
-        return self.current_step == len(onboarding_steps_list)
+
+        return self.current_step > len(onboarding_steps_list)

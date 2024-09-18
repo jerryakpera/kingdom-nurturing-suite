@@ -1,0 +1,36 @@
+{% extends "onboarding/onboarding_base.html" %}
+
+{% block onboarding_content %}
+  <div class="p-4 md:p-6 ">
+    <form class="space-y-6" id="form-container" method="POST" action="{% url "onboarding:group" %}">
+      {% csrf_token %}
+
+      <div class="card-body flex flex-col gap-4">
+        <div>
+          <h1 class="font-semibold text-xl text-primary">Group registration</h1>
+          <p class="text-gray-700">
+            Register your group so by providing its name, location and brief description
+          </p>
+          <hr class="my-3">
+        </div>
+
+        {% include "groups/forms/group_form.html" %}
+      </div>
+
+      <div class="card-footer">
+        <div class="flex justify-end">
+          <div class="flex gap-2">
+            <a class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5" href="{% url "onboarding:back" %}">
+              Back
+            </a>
+
+            <button class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5" type="submit">
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+  </div>
+{% endblock onboarding_content %}
