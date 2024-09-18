@@ -288,7 +288,10 @@ def agree(request):
             profile.user.agreed_to_terms = True
             profile.user.save()
 
-            profile_onboarding.next(profile=profile)
+            profile_onboarding.current_step = profile_onboarding.current_step + 1
+
+            profile_onboarding.save()
+
             return handle_next_step(request)
 
     context = {

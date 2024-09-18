@@ -1,3 +1,3 @@
-{% if request.user.is_authenticated %}
+{% if request.user.is_authenticated and request.user.profile.is_onboarded %}
   {% include "./user_banners/user_banners.html" %}
 {% endif %}

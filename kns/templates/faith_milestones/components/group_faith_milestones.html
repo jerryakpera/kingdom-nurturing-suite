@@ -1,4 +1,4 @@
-{% load profiles_custom_tags %}
+{% load groups_custom_tags %}
 
 <label>
   <input class="peer/showLabel absolute scale-0" type="checkbox" />
@@ -6,17 +6,17 @@
     <div class="flex items-center justify-between rounded-b-md bg-knsSecondary-200 px-4">
       <h3 class="flex h-10 cursor-pointer items-center font-bold w-full">Faith Milestones</h3>
 
-      <div class="text-xs bg-gray-200 rounded-2xl p-1.5 font-semibold">{{ profile.faith_milestones.count }}/10</div>
+      <div class="text-xs bg-gray-200 rounded-2xl p-1.5 font-semibold">{{ group.faith_milestones.count }}/10</div>
     </div>
     <div class="px-4 space-y-4">
       <p class="text-sm text-black">
-        Faith Milestones helps track an individual's spiritual steps on their profile. It highlights personal growth and involvement in faith, offering a way to celebrate, and measure progress.
+        Faith Milestones helps track a group's spiritual steps. It highlights growth and involvement in faith by the group, offering a way to celebrate, and measure progress.
       </p>
 
-      {% if request.user|is_profiles_group_leader:profile %}
+      {% if request.user|is_leader_of_parent_group:group %}
         <div>
           <a
-            href="{% url "profiles:edit_profile_faith_milestones" profile_slug=profile.slug %}"
+            href="{% url "groups:edit_group_milestones" group_slug=group.slug %}"
             class="w-full block py-1.5 items-center text-xs sm:text-sm text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300"
           >
             Edit
@@ -25,13 +25,13 @@
         </div>
       {% endif %}
 
-      {% if profile.faith_milestones.count == 0 %}
+      {% if group.faith_milestones.count == 0 %}
         <div class="p-2 border border-red-400 bg-red-100 rounded-md font-medium text-sm w-full">
           There are no faith milestones to display at the moment.
         </div>
       {% else %}
         <div class="space-y-2">
-          {% for item_faith_milestone in profile.faith_milestones.all %}
+          {% for item_faith_milestone in group.faith_milestones.all %}
             {% with faith_milestone=item_faith_milestone.faith_milestone %}
               {% include "faith_milestones/components/faith_milestones_item.html" %}
             {% endwith %}

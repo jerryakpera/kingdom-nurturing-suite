@@ -5,6 +5,7 @@ Utils for the `onboarding` app.
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 
+from kns.core.utils import log_this
 from kns.profiles.models import Profile
 
 from .models import ProfileOnboarding

@@ -1,5 +1,5 @@
-<div class="border border-gray-200 shadow-sm p-3 rounded-md">
-  <div class="space-y-4">
+<div class="border border-gray-200 shadow-sm rounded-md">
+  <div class="space-y-4 p-3">
     <div class="flex justify-between items-center">
       <h1 class="text-lg font-bold text-black lg:text-xl font-serif">
         {{ group.name }}
@@ -63,5 +63,9 @@
 
       {% include "groups/components/group_tree/group_tree_modal.html" %}
     </div>
+  </div>
+
+  <div class="mt-4">
+    {% include "faith_milestones/components/group_faith_milestones.html" %}
   </div>
 </div>

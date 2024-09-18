@@ -10,6 +10,7 @@ role and visitor status, and steps can be navigated through the `next` and
 from django.core.cache import cache
 from django.db import models
 
+from kns.core.utils import log_this
 from kns.onboarding.constants import ONBOARDING_STEPS
 from kns.profiles.models import Profile
 
@@ -38,8 +39,10 @@ class ProfileOnboarding(models.Model):
 
         If the current step is already the first step, it remains unchanged.
         """
-        self.current_step = max(1, self.current_step - 1)
-        self.save()
+
+        if self.current_step > 1:
+            self.current_step = self.current_step - 1
+            self.save()
 
     def next(self, profile):
         """
@@ -54,6 +57,7 @@ class ProfileOnboarding(models.Model):
         max_steps = len(self.get_onboarding_steps_list(profile))
 
         self.current_step = min(self.current_step + 1, max_steps)
+
         self.save()
 
     def get_onboarding_steps_list(self, profile):

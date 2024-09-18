@@ -5,6 +5,10 @@ Middlewares for the `onboarding` app.
 from django.shortcuts import redirect
 from django.urls import resolve, reverse
 
+from kns.core.utils import log_this
+
+from .models import ProfileOnboarding
+
 
 class OnboardingMiddleware:
     """
@@ -71,21 +75,18 @@ class OnboardingMiddleware:
 
             # Check if the user has completed onboarding
             if not request.user.profile.is_onboarded:
-                profile_onboarding = getattr(
-                    request.user.profile,
-                    "onboarding",
-                    None,
+                ProfileOnboarding.objects.get_or_create(profile=request.user.profile)
+
+                profile_onboarding = ProfileOnboarding.objects.get(
+                    profile=request.user.profile
                 )
 
-                if profile_onboarding:
-                    current_step = profile_onboarding.get_current_step(
-                        request.user.profile
-                    )
-                    onboarding_url = reverse(current_step["url_name"])
+                current_step = profile_onboarding.get_current_step(request.user.profile)
+                onboarding_url = reverse(current_step["url_name"])
 
-                    # If the user is not on their current onboarding step, redirect them
-                    if request.path != onboarding_url:
-                        return redirect(onboarding_url)
+                # If the user is not on their current onboarding step, redirect them
+                if request.path != onboarding_url:
+                    return redirect(onboarding_url)
 
         # Proceed with the request if onboarding is complete or irrelevant
         return self.get_response(request)

@@ -579,7 +579,7 @@ class TestAgreeView(TestCase):
         self.profile.refresh_from_db()
 
         # Assert that the current step is updated to the next one
-        self.assertEqual(self.profile_onboarding.current_step, 4)
+        self.assertEqual(self.profile_onboarding.current_step, 5)
 
         # Check if the profile's verified status is updated
         self.assertTrue(self.profile.user.verified)
