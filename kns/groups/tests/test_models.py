@@ -1,8 +1,10 @@
+from django.db.models.signals import post_save
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from kns.custom_user.models import User
 from kns.groups.tests.factories import GroupFactory, GroupMemberFactory
+from kns.onboarding.models import ProfileCompletionTask
 
 
 class TestGroupFactory(TestCase):
@@ -384,3 +386,119 @@ class TestGroupMethods(TestCase):
         self.group.add_member(new_profile)
         self.assertEqual(self.group.members.count(), 4)
         self.assertTrue(self.group.is_member(new_profile))
+
+
+class TestGroupSignals(TestCase):
+    def setUp(self):
+        # Create user and profile
+        self.user1 = User.objects.create_user(
+            email="leader@example.com",
+            password="password",
+        )
+        self.profile1 = self.user1.profile
+
+        self.profile1.role = "leader"
+        self.profile1.save()
+
+        self.profile1.create_profile_completion_tasks()
+
+    def test_mark_register_group_complete_task_exists(self):
+        """
+        Test if the 'register_group' task is marked complete when a group is created.
+        """
+        # Create a group with user1 as the leader
+        GroupFactory(
+            leader=self.profile1,
+            name="Youth Fellowship Group",
+        )
+
+        register_group_task = ProfileCompletionTask.objects.get(
+            profile=self.profile1, task_name="register_group"
+        )
+
+        # Refresh the task from the database
+        register_group_task.refresh_from_db()
+
+        # Assert that the task is marked as complete
+        self.assertTrue(register_group_task.is_complete)
+
+    def test_mark_register_group_complete_no_task(self):
+        """
+        Test that nothing happens if no 'register_group' task exists for the user.
+        """
+        # Create another user and profile without a 'register_group' task
+        user2 = User.objects.create_user(
+            email="leader2@example.com",
+            password="password",
+        )
+
+        profile2 = user2.profile
+
+        # Create a group with user2 as the leader
+        GroupFactory(
+            leader=profile2,
+            name="New Members Group",
+        )
+
+        # Assert that no tasks exist for profile2
+        self.assertFalse(
+            ProfileCompletionTask.objects.filter(
+                profile=profile2,
+                task_name="register_group",
+            ).exists()
+        )
+
+    def test_mark_register_group_complete_task_already_complete(self):
+        """
+        Test that if the 'register_group' task is already complete, it remains complete.
+        """
+        self.register_group_task = ProfileCompletionTask.objects.get(
+            profile=self.profile1,
+            task_name="register_group",
+        )
+
+        # Mark the task as already complete
+        self.register_group_task.is_complete = True
+        self.register_group_task.save()
+
+        # Create a group with user1 as the leader
+        GroupFactory(
+            leader=self.profile1,
+            name="Youth Leadership Group",
+        )
+
+        # Refresh the task from the database
+        self.register_group_task.refresh_from_db()
+
+        # Assert that the task is still complete
+        self.assertTrue(self.register_group_task.is_complete)
+
+    def test_mark_register_group_complete_signal_not_fired(self):
+        """
+        Test that the signal is not fired when an existing group is updated.
+        """
+        # Create a group with user1 as the leader
+        group = GroupFactory(
+            leader=self.profile1,
+            name="Bible Study Group",
+        )
+
+        self.register_group_task = ProfileCompletionTask.objects.get(
+            profile=self.profile1,
+            task_name="register_group",
+        )
+
+        # Refresh the task to confirm it's marked complete
+        self.register_group_task.refresh_from_db()
+        self.assertTrue(self.register_group_task.is_complete)
+
+        # Reset task completion to False and update the existing group
+        self.register_group_task.is_complete = False
+        self.register_group_task.save()
+
+        group.name = "Updated Bible Study Group"
+        group.save()
+
+        # Assert that the task is still not marked as complete
+        self.register_group_task.refresh_from_db()
+        self.assertFalse(self.register_group_task.is_complete)

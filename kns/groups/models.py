@@ -8,10 +8,13 @@ from uuid import uuid4
 from cloudinary.models import CloudinaryField
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.urls import reverse
 from mptt.models import MPTTModel, TreeForeignKey
 
 from kns.core.modelmixins import ModelWithLocation, TimestampedModel
+from kns.onboarding.models import ProfileCompletionTask
 from kns.profiles.models import Profile
 
 from . import constants
@@ -406,3 +409,38 @@ class GroupMember(TimestampedModel):
             their profile name and the group name.
         """
         return f"{self.profile.get_full_name()} ({self.group.name})"
+
+
+@receiver(post_save, sender=Group)
+def mark_register_group_complete(sender, instance, created, **kwargs):
+    """
+    Mark the 'register_group' task as complete when a group is created.
+
+    Parameters
+    ----------
+    sender : type
+        The model class that triggered the signal.
+    instance : Group
+        The instance of the group being saved.
+    created : bool
+        Whether the group was created or updated.
+    **kwargs
+        Additional keyword arguments passed by the signal.
+    """
+    if created:
+        # Assuming the leader of the group is the one who registered it
+        profile = instance.leader
+
+        register_group_task_exists = ProfileCompletionTask.objects.filter(
+            profile=profile,
+            task_name="register_group",
+        ).exists()
+
+        if register_group_task_exists:
+            task = ProfileCompletionTask.objects.get(
+                profile=profile,
+                task_name="register_group",
+            )
+
+            if task:
+                task.mark_complete()
