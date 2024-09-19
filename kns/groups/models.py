@@ -424,7 +424,7 @@ def mark_register_group_complete(sender, instance, created, **kwargs):
         The instance of the group being saved.
     created : bool
         Whether the group was created or updated.
-    **kwargs
+    **kwargs : dict
         Additional keyword arguments passed by the signal.
     """
     if created:
@@ -444,3 +444,45 @@ def mark_register_group_complete(sender, instance, created, **kwargs):
 
             if task:
                 task.mark_complete()
+
+
+@receiver(post_save, sender=GroupMember)
+def mark_register_first_member_complete(sender, instance, created, **kwargs):
+    """
+    Mark the 'register_first_member' task as complete when the first member is added to the group.
+
+    This signal is triggered after a GroupMember instance is saved. If it is the first
+    member being added to the group, the leader of the group will have their
+    'register_first_member' task marked as complete.
+
+    Parameters
+    ----------
+    sender : type
+        The model class that triggered the signal (GroupMember).
+    instance : GroupMember
+        The instance of the GroupMember model being saved.
+    created : bool
+        A boolean indicating if the GroupMember instance was newly created.
+    **kwargs : dict
+        Additional keyword arguments passed by the signal.
+    """
+    if created:
+        # Check if it's the first member of the group
+        group = instance.group
+
+        if group.members.count() == 1:
+            profile = group.leader
+
+            task_exists = ProfileCompletionTask.objects.filter(
+                profile=profile,
+                task_name="register_first_member",
+            ).exists()
+
+            if task_exists:
+                task = ProfileCompletionTask.objects.get(
+                    profile=profile,
+                    task_name="register_first_member",
+                )
+
+                if task:
+                    task.mark_complete()

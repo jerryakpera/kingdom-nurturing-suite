@@ -1,4 +1,3 @@
-from django.db.models.signals import post_save
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -502,3 +501,121 @@ class TestGroupSignals(TestCase):
         # Assert that the task is still not marked as complete
         self.register_group_task.refresh_from_db()
         self.assertFalse(self.register_group_task.is_complete)
+
+
+class TestGroupMemberSignals(TestCase):
+    def setUp(self):
+        # Create user and profile
+        self.user1 = User.objects.create_user(
+            email="leader@example.com",
+            password="password",
+        )
+        self.profile1 = self.user1.profile
+
+        self.profile1.role = "leader"
+        self.profile1.save()
+
+        self.profile1.create_profile_completion_tasks()
+
+        # Create a group with profile1 as the leader
+        self.group = GroupFactory(
+            leader=self.profile1,
+            name="Fellowship Group",
+        )
+
+    def test_mark_register_first_member_complete_task_exists(self):
+        """
+        Test if the 'register_first_member' task is marked complete
+        when the first group member is added.
+        """
+        # Add the first member to the group
+        GroupMemberFactory(
+            profile=self.profile1,
+            group=self.group,
+        )
+
+        # Fetch the 'register_first_member' task
+        register_first_member_task = ProfileCompletionTask.objects.get(
+            profile=self.profile1, task_name="register_first_member"
+        )
+
+        # Refresh from the database and assert it's complete
+        register_first_member_task.refresh_from_db()
+        self.assertTrue(register_first_member_task.is_complete)
+
+    def test_mark_register_first_member_complete_no_task(self):
+        """
+        Test that nothing happens if no 'register_first_member' task exists for the user.
+        """
+        # Create another user and profile without a 'register_first_member' task
+        user2 = User.objects.create_user(
+            email="leader2@example.com",
+            password="password",
+        )
+        profile2 = user2.profile
+
+        # Create a group with profile2 as the leader
+        group2 = GroupFactory(
+            leader=profile2,
+            name="Second Group",
+        )
+
+        # Add the first member to the new group
+        GroupMemberFactory(
+            profile=profile2,
+            group=group2,
+        )
+
+        # Assert no 'register_first_member' task exists for profile2
+        self.assertFalse(
+            ProfileCompletionTask.objects.filter(
+                profile=profile2,
+                task_name="register_first_member",
+            ).exists()
+        )
+
+    def test_mark_register_first_member_complete_task_already_complete(self):
+        """
+        Test that if the 'register_first_member' task is already complete, it remains complete.
+        """
+        # Fetch and mark the 'register_first_member' task as complete
+        register_first_member_task = ProfileCompletionTask.objects.get(
+            profile=self.profile1, task_name="register_first_member"
+        )
+        register_first_member_task.is_complete = True
+        register_first_member_task.save()
+
+        # Add the first member to the group
+        GroupMemberFactory(
+            profile=self.profile1,
+            group=self.group,
+        )
+
+        # Refresh from the database and assert it's still complete
+        register_first_member_task.refresh_from_db()
+        self.assertTrue(register_first_member_task.is_complete)
+
+    def test_mark_register_first_member_signal_not_fired_for_existing_member(self):
+        """
+        Test that the signal is not fired when an existing group member is updated.
+        """
+        # Add the first member to the group
+        member = GroupMemberFactory(
+            profile=self.profile1,
+            group=self.group,
+        )
+
+        # Fetch and mark the task as complete
+        register_first_member_task = ProfileCompletionTask.objects.get(
+            profile=self.profile1, task_name="register_first_member"
+        )
+        register_first_member_task.is_complete = True
+        register_first_member_task.save()
+
+        # Update the existing group member
+        member.role = "new role"
+        member.save()
+
+        # Refresh and ensure task is still complete
+        register_first_member_task.refresh_from_db()
+        self.assertTrue(register_first_member_task.is_complete)
