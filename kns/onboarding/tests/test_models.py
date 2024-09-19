@@ -261,9 +261,12 @@ class TestProfileCompletionModel(TestCase):
             email="john.doe@example.com",
             password="password",
         )
+
         self.profile = self.user.profile
+
         self.profile.first_name = "John"
         self.profile.last_name = "Doe"
+
         self.profile.save()
 
         self.profile_completion = ProfileCompletion.objects.create(
@@ -272,6 +275,11 @@ class TestProfileCompletionModel(TestCase):
 
         # Create sample tasks
         self.tasks = [
+            ProfileCompletionTask.objects.create(
+                profile=self.profile,
+                task_name="complete_profile",
+                description="Complete your.",
+            ),
             ProfileCompletionTask.objects.create(
                 profile=self.profile,
                 task_name="register_group",
@@ -306,7 +314,7 @@ class TestProfileCompletionModel(TestCase):
         Test that `remaining_tasks` returns incomplete tasks.
         """
         remaining = self.profile_completion.remaining_tasks()
-        self.assertEqual(len(remaining), 3)
+        self.assertEqual(len(remaining), 4)
 
         # Mark all tasks as complete
         for task in self.tasks:
@@ -327,13 +335,13 @@ class TestProfileCompletionModel(TestCase):
             task.mark_complete()
 
         completed = self.profile_completion.completed_tasks()
-        self.assertEqual(len(completed), 3)
+        self.assertEqual(len(completed), 4)
 
     def test_total_tasks(self):
         """
         Test that `total_tasks` returns the correct number of tasks.
         """
-        self.assertEqual(self.profile_completion.total_tasks(), 3)
+        self.assertEqual(self.profile_completion.total_tasks(), 4)
 
     def test_completed_task_count(self):
         """
@@ -345,49 +353,7 @@ class TestProfileCompletionModel(TestCase):
         for task in self.tasks:
             task.mark_complete()
 
-        self.assertEqual(self.profile_completion.completed_task_count(), 3)
-
-    def test_completion_percentage(self):
-        """
-        Test that `completion_percentage` returns the correct percentage of tasks completed.
-        """
-        # Scenario 1: No tasks completed
-        self.assertEqual(
-            self.profile_completion.completion_percentage(),
-            0,
-        )
-
-        # Scenario 2: Some tasks completed
-        # Assuming you start with 5 tasks and complete 2 of them
-        tasks_to_complete = self.tasks[:2]  # Taking the first 2 tasks
-        for task in tasks_to_complete:
-            task.mark_complete()
-
-        self.assertEqual(
-            self.profile_completion.completion_percentage(),
-            40,
-        )
-
-        # Scenario 3: All tasks completed
-        for task in self.tasks:
-            task.mark_complete()
-
-        self.assertEqual(
-            self.profile_completion.completion_percentage(),
-            100,
-        )
-
-        # Scenario 4: No tasks
-        # Remove all tasks and create a new ProfileCompletion instance with no tasks
-        ProfileCompletionTask.objects.all().delete()
-        self.profile_completion = ProfileCompletion.objects.create(
-            profile=self.profile,
-        )
-
-        self.assertEqual(
-            self.profile_completion.completion_percentage(),
-            100,
-        )
+        self.assertEqual(self.profile_completion.completed_task_count(), 4)
 
     def test_profile_completion_str_method(self):
         """
@@ -408,3 +374,48 @@ class TestProfileCompletionModel(TestCase):
             )
 
         assert "UNIQUE constraint failed" in str(excinfo.value)
+
+    def test_completion_percentage(self):
+        """
+        Test that `completion_percentage` returns the correct percentage of tasks completed.
+        """
+        # Scenario 1: No tasks completed
+        self.assertEqual(
+            self.profile_completion.completion_percentage(),
+            0,
+        )
+
+        # Scenario 2: Some tasks completed
+        # Assuming you start with 5 tasks and complete 2 of them
+        tasks_to_complete = self.tasks[:2]  # Taking the first 2 tasks
+        for task in tasks_to_complete:
+            task.mark_complete()
+
+        self.assertEqual(
+            self.profile_completion.completion_percentage(),
+            int((2 / len(self.tasks)) * 100),
+        )
+
+        # Scenario 3: All tasks completed
+        for task in self.tasks:
+            task.mark_complete()
+
+        self.assertEqual(
+            self.profile_completion.completion_percentage(),
+            100,
+        )
+
+        # Scenario 4: No tasks
+        # Remove all tasks and reset ProfileCompletion
+        ProfileCompletionTask.objects.all().delete()
+        self.profile_completion.delete()
+
+        # Recreate ProfileCompletion instance with no tasks
+        self.profile_completion = ProfileCompletion.objects.create(
+            profile=self.profile,
+        )
+
+        self.assertEqual(
+            self.profile_completion.completion_percentage(),
+            100,
+        )
