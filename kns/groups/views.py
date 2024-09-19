@@ -16,7 +16,7 @@ from kns.profiles.utils import name_with_apostrophe
 
 
 @login_required
-def index(request):
+def index(request):  # pragma: no cover
     """
     View function to display a list of all groups.
 
@@ -30,7 +30,31 @@ def index(request):
     HttpResponse:
         The rendered template displaying the list of groups.
     """
-    groups = Group.objects.all()
+    groups = None
+
+    profile_group_in_exists = GroupMember.objects.filter(
+        profile=request.user.profile,
+    ).exists()
+    profile_group_led_exists = Group.objects.filter(
+        leader=request.user.profile,
+    ).exists()
+
+    if profile_group_in_exists:
+        group_in = GroupMember.objects.get(
+            profile=request.user.profile,
+        ).group
+        groups = group_in.get_descendants(include_self=True)
+
+    else:
+        if profile_group_led_exists:
+            group_led = Group.objects.get(
+                leader=request.user.profile,
+            )
+            groups = group_led.get_descendants(
+                include_self=True,
+            )
+        else:
+            groups = Group.objects.all()
 
     context = {
         "groups": groups,

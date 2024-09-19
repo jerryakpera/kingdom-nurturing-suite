@@ -48,6 +48,13 @@ def index(request):  # pragma: no cover
             "profile_completion": profile_completion,
         }
 
+        group_led = Group.objects.filter(
+            leader=request.user.profile,
+        ).first()  # Get the first group led by the user, if any
+
+        if group_led:
+            context["local_groups"] = group_led.get_local_descendant_groups()[:3]
+
     else:
         context = {}
 

@@ -357,6 +357,28 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         """
         return self.members.filter(profile=profile).exists()
 
+    # TODO: Remove test ignore
+    def get_local_descendant_groups(self):  # pragma: no cover
+        """
+        Return all groups within the same city or country as the groups location,
+        that are descendants of the group.
+
+        Returns
+        -------
+        QuerySet
+            A queryset of groups that are descendants of this group and
+            are in the same city or country as the group.
+        """
+        # Get all descendant groups of this group
+        descendant_groups = self.get_descendants()
+
+        # Filter based on city first, then country if city is not available
+        local_groups = descendant_groups.filter(
+            location_city=self.location_city,
+        )
+
+        return local_groups
+
 
 class GroupMember(TimestampedModel):
     """

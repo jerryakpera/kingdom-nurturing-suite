@@ -1,0 +1,74 @@
+{% load static %}
+
+<div class="p-2 md:w-1/2">
+  <div class="h-full border border-gray-300 shadow-sm border-opacity-60 rounded-lg overflow-hidden bg-white">
+    {% if group.image %}
+      <img
+        alt="{{ group.name }}"
+        src="{{ group.image.url }}"
+        class="lg:h-48 md:h-36 w-full object-cover object-center"
+      >
+    {% else %}
+      <img
+        alt="{{ group.name }}"
+        src="{% static "groups/images/group-default.jpg" %}"
+        class="lg:h-48 md:h-36 w-full object-cover object-center"
+      >
+    {% endif %}
+    <div class="p-6 sm:p-4 md:p-6">
+      <h6 class="tracking-widest text-xs title-font font-semibold text-gray-600 mb-1">
+        {% if group.location_country %}
+          <span class="mb-0 fw-semibold">
+            <img
+              alt="Event location flag"
+              src="{{ group.location_country.flag }}"
+            />
+          </span>
+        {% endif %}
+
+        <div class="flex justify-between">
+          {{ group.location_display }}
+          <div>
+            {{ group.created_at|date:"F j, Y" }}
+          </div>
+        </div>
+      </h6>
+
+      <h3 class="font-serif text-lg font-bold text-knsDark-900 mb-2">
+        <a href="{{ group.get_absolute_url }}">
+          {{ group.name }}
+        </a>
+      </h3>
+      <div class="text-sm text-knsSecondary font-semibold">
+        <a href="{{ group.leader.get_absolute_url }}">
+          {{ group.leader.get_full_name }}
+        </a>
+      </div>
+
+      <p class="leading-relaxed mb-3 text-sm">
+        {{ group.description }}
+      </p>
+
+      <div class="flex items-center flex-wrap justify-between">
+        <a class="w-28 h-8 text-xs font-medium text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSebg-knsSecondary-300 dark:bg-knsSecondary-600 dark:hover:bg-knsSecondary-700 dark:focus:ring-knsSebg-knsSecondary-800 gap-x-2 flex items-center justify-center cursor-pointer" href="{{ group.get_absolute_url }}">
+          View group
+          <iconify-icon icon="ph:arrow-right-fill" class="text-lg"></iconify-icon>
+        </a>
+
+        <div class="flex space-x-4 justify-between">
+          <span class="text-gray-800 font-bold inline-flex items-center leading-none text-sm border-gray-300 gap-x-1">
+            <iconify-icon icon="iconamoon:profile-fill" class="text-lg"></iconify-icon>
+            {{ group.total_members_count }}
+          </span>
+          <span class="text-gray-800 inline-flex items-center leading-none text-sm gap-x-1 font-bold">
+            <iconify-icon icon="mdi:family-tree" class="text-lg"></iconify-icon>
+            {{ group.get_descendant_count }}
+          </span>
+        </div>
+
+        <!-- Include the modal specific to this group -->
+        {% include "groups/components/group_modal/group_modal.html" %}
+      </div>
+    </div>
+  </div>
+</div>
