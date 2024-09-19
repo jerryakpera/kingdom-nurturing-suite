@@ -151,6 +151,16 @@ class TestProfileOnboardingModel(TestCase):
 
         self.assertFalse(self.onboarding.is_last_step(self.profile))
 
+    def test_str_method(self):
+        """
+        Test that the `__str__` method returns the correct string representation.
+        """
+        # Expected string representation
+        expected_str = f"{self.profile.get_full_name()} - onboarding."
+
+        # Check if the string representation is correct
+        self.assertEqual(str(self.onboarding), expected_str)
+
 
 class TestProfileCompletionTaskModel(TestCase):
     def setUp(self):
@@ -173,7 +183,7 @@ class TestProfileCompletionTaskModel(TestCase):
         task = ProfileCompletionTask.objects.create(
             profile=self.profile,
             task_name="complete_profile",
-            description="Complete all required fields in the profile.",
+            task_description="Complete all required fields in the profile.",
         )
 
         self.assertEqual(
@@ -185,7 +195,7 @@ class TestProfileCompletionTaskModel(TestCase):
             "complete_profile",
         )
         self.assertEqual(
-            task.description,
+            task.task_description,
             "Complete all required fields in the profile.",
         )
         self.assertFalse(task.is_complete)
@@ -197,7 +207,7 @@ class TestProfileCompletionTaskModel(TestCase):
         task = ProfileCompletionTask.objects.create(
             profile=self.profile,
             task_name="complete_profile",
-            description="Complete all required fields in the profile.",
+            task_description="Complete all required fields in the profile.",
         )
 
         self.assertEqual(str(task), "complete_profile for Jane Doe")
@@ -210,7 +220,7 @@ class TestProfileCompletionTaskModel(TestCase):
         task = ProfileCompletionTask.objects.create(
             profile=self.profile,
             task_name="complete_profile",
-            description="Complete all required fields in the profile.",
+            task_description="Complete all required fields in the profile.",
         )
 
         task.mark_complete()
@@ -226,14 +236,14 @@ class TestProfileCompletionTaskModel(TestCase):
         ProfileCompletionTask.objects.create(
             profile=self.profile,
             task_name="complete_profile",
-            description="Complete all required fields in the profile.",
+            task_description="Complete all required fields in the profile.",
         )
 
         with pytest.raises(IntegrityError) as excinfo:
             ProfileCompletionTask.objects.create(
                 profile=self.profile,
                 task_name="complete_profile",
-                description="Duplicate task for the same profile.",
+                task_description="Duplicate task for the same profile.",
             )
 
         assert "UNIQUE constraint failed" in str(excinfo.value)
@@ -245,11 +255,31 @@ class TestProfileCompletionTaskModel(TestCase):
         task = ProfileCompletionTask.objects.create(
             profile=self.profile,
             task_name="register_group",
-            description="Register a new group.",
+            task_description="Register a new group.",
         )
 
         self.assertFalse(task.is_complete)
         self.assertIsNone(task.completed_at)
+
+    def test_name_method(self):
+        """
+        Test that the `name` method returns the human-readable name of the task.
+        """
+        task = ProfileCompletionTask.objects.create(
+            profile=self.profile,
+            task_name="register_group",
+            task_description="Register a new group.",
+        )
+
+        self.assertEqual(task.name(), "Register group")
+
+        task = ProfileCompletionTask.objects.create(
+            profile=self.profile,
+            task_name="add_vocations_skills",
+            task_description="Add vocations, skills, and interests.",
+        )
+
+        self.assertEqual(task.name(), "Add vocations, skills, and interests")
 
 
 class TestProfileCompletionModel(TestCase):
@@ -266,36 +296,16 @@ class TestProfileCompletionModel(TestCase):
 
         self.profile.first_name = "John"
         self.profile.last_name = "Doe"
+        self.profile.role = "leader"
 
         self.profile.save()
 
-        self.profile_completion = ProfileCompletion.objects.create(
+        self.profile.create_profile_completion_tasks()
+
+        self.profile_completion = ProfileCompletion.objects.get(
             profile=self.profile,
         )
-
-        # Create sample tasks
-        self.tasks = [
-            ProfileCompletionTask.objects.create(
-                profile=self.profile,
-                task_name="complete_profile",
-                description="Complete your.",
-            ),
-            ProfileCompletionTask.objects.create(
-                profile=self.profile,
-                task_name="register_group",
-                description="Register a new group.",
-            ),
-            ProfileCompletionTask.objects.create(
-                profile=self.profile,
-                task_name="register_first_member",
-                description="Register the first member in the group.",
-            ),
-            ProfileCompletionTask.objects.create(
-                profile=self.profile,
-                task_name="add_vocations_skills",
-                description="Add vocations and skills to the profile.",
-            ),
-        ]
+        self.tasks = self.profile_completion.tasks
 
     def test_is_profile_complete(self):
         """

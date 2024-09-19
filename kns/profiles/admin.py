@@ -8,6 +8,7 @@ from kns.classifications.models import ProfileClassification
 from kns.faith_milestones.models import ProfileFaithMilestone
 from kns.levels.models import ProfileLevel
 from kns.mentorships.models import ProfileMentorshipArea
+from kns.onboarding.models import ProfileCompletionTask
 from kns.skills.models import ProfileInterest, ProfileSkill
 from kns.vocations.models import ProfileVocation
 
@@ -141,6 +142,15 @@ class ProfileClassificationInline(admin.TabularInline):
     model = ProfileClassification
 
 
+class ProfileCompletionTaskInline(admin.TabularInline):
+    """
+    Inline admin interface for the ProfileCompletionTask model.
+    """
+
+    extra = 0
+    model = ProfileCompletionTask
+
+
 class ProfileAdmin(admin.ModelAdmin):
     """
     Admin interface for the Profile model.
@@ -166,6 +176,7 @@ class ProfileAdmin(admin.ModelAdmin):
         ProfileVocationInline,
         ProfileLevelInline,
         ProfileClassificationInline,
+        ProfileCompletionTaskInline,
     ]
 
 

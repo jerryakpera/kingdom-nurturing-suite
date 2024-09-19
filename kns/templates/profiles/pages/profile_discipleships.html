@@ -8,8 +8,16 @@
       {{ profile.get_full_name|name_with_apostrophe }} discipleships
     </h1>
 
-    {% if profile == request.user.profile %}
+    {% if profile == request.user.profile and request.user.profile.group_led.members.count > 0 %}
       {% include "profiles/forms/group_member_discipleship_form.html" %}
+    {% endif %}
+
+    {% if request.user.profile.group_led.members.count == 0 %}
+      <div id="marketing-banner" tabindex="-1" class="flex flex-col md:flex-row justify-between p-4 border border-gray-100 rounded-lg shadow-sm bg-gray-800">
+        <div class="flex flex-col items-start md:items-center md:flex-row md:mb-0">
+          <p class="flex items-center text-sm font-normal text-gray-200">No discipleships to display</p>
+        </div>
+      </div>
     {% endif %}
 
     <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-1 md:grid-cols-2 gap-2">

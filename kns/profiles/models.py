@@ -9,6 +9,7 @@ from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.urls import reverse
 from django.utils import timezone
 from django_countries.fields import CountryField
 
@@ -727,6 +728,7 @@ class Profile(
         Automatically creates profile completion tasks when a profile is onboarded.
         Tasks are created based on the profile's role and existing tasks to avoid duplicates.
         """
+        from kns.onboarding.constants import TASKS
         from kns.onboarding.models import ProfileCompletion, ProfileCompletionTask
 
         # Ensure a ProfileCompletion entry exists for the profile
@@ -745,9 +747,28 @@ class Profile(
 
         # Create tasks only if they do not already exist
         for task_name in base_tasks:
+            task_link = ""
+            task_description = TASKS[task_name]["task_description"]
+
+            if task_name == "register_group":
+                task_link = reverse("groups:register_group")
+
+            if task_name == "register_first_member":
+                task_link = reverse("profiles:register_member")
+
+            if task_name == "add_vocations_skills":
+                task_link = reverse(
+                    "profiles:edit_profile_vocations",
+                    kwargs={
+                        "profile_slug": self.slug,
+                    },
+                )
+
             ProfileCompletionTask.objects.get_or_create(
                 profile=self,
                 task_name=task_name,
+                task_link=task_link,
+                task_description=task_description,
             )
 
     def check_and_complete_vocations_skills(self):

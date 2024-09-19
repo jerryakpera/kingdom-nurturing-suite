@@ -152,6 +152,17 @@ class ProfileOnboarding(models.Model):
 
         return self.current_step > len(onboarding_steps_list)
 
+    def __str__(self):
+        """
+        Return a string representation of the task.
+
+        Returns
+        -------
+        str
+            A string in the format of "Onboarding for {profile_name}".
+        """
+        return f"{self.profile.get_full_name()} - onboarding."
+
 
 class ProfileCompletionTask(TimestampedModel, models.Model):
     """
@@ -188,19 +199,37 @@ class ProfileCompletionTask(TimestampedModel, models.Model):
         max_length=100,
         choices=TASKS_CHOICES,
     )
-    task_description = models.CharField(
-        max_length=150,
+    task_description = models.TextField(
         validators=[
             MinLengthValidator(120),
             MaxLengthValidator(150),
         ],
     )
-    description = models.TextField()
+    task_link = models.CharField(
+        max_length=300,
+        blank=True,
+        null=True,
+    )
     is_complete = models.BooleanField(default=False)
     completed_at = models.DateTimeField(
         null=True,
         blank=True,
     )
+
+    def name(self):
+        """
+        Return the human-readable name of the task based on the task_name.
+
+        Returns
+        -------
+        str
+            The human-readable name of the task.
+        """
+        for key, value in TASKS_CHOICES:
+            if key == self.task_name:
+                return value
+
+        return self.task_name  # pragma: no cover
 
     def mark_complete(self):
         """
@@ -251,6 +280,19 @@ class ProfileCompletion(models.Model):
         return not self.profile.completion_tasks.filter(
             is_complete=False,
         ).exists()
+
+    @property
+    def tasks(self):
+        """
+        Return all tasks associated with the profile completion.
+
+        Returns
+        -------
+        QuerySet
+            A QuerySet of all tasks (both complete and incomplete)
+            associated with the profile.
+        """
+        return self.profile.completion_tasks.all().order_by("-created_at")
 
     def remaining_tasks(self):
         """

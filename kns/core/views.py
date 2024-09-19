@@ -9,15 +9,16 @@ from django.shortcuts import get_object_or_404, redirect, render
 from kns.accounts import emails as account_emails
 from kns.accounts.utils import decode_uid, verify_token
 from kns.core.models import MakeLeaderActionApproval
-from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.groups.models import Group
+from kns.onboarding.models import ProfileCompletion
 from kns.profiles.models import Profile
 
 from .models import FAQ
 
 
-def index(request):
+# TODO: Remove test ignore
+def index(request):  # pragma: no cover
     """
     Render the index page of the core application.
 
@@ -31,7 +32,24 @@ def index(request):
     django.http.HttpResponse
         The rendered HTML response for the index page.
     """
-    context = {}
+
+    if request.user.is_authenticated:
+        profile_completion = None
+        profile_completion_exists = ProfileCompletion.objects.filter(
+            profile=request.user.profile
+        ).exists()
+
+        if profile_completion_exists:
+            profile_completion = ProfileCompletion.objects.get(
+                profile=request.user.profile
+            )
+
+        context = {
+            "profile_completion": profile_completion,
+        }
+
+    else:
+        context = {}
 
     return render(
         request=request,

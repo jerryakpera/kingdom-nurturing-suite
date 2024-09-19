@@ -292,6 +292,8 @@ def agree(request):
 
             profile_onboarding.save()
 
+            profile.create_profile_completion_tasks()
+
             return handle_next_step(request)
 
     context = {

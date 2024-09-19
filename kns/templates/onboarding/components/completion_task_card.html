@@ -1,0 +1,58 @@
+<div class="flex flex-col overflow-hidden rounded-lg border bg-white">
+  <div class="p-4 bg-gray-500">
+    <div class="text-center text-2xl">
+      {% if completion_task.is_complete %}
+        <iconify-icon icon="bi:check-all" class="text-white"></iconify-icon>
+      {% else %}
+        <iconify-icon icon="material-symbols:pending" class="text-white"></iconify-icon>
+      {% endif %}
+    </div>
+    <h2 class="text-lg font-semibold text-white text-center">
+      {{ completion_task.name }}
+    </h2>
+  </div>
+
+  <div class="flex flex-1 flex-col p-4 sm:p-6">
+    <p class="mb-4 text-gray-500 text-center">
+      {{ completion_task.task_description }}
+    </p>
+
+    {% if completion_task.task_name == "register_group" %}
+      {% if request.user.profile.is_profile_complete %}
+        <a href="{{ completion_task.task_link }}" class="text-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
+          Register your group
+        </a>
+      {% else %}
+        <p class="text-black text-sm bg-gray-200 rounded-md p-3 text-center flex items-start font-medium">
+          <iconify-icon icon="material-symbols-light:info" class="text-lg"></iconify-icon>
+          You must complete your profile before registering your group
+        </p>
+      {% endif %}
+    {% endif %}
+
+    {% if completion_task.task_name == "register_first_member" %}
+      {% if request.user.profile.is_profile_complete %}
+        <a href="{{ completion_task.task_link }}" class="text-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
+          Register member
+        </a>
+      {% else %}
+        <p class="text-black text-sm bg-gray-200 rounded-md p-3 text-center flex items-start font-medium">
+          <iconify-icon icon="material-symbols-light:info" class="text-lg"></iconify-icon>
+          You must register your group before you can add a member
+        </p>
+      {% endif %}
+    {% endif %}
+
+    {% if completion_task.task_name == "add_vocations_skills" or completion_task.task_name == "browse_events" %}
+      <a href="{{ completion_task.task_link }}" class="text-center text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
+        {% if completion_task.task_name == "add_vocations_skills" %}
+          Add Skills and Vocations
+        {% elif completion_task.task_name == "browse_events" %}
+          Browse Events
+        {% else %}
+          Go to Task
+        {% endif %}
+      </a>
+    {% endif %}
+  </div>
+</div>
