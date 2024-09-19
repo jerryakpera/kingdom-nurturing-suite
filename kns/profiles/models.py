@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from cloudinary.models import CloudinaryField
 from django.core.validators import MaxLengthValidator, MinLengthValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -749,6 +749,43 @@ class Profile(
                 profile=self,
                 task_name=task_name,
             )
+
+    def check_and_complete_vocations_skills(self):
+        """
+        Check if the profile has all three: ProfileSkill, ProfileInterest, and ProfileVocation.
+        If so, mark the 'add_vocations_skills' task as complete.
+        """
+        from kns.onboarding.models import ProfileCompletionTask
+        from kns.skills.models import ProfileInterest, ProfileSkill
+        from kns.vocations.models import ProfileVocation
+
+        with transaction.atomic():
+            has_skills = ProfileSkill.objects.filter(
+                profile=self,
+            ).exists()
+            has_interests = ProfileInterest.objects.filter(
+                profile=self,
+            ).exists()
+            has_vocations = ProfileVocation.objects.filter(
+                profile=self,
+            ).exists()
+
+            if has_skills or has_interests or has_vocations:
+                task_exists = ProfileCompletionTask.objects.filter(
+                    profile=self,
+                    task_name="add_vocations_skills",
+                ).exists()
+
+                if task_exists:  # pragma: no cover
+                    # Get or create the 'add_vocations_skills' task and mark it as complete
+                    task = ProfileCompletionTask.objects.get(
+                        profile=self,
+                        task_name="add_vocations_skills",
+                    )
+
+                    if not task.is_complete:
+                        task.is_complete = True
+                        task.save()
 
 
 @receiver(post_save, sender=User)

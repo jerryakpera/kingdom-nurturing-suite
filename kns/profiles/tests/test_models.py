@@ -20,6 +20,7 @@ from kns.profiles.models import (
     Profile,
     ProfileEncryption,
 )
+from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 from kns.vocations.models import ProfileVocation, Vocation
 
 
@@ -945,3 +946,125 @@ class TestProfileCompletionTasks(TestCase):
         ).exists()
 
         assert profile_completion is True
+
+
+class TestCheckAndCompleteVocationsSkills(TestCase):
+    def setUp(self):
+        """
+        Setup method to create a Profile instance linked to the test user.
+        """
+        # Clean up existing data to ensure a clean test environment
+        # User.objects.all().delete()
+        # Profile.objects.all().delete()
+        # ProfileSkill.objects.all().delete()
+        # ProfileInterest.objects.all().delete()
+        # ProfileVocation.objects.all().delete()
+        # ProfileCompletionTask.objects.all().delete()
+
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+
+        self.profile.role = "leader"
+        self.profile.save()
+
+        self.profile.create_profile_completion_tasks()
+
+        # Create Skill and Vocation instances
+        self.skill = Skill.objects.create(
+            title="Python Programming",
+            content="<p>Advanced Python programming skills.</p>",
+            author=self.profile,
+        )
+
+        self.interest = Skill.objects.create(
+            title="Interest in Python",
+            content="<p>Interest in learning Python programming.</p>",
+            author=self.profile,
+        )
+
+        self.vocation = Vocation.objects.create(
+            title="Software Developer",
+            description="Develops software.",
+            author=self.profile,
+        )
+
+    def test_all_items_present_task_not_completed(self):
+        """
+        Test when the profile has all required items but the task is not completed.
+        """
+        ProfileSkill.objects.create(
+            profile=self.profile,
+            skill=self.skill,
+        )
+        ProfileInterest.objects.create(
+            profile=self.profile,
+            interest=self.interest,
+        )
+        ProfileVocation.objects.create(
+            profile=self.profile,
+            vocation=self.vocation,
+        )
+
+        self.profile.check_and_complete_vocations_skills()
+
+        task = ProfileCompletionTask.objects.get(
+            profile=self.profile, task_name="add_vocations_skills"
+        )
+        self.assertTrue(task.is_complete)
+
+    def test_all_items_present_task_already_completed(self):
+        """
+        Test when the profile has all required items but the task is already completed.
+        """
+        ProfileSkill.objects.create(
+            profile=self.profile,
+            skill=self.skill,
+        )
+        ProfileInterest.objects.create(
+            profile=self.profile,
+            interest=self.interest,
+        )
+        ProfileVocation.objects.create(
+            profile=self.profile,
+            vocation=self.vocation,
+        )
+
+        task = ProfileCompletionTask.objects.get(
+            profile=self.profile,
+            task_name="add_vocations_skills",
+        )
+
+        task.is_complete = True
+        task.save()
+
+        self.profile.check_and_complete_vocations_skills()
+
+        task = ProfileCompletionTask.objects.get(
+            profile=self.profile,
+            task_name="add_vocations_skills",
+        )
+
+        self.assertTrue(task.is_complete)
+
+    def test_missing_items(self):
+        """
+        Test when the profile is missing one or more required items.
+        """
+        self.profile.check_and_complete_vocations_skills()
+
+        task_exists = ProfileCompletionTask.objects.filter(
+            profile=self.profile,
+            task_name="add_vocations_skills",
+        ).exists()
+
+        task = ProfileCompletionTask.objects.get(
+            profile=self.profile,
+            task_name="add_vocations_skills",
+        )
+
+        self.assertTrue(task_exists)
+        self.assertFalse(task.is_complete)
