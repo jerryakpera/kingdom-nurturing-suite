@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
+from kns.core.utils import log_this
 from kns.custom_user.models import User
 
 from .decorators import guest_required
@@ -84,21 +85,9 @@ def login_view(request):
                     None,
                     "Access denied. You do not have the necessary permissions.",
                 )
-
-                context = {
-                    "login_form": form,
-                }
-
-                return render(
-                    request=request,
-                    template_name="accounts/pages/login.html",
-                    context=context,
-                )
             else:
-                # Log the user in
                 login(request, user)
-
-                return redirect("accounts:index")
+                return redirect("core:index")
         else:
             form.add_error(
                 None,

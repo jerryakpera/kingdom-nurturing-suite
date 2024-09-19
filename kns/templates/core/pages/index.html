@@ -3,80 +3,17 @@
 {% load static %}
 
 {% block title %}
-  KNS | Home
+  {% if request.user.is_authenticated %}
+    KNT | Home
+  {% else %}
+    KNS | Home
+  {% endif %}
 {% endblock title %}
 
 {% block base_content %}
-  <section class="bg-knsLight-400 py-16 md:py-32">
-    <div class="text-center container-default">
-      <a href="/about" class="inline-flex justify-between items-center py-1 px-1 pr-4 mb-7 text-sm text-gray-700 bg-gray-100 rounded-full  hover:bg-gray-200" role="alert">
-        <span class="text-xs bg-knsPrimary rounded-full text-white px-4 py-1.5 mr-3">Support</span> <span class="text-sm font-medium">Submit a ticket now!</span>
-        <iconify-icon icon="ph:caret-right" class="text-lg ml-1"></iconify-icon>
-      </a>
-      <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl ">A Network Solutions For Disciples</h1>
-      <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48">One place to explore learning with peers, discipleship & training events, mentorship programs and so much more to equip others and be equipped</p>
-      <div class="flex flex-col mb-8 lg:mb-16 space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
-        <a href="/about" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-knsPrimary-700 hover:bg-knsPrimary-800 focus:ring-4 focus:ring-knsPrimary-300">
-          Learn more
-          <iconify-icon icon="octicon:arrow-right-16" class="text-xl ml-2"></iconify-icon>
-        </a>
-        <a href="#" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 ">
-          <iconify-icon icon="mdi:video-outline" class="text-xl mr-2"></iconify-icon>
-          Watch video
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <section class="py-16 md:py-32">
-    <div class="gap-16 items-center lg:grid lg:grid-cols-2 container-default">
-      <div class="font-light text-gray-500 sm:text-lg">
-        <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900">Discipleship with Innovation</h2>
-        <p class="mb-4">The Kingdom Nurturing Suite is designed to empower Disciple Making Movements by providing a robust platform for managing relationships, tracking progress, and sharing experiences. It aims to facilitate the holistic growth of individuals and groups/teams, enabling them to fulfill their mission effectively and impactfully</p>
-        <p class="mb-4 text-knsSecondary font-bold">KNS is designed to aid discipleship efforts while maintaining simplicity and ease of use.</p>
-      </div>
-      <div class="grid grid-cols-2 gap-4 mt-8">
-        <img class="w-full rounded-lg h-40 md:h-96 object-cover" src="{% static "core/images/mike.jpg" %}" alt="office content 1">
-        <img class="mt-4 w-full lg:mt-10 h-40 md:h-96 rounded-lg object-cover" src="{% static "core/images/event-venue.jpg" %}" alt="office content 2">
-      </div>
-    </div>
-  </section>
-
-  <section class="bg-knsLight-300 py-16 md:py-32">
-    <div class="container-default">
-      <div class="max-w-screen-md mb-8 lg:mb-16">
-        <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900">Empowering Disciple Making Movements</h2>
-        <p class="text-gray-500 sm:text-xl">Kingdom Nurturing Suite (KNS) is designed to support the integrated Disciple Making Movement by facilitating the effective administration, management, and growth tracking of Discovery Bible Study (DBS) groups and their activities.</p>
-      </div>
-      <div class="space-y-8 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:space-y-0">
-        <div>
-          <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12">
-            <iconify-icon icon="zondicons:chart" class="text-4xl"></iconify-icon>
-          </div>
-          <h3 class="mb-2 text-xl font-bold">Track & Share Your Discipleship Journey</h3>
-          <p class="text-gray-500">
-            Administer, coordinate, and report on DMM activities with KNS. Track growth, register groups, and facilitate equipping processes while sharing and learning from others' experiences.
-          </p>
-        </div>
-        <div>
-          <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12">
-            <iconify-icon icon="icomoon-free:tree" class="text-4xl"></iconify-icon>
-          </div>
-          <h3 class="mb-2 text-xl font-bold">Register and Track Group Multiplication</h3>
-          <p class="text-gray-500">
-            Create and manage DBS groups online, track member transformations, and support the development of emerging leaders who can form their own groups for generational multiplication.
-          </p>
-        </div>
-        <div>
-          <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-primary-100 lg:h-12 lg:w-12">
-            <iconify-icon icon="bxs:bible" class="font-bold text-4xl"></iconify-icon>
-          </div>
-          <h3 class="mb-2 text-xl font-bold">Mutually Equip and Grow with other Disciples</h3>
-          <p class="text-gray-500">
-            Network and collaborate with peers, find mentors and mentees, and utilize diverse practices to enhance your movement experience and maximize the five-fold ministries.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
+  {% if request.user.is_authenticated %}
+    {% include "core/pages/tools_home.html" %}
+  {% else %}
+    {% include "core/pages/home.html" %}
+  {% endif %}
 {% endblock base_content %}
