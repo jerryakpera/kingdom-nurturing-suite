@@ -8,9 +8,11 @@ role and visitor status, and steps can be navigated through the `next` and
 """
 
 from django.core.cache import cache
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db import models
+from django.utils import timezone
 
-from kns.core.utils import log_this
+from kns.core.modelmixins import TimestampedModel
 from kns.onboarding.constants import ONBOARDING_STEPS
 from kns.profiles.models import Profile
 
@@ -149,3 +151,198 @@ class ProfileOnboarding(models.Model):
         onboarding_steps_list = self.get_onboarding_steps_list(profile)
 
         return self.current_step > len(onboarding_steps_list)
+
+
+class ProfileCompletionTask(TimestampedModel, models.Model):
+    """
+    Represent a task that a profile needs to complete for profile integration.
+
+    Attributes
+    ----------
+    profile : ForeignKey
+        The profile who owns the task.
+    task_name : CharField
+        The name of the task.
+    task_description : CharField
+        The description of the task.
+    is_complete : BooleanField
+        Whether the task has been completed.
+    created_at : DateTimeField
+        The date and time the task was created.
+    completed_at : DateTimeField
+        The date and time the task was completed (optional).
+    """
+
+    TASKS = [
+        (
+            "complete_profile",
+            "Complete your profile",
+        ),
+        (
+            "register_group",
+            "Register group",
+        ),
+        (
+            "register_first_member",
+            "Register first member",
+        ),
+        (
+            "add_vocations_skills",
+            "Add vocations, skills, and interests",
+        ),
+        (
+            "browse_events",
+            "Browse events near you",
+        ),
+    ]
+
+    class Meta:
+        unique_together = (
+            "profile",
+            "task_name",
+        )
+
+    profile = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="completion_tasks",
+    )
+    task_name = models.CharField(
+        max_length=100,
+        choices=TASKS,
+    )
+    task_description = models.CharField(
+        max_length=150,
+        validators=[
+            MinLengthValidator(120),
+            MaxLengthValidator(150),
+        ],
+    )
+    description = models.TextField()
+    is_complete = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
+    def mark_complete(self):
+        """
+        Mark the task as complete and sets the completion time.
+        """
+        self.is_complete = True
+        self.completed_at = timezone.now()
+        self.save()
+
+    def __str__(self):
+        """
+        Return a string representation of the task.
+
+        Returns
+        -------
+        str
+            A string in the format of "{task_name} for {profile_full_name}".
+        """
+        return f"{self.task_name} for {self.profile.get_full_name()}"
+
+
+class ProfileCompletion(models.Model):
+    """
+    Track the overall completion of a profile.
+
+    Attributes
+    ----------
+    profile : OneToOneField
+        The profile whose completion is tracked.
+    """
+
+    profile = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="profile_completion",
+    )
+
+    @property
+    def is_profile_complete(self):
+        """
+        Return whether the profile is fully complete by checking all tasks.
+
+        Returns
+        -------
+        bool
+            True if all tasks are complete, False otherwise.
+        """
+        return not self.profile.completion_tasks.filter(
+            is_complete=False,
+        ).exists()
+
+    def remaining_tasks(self):
+        """
+        Return a QuerySet of incomplete tasks.
+
+        Returns
+        -------
+        QuerySet
+            A QuerySet containing incomplete tasks for the profile.
+        """
+        return self.profile.completion_tasks.filter(is_complete=False)
+
+    def completed_tasks(self):
+        """
+        Return a QuerySet of completed tasks.
+
+        Returns
+        -------
+        QuerySet
+            A QuerySet containing completed tasks for the profile.
+        """
+        return self.profile.completion_tasks.filter(is_complete=True)
+
+    def total_tasks(self):
+        """
+        Return the total number of tasks assigned to the profile.
+
+        Returns
+        -------
+        int
+            The total count of tasks for the profile.
+        """
+        return self.profile.completion_tasks.count()
+
+    def completed_task_count(self):
+        """
+        Return the number of completed tasks.
+
+        Returns
+        -------
+        int
+            The count of completed tasks for the profile.
+        """
+        return self.completed_tasks().count()
+
+    def completion_percentage(self):
+        """
+        Return the percentage of tasks completed as an integer.
+        If there are no tasks, return 100 (consider profile complete).
+
+        Returns
+        -------
+        int
+            The percentage of completed tasks, or 100 if there are no tasks.
+        """
+        total = self.total_tasks()
+
+        if total == 0:
+            return 100
+
+        return int((self.completed_task_count() / total) * 100)
+
+    def __str__(self):
+        """
+        Return a string representation of the ProfileCompletion instance.
+
+        Returns
+        -------
+        str
+            A string in the format of "Profile completion for {profile_full_name}".
+        """
+        return f"Profile completion for {self.profile.get_full_name()}"
