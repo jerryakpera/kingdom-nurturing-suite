@@ -95,6 +95,8 @@ def index(request):
             profile_onboarding.next(profile=profile)
             return handle_next_step(request)
 
+    profile.create_profile_completion_tasks()
+
     context = {
         "onboarding_data": onboarding_data,
         "bio_details_form": bio_details_form,
@@ -291,8 +293,6 @@ def agree(request):
             profile_onboarding.current_step = profile_onboarding.current_step + 1
 
             profile_onboarding.save()
-
-            profile.create_profile_completion_tasks()
 
             return handle_next_step(request)
 

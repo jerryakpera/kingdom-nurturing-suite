@@ -1375,6 +1375,8 @@ def edit_profile_skills(request, profile_slug):
                 f"{name_with_apostrophe(profile.get_full_name())} profile updated.",
             )
 
+            profile.check_and_complete_vocations_skills()
+
             return redirect(profile)
 
     return render(
@@ -1445,6 +1447,8 @@ def edit_profile_vocations(request, profile_slug):
                 request,
                 f"{name_with_apostrophe(profile.get_full_name())} profile updated.",
             )
+
+            profile.check_and_complete_vocations_skills()
 
             return redirect(profile)
 

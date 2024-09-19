@@ -11,6 +11,10 @@
     <!-- text - end -->
 
     <div class="grid gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-8">
+      <!-- article - start -->
+      {% include "onboarding/components/complete_profile_card.html" %}
+      <!-- article - end -->
+
       {% for completion_task in profile_completion.tasks %}
         <!-- article - start -->
         {% include "onboarding/components/completion_task_card.html" %}

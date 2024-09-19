@@ -83,7 +83,7 @@ milestones = [  # pragma: no cover
         "type": "group",
     },
     {
-        "title": "Group completed a discipleship course",
+        "title": "Group has conducted a discipleship course in last 6 months",
         "description": (
             "This milestone indicates that the group has collectively "
             "completed a course focused on foundational principles of "
@@ -109,7 +109,7 @@ milestones = [  # pragma: no cover
         "type": "group",
     },
     {
-        "title": "Group regularly attends church services",
+        "title": "Group is active in community.",
         "description": (
             "This milestone signifies the group's consistent participation "
             "in church services, enhancing their spiritual journey."
@@ -125,7 +125,7 @@ milestones = [  # pragma: no cover
         "type": "group",
     },
     {
-        "title": "Group completed a Movement Training",
+        "title": "Group has organized a Movement Training",
         "description": (
             "This milestone marks the group's completion of a Movement "
             "Training, focusing on discovering and using spiritual gifts."
@@ -133,7 +133,7 @@ milestones = [  # pragma: no cover
         "type": "group",
     },
     {
-        "title": "Group participates in small group studies",
+        "title": "Group participates in small group Bible studies",
         "description": (
             "This milestone reflects the group's active engagement in "
             "small group or Bible study sessions, encouraging community "
