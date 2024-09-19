@@ -12,6 +12,7 @@ from kns.custom_user.models import User
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
 from kns.mentorships.models import MentorshipArea, ProfileMentorshipArea
+from kns.onboarding.models import ProfileCompletion, ProfileCompletionTask
 from kns.profiles.models import (
     ConsentForm,
     Discipleship,
@@ -819,3 +820,128 @@ class TestDiscipleshipModel(TestCase):
         )
 
         self.assertTrue(discipleship.group_display(), "First 12")
+
+
+class TestProfileCompletionTasks(TestCase):
+    def setUp(self):
+        """
+        Setup method to create a Profile instance linked to the test user.
+        """
+        super().setUp()
+
+        User.objects.all().delete()
+
+        Profile.objects.all().delete()
+        ProfileCompletion.objects.all().delete()
+        ProfileCompletionTask.objects.all().delete()
+
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+
+    def test_create_profile_completion_tasks_for_leader(self):
+        """
+        Test that the correct tasks are created for a profile with the role of 'leader'.
+        """
+        self.profile.role = "leader"
+        self.profile.save()
+
+        self.profile.create_profile_completion_tasks()
+
+        # Verify ProfileCompletion entry creation
+        profile_completion = ProfileCompletion.objects.get(
+            profile=self.profile,
+        )
+
+        assert profile_completion is not None
+
+        # Verify the creation of tasks
+        tasks = [
+            "register_group",
+            "register_first_member",
+            "add_vocations_skills",
+            "browse_events",
+        ]
+
+        for task_name in tasks:
+            task = ProfileCompletionTask.objects.filter(
+                profile=self.profile, task_name=task_name
+            )
+            assert task.exists()
+
+    def test_create_profile_completion_tasks_for_non_leader(self):
+        """
+        Test that the correct tasks are created for a profile with a role other than 'leader'.
+        """
+        self.profile.role = "member"
+        self.profile.save()
+
+        self.profile.create_profile_completion_tasks()
+
+        # Verify ProfileCompletion entry creation
+        profile_completion = ProfileCompletion.objects.get(profile=self.profile)
+        assert profile_completion is not None
+
+        # Verify the creation of tasks
+        tasks = [
+            "add_vocations_skills",
+            "browse_events",
+        ]
+
+        for task_name in tasks:
+            task = ProfileCompletionTask.objects.filter(
+                profile=self.profile,
+                task_name=task_name,
+            )
+
+            assert task.exists()
+
+        # Verify that 'register_group' task is not created
+        register_group_task = ProfileCompletionTask.objects.filter(
+            profile=self.profile, task_name="register_group"
+        )
+
+        assert not register_group_task.exists()
+
+    def test_create_profile_completion_tasks_no_duplicates(self):
+        """
+        Test that duplicate tasks are not created if they already exist.
+        """
+        self.profile.role = "leader"
+        self.profile.save()
+
+        # Create tasks for the first time
+        self.profile.create_profile_completion_tasks()
+
+        # Create tasks again to test for duplicates
+        self.profile.create_profile_completion_tasks()
+
+        # Verify the number of tasks is correct
+        tasks = [
+            "register_group",
+            "register_first_member",
+            "add_vocations_skills",
+            "browse_events",
+        ]
+
+        for task_name in tasks:
+            task_count = ProfileCompletionTask.objects.filter(
+                profile=self.profile, task_name=task_name
+            ).count()
+
+            assert task_count == 1
+
+    def test_profile_completion_entry_creation(self):
+        """
+        Test that a ProfileCompletion entry is created when tasks are created.
+        """
+        self.profile.create_profile_completion_tasks()
+
+        profile_completion = ProfileCompletion.objects.filter(
+            profile=self.profile,
+        ).exists()
+
+        assert profile_completion is True

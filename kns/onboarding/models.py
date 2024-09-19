@@ -13,7 +13,7 @@ from django.db import models
 from django.utils import timezone
 
 from kns.core.modelmixins import TimestampedModel
-from kns.onboarding.constants import ONBOARDING_STEPS
+from kns.onboarding.constants import ONBOARDING_STEPS, TASKS_CHOICES
 from kns.profiles.models import Profile
 
 
@@ -173,29 +173,6 @@ class ProfileCompletionTask(TimestampedModel, models.Model):
         The date and time the task was completed (optional).
     """
 
-    TASKS = [
-        (
-            "complete_profile",
-            "Complete your profile",
-        ),
-        (
-            "register_group",
-            "Register group",
-        ),
-        (
-            "register_first_member",
-            "Register first member",
-        ),
-        (
-            "add_vocations_skills",
-            "Add vocations, skills, and interests",
-        ),
-        (
-            "browse_events",
-            "Browse events near you",
-        ),
-    ]
-
     class Meta:
         unique_together = (
             "profile",
@@ -209,7 +186,7 @@ class ProfileCompletionTask(TimestampedModel, models.Model):
     )
     task_name = models.CharField(
         max_length=100,
-        choices=TASKS,
+        choices=TASKS_CHOICES,
     )
     task_description = models.CharField(
         max_length=150,

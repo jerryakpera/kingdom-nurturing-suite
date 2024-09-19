@@ -77,3 +77,68 @@ ONBOARDING_STEPS = {  # pragma: no cover
         "template_name": "onboarding/agree_onboarding.html",
     },
 }
+
+
+TASKS_CHOICES = [  # pragma: no cover
+    (
+        "complete_profile",
+        "Complete your profile",
+    ),
+    (
+        "register_group",
+        "Register group",
+    ),
+    (
+        "register_first_member",
+        "Register first member",
+    ),
+    (
+        "add_vocations_skills",
+        "Add vocations, skills, and interests",
+    ),
+    (
+        "browse_events",
+        "Browse events near you",
+    ),
+]
+
+TASKS = {
+    "complete_profile": {
+        "task_name": "complete_profile",
+        "task_description": (
+            "Complete your profile by providing necessary fields "
+            "to ensure that your profile is complete and fully representative of you."
+        ),
+    },
+    "register_group": {
+        "task_name": "register_group",
+        "task_description": (
+            "Register your group that you are leading. Ensure that all necessary "
+            "details are provided, such as the group's name, description, and location."
+        ),
+    },
+    "register_first_member": {
+        "task_name": "register_first_member",
+        "task_description": (
+            "Register the first member of your newly created group. This process "
+            "involves adding a member to the group and ensuring their details "
+            "are correctly entered."
+        ),
+    },
+    "add_vocations_skills": {
+        "task_name": "add_vocations_skills",
+        "task_description": (
+            "Add vocations, skills, and interests to your profile. This helps "
+            "in showcasing your expertise and areas of interest, which "
+            "is vital for matching you with relevant opportunities and networks."
+        ),
+    },
+    "browse_events": {
+        "task_name": "browse_events",
+        "task_description": (
+            "Browse through events that are happening near you. This "
+            "includes viewing skill and movement trainings, prayer movements "
+            "and community services."
+        ),
+    },
+}

@@ -722,6 +722,34 @@ class Profile(
 
         return "---"
 
+    def create_profile_completion_tasks(self):
+        """
+        Automatically creates profile completion tasks when a profile is onboarded.
+        Tasks are created based on the profile's role and existing tasks to avoid duplicates.
+        """
+        from kns.onboarding.models import ProfileCompletion, ProfileCompletionTask
+
+        # Ensure a ProfileCompletion entry exists for the profile
+        ProfileCompletion.objects.get_or_create(profile=self)
+
+        # Define the base tasks
+        base_tasks = [
+            "add_vocations_skills",
+            "browse_events",
+        ]
+
+        # Add role-specific tasks
+        if self.role == "leader":
+            base_tasks.append("register_first_member")
+            base_tasks.append("register_group")
+
+        # Create tasks only if they do not already exist
+        for task_name in base_tasks:
+            ProfileCompletionTask.objects.get_or_create(
+                profile=self,
+                task_name=task_name,
+            )
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
