@@ -9,6 +9,7 @@ from kns.core.models import MakeLeaderActionApproval
 from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.groups.models import Group
+from kns.onboarding.models import ProfileCompletion
 from kns.profiles.models import Profile
 
 from ..models import FAQ
@@ -378,4 +379,73 @@ class TestMakeLeaderApprovalNotificationView(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(
             "You cannot complete this action" in str(messages[0]),
+        )
+
+
+class TestCoreIndexView(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Set up user and profile data
+        self.user = User.objects.create_user(
+            email="testuser@example.com", password="password123"
+        )
+        self.profile = self.user.profile
+
+        self.profile.is_onboarded = True
+        self.profile.save()
+
+        # Create a ProfileCompletion instance
+        self.profile_completion = ProfileCompletion.objects.create(
+            profile=self.profile,
+        )
+
+        self.profile.create_profile_completion_tasks()
+
+        self.profile_completion = ProfileCompletion.objects.get(
+            profile=self.profile,
+        )
+        self.tasks = self.profile_completion.tasks
+
+        # Log the user in
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+    def test_index_response_authenticated(self):
+        """
+        An authenticated user should get a valid response and have
+        profile_completion in the context.
+        """
+        response = self.client.get(reverse("core:index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "core/pages/index.html")
+
+        # Check that the profile_completion object is passed in the context
+        self.assertIn("profile_completion", response.context)
+        self.assertEqual(
+            response.context["profile_completion"],
+            self.profile_completion,
+        )
+
+    def test_index_response_unauthenticated(self):
+        """
+        An unauthenticated user should get a valid response without
+        profile_completion in the context.
+        """
+        self.client.logout()
+        response = self.client.get(reverse("core:index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "core/pages/index.html",
+        )
+
+        # Check that profile_completion is not in the context
+        self.assertNotIn(
+            "profile_completion",
+            response.context,
         )

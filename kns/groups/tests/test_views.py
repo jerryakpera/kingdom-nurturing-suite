@@ -25,47 +25,69 @@ class TestGroupViews(TestCase):
 
         # Create a group
         self.group = Group.objects.create(
-            leader=self.user.profile,
+            leader=self.profile,
             name="Test Group",
             slug="test-group",
+            location_country="NG",
+            location_city="Bauchi",
             description=test_constants.VALID_GROUP_DESCRIPTION,
         )
 
     def test_index_view_authenticated(self):
         """
         Test the index view for authenticated users to ensure
-        it renders correctly and lists groups.
+        it renders correctly and includes profile completion and groups.
         """
+        user2 = User.objects.create_user(
+            email="testuser2@example.com",
+            password="password",
+        )
+        profile2 = user2.profile
+
+        self.group.add_member(profile=profile2)
+
+        # Create a group
+        self.group2 = Group.objects.create(
+            leader=profile2,
+            name="Test Group 2",
+            location_country="NG",
+            location_city="Bauchi",
+            parent=self.group,
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        # Log in the test user
         self.client.login(
-            email="testuser@example.com",
+            email=self.user.email,
             password="password123",
         )
 
-        response = self.client.get(reverse("groups:index"))
+        response = self.client.get(reverse("core:index"))
 
         # Check if the response status code is 200 OK
-        self.assertEqual(
-            response.status_code,
-            200,
-        )
+        self.assertEqual(response.status_code, 200)
 
         # Check if the correct template is used
         self.assertTemplateUsed(
             response,
-            "groups/pages/index.html",
+            "core/pages/index.html",
         )
 
-        self.assertIn(
-            "groups",
-            response.context,
-        )
+        # Check that 'profile_completion' is in the context
+        self.assertIn("profile_completion", response.context)
+
+        # If there is a group led by the user, 'local_groups' should be in the context
+        self.assertIn("local_groups", response.context)
         self.assertEqual(
-            response.context["groups"].count(),
+            response.context["local_groups"].count(),
             1,
         )
 
-        # Ensure the profile is listed
-        assert b"Test Group" in response.content
+        # Ensure the correct group is listed in 'local_groups'
+        self.assertIn(self.group2, response.context["local_groups"])
+
+        # Ensure the group's name appears in the page content
+        self.assertIn("Test Group 2", response.content.decode())
 
     def test_group_overview_view(self):
         """

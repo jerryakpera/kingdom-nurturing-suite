@@ -125,6 +125,7 @@ class TestGroupMethods(TestCase):
             name="Bible Study Group",
             location_country="Nigeria",
             location_city="Lagos",
+            leader=self.profile1,
         )
 
         self.user2 = User.objects.create_user(
@@ -138,6 +139,12 @@ class TestGroupMethods(TestCase):
             password="password",
         )
         self.profile3 = self.user3.profile
+
+        self.user4 = User.objects.create_user(
+            email="member4@example.com",
+            password="password",
+        )
+        self.profile4 = self.user4.profile
 
         # Create group members with unique profiles
         self.member1 = GroupMemberFactory(
@@ -153,6 +160,32 @@ class TestGroupMethods(TestCase):
             group=self.group,
         )
 
+        # Create two descendant groups, one in the same city, one in a different city
+        self.child_group_same_city = GroupFactory(
+            parent=self.group,
+            leader=self.profile2,
+            name="Child Group Lagos",
+            location_country="Nigeria",
+            location_city="Lagos",
+        )
+
+        self.child_group_different_city = GroupFactory(
+            parent=self.group,
+            leader=self.profile3,
+            name="Child Group Abuja",
+            location_country="Nigeria",
+            location_city="Abuja",
+        )
+
+        # Create a grandchild group in the same city
+        self.grandchild_group_same_city = GroupFactory(
+            parent=self.child_group_same_city,
+            leader=self.profile4,
+            name="Grandchild Group Lagos",
+            location_country="Nigeria",
+            location_city="Lagos",
+        )
+
     def test_group_members(self):
         members = self.group.group_members()
         self.assertIn(self.profile1, members)
@@ -161,7 +194,7 @@ class TestGroupMethods(TestCase):
 
     def test_add_member(self):
         new_user = User.objects.create_user(
-            email="member4@example.com",
+            email="member5@example.com",
             password="password",
         )
 
@@ -385,6 +418,52 @@ class TestGroupMethods(TestCase):
         self.group.add_member(new_profile)
         self.assertEqual(self.group.members.count(), 4)
         self.assertTrue(self.group.is_member(new_profile))
+
+    def test_get_local_descendant_groups_same_city(self):
+        """
+        Test that get_local_descendant_groups returns only descendants
+        that are in the same city as the group.
+        """
+        local_groups = self.group.get_local_descendant_groups()
+
+        # Ensure only the groups in the same city are returned
+        self.assertIn(self.child_group_same_city, local_groups)
+        self.assertIn(self.grandchild_group_same_city, local_groups)
+        self.assertNotIn(self.child_group_different_city, local_groups)
+
+    def test_get_local_descendant_groups_exclude_self(self):
+        """
+        Test that the method excludes the group itself from the result.
+        """
+        local_groups = self.group.get_local_descendant_groups()
+
+        # Ensure the parent group itself is excluded
+        self.assertNotIn(self.group, local_groups)
+
+    def test_get_local_descendant_groups_different_city(self):
+        """
+        Test that get_local_descendant_groups doesn't return groups
+        in a different city.
+        """
+        local_groups = self.group.get_local_descendant_groups()
+
+        # Ensure the group in a different city is not returned
+        self.assertNotIn(self.child_group_different_city, local_groups)
+
+    def test_get_local_descendant_groups_called_on_child(self):
+        """
+        Test that get_local_descendant_groups works correctly when called
+        on a child group, ensuring that the parent's descendants are returned.
+        """
+        # Call the method on a child group that has a parent
+        local_groups = self.child_group_same_city.get_local_descendant_groups()
+
+        # Ensure that descendants of the parent group are returned
+        self.assertIn(self.grandchild_group_same_city, local_groups)
+        self.assertNotIn(self.child_group_different_city, local_groups)
+
+        # Ensure that the group itself (child_group_same_city) is excluded
+        self.assertNotIn(self.child_group_same_city, local_groups)
 
 
 class TestGroupSignals(TestCase):

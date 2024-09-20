@@ -17,8 +17,7 @@ from kns.profiles.models import Profile
 from .models import FAQ
 
 
-# TODO: Remove test ignore
-def index(request):  # pragma: no cover
+def index(request):
     """
     Render the index page of the core application.
 
@@ -48,12 +47,14 @@ def index(request):  # pragma: no cover
             "profile_completion": profile_completion,
         }
 
-        group_led = Group.objects.filter(
+        group_led_exists = Group.objects.filter(
             leader=request.user.profile,
-        ).first()  # Get the first group led by the user, if any
+        ).exists()
 
-        if group_led:
-            context["local_groups"] = group_led.get_local_descendant_groups()[:3]
+        if group_led_exists:
+            context["local_groups"] = (
+                request.user.profile.group_led.get_local_descendant_groups()[:3]
+            )
 
     else:
         context = {}

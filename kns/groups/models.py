@@ -14,6 +14,7 @@ from django.urls import reverse
 from mptt.models import MPTTModel, TreeForeignKey
 
 from kns.core.modelmixins import ModelWithLocation, TimestampedModel
+from kns.core.utils import log_this
 from kns.onboarding.models import ProfileCompletionTask
 from kns.profiles.models import Profile
 
@@ -357,8 +358,7 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         """
         return self.members.filter(profile=profile).exists()
 
-    # TODO: Remove test ignore
-    def get_local_descendant_groups(self):  # pragma: no cover
+    def get_local_descendant_groups(self):
         """
         Return all groups within the same city or country as the groups location,
         that are descendants of the group.
@@ -369,12 +369,20 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
             A queryset of groups that are descendants of this group and
             are in the same city or country as the group.
         """
-        # Get all descendant groups of this group
-        descendant_groups = self.get_descendants()
+
+        descendant_groups = None
+
+        if self.parent:
+            descendant_groups = self.parent.get_descendants()
+        else:
+            # Get all descendant groups of this group
+            descendant_groups = self.get_descendants()
 
         # Filter based on city first, then country if city is not available
         local_groups = descendant_groups.filter(
             location_city=self.location_city,
+        ).exclude(
+            id=self.id,
         )
 
         return local_groups
