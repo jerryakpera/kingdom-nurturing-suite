@@ -262,7 +262,7 @@ class Setting(models.Model):
         """
 
 
-class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
+class ActionApproval(TimestampedModel, models.Model):
     """
     Model representing an action that requires approval from a leader.
     """
@@ -337,7 +337,7 @@ class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
         blank=True,
     )
 
-    def check_timeout(self):  # pragma: no cover
+    def check_timeout(self):
         """
         Check if the approval request has timed out.
         """
@@ -346,9 +346,7 @@ class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
             and (self.created_at + self.timeout_duration) < timezone.now()
         ):
             self.status = "expired"
-
             self.save()
-            self.notify_approval()
 
     def action_type_display(self):
         """
@@ -374,8 +372,31 @@ class ActionApproval(TimestampedModel, models.Model):  # pragma: no cover
 
         return action_types[self.action_type]
 
+    def can_approve_or_reject(self, consumer):
+        """
+        Check if the specified consumer can approve or reject the action.
 
-class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
+        This method verifies whether the given consumer (usually a profile)
+        has the authority to approve or reject the action based on their role
+        within the group. Specifically, the action can be approved or rejected
+        if the consumer is the leader of the group for which the action is
+        being requested.
+
+        Parameters
+        ----------
+        consumer : Profile
+            The profile of the person attempting to approve or reject the action.
+
+        Returns
+        -------
+        bool
+            True if the consumer is the leader of the group and can approve or
+            reject the action, False otherwise.
+        """
+        return self.group_created_for.leader == consumer
+
+
+class MakeLeaderActionApproval(ActionApproval):
     """
     Specialized action approval for making a profile a leader.
     """
@@ -386,7 +407,7 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
         related_name="make_leader_action_approvals",
     )
 
-    def notify_consumer(self, request):
+    def notify_consumer(self, request):  # pragma: no cover
         """
         Notify the new leader of the approval request.
 
@@ -407,7 +428,7 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
             self.group_created_for.leader,
         )
 
-    def notify_creator(self, request):
+    def notify_creator(self, request):  # pragma: no cover
         """
         Notify the creator of the approval request about status change.
 
@@ -440,7 +461,7 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
         consumer : Profile
             The leader or admin that is approving the action.
         """
-        if self.status == "pending":
+        if self.status == "pending" and self.can_approve_or_reject(consumer):
             self.approved_by = consumer
             self.status = "approved"
             self.approved_at = timezone.now()
@@ -460,7 +481,7 @@ class MakeLeaderActionApproval(ActionApproval):  # pragma: no cover
         consumer : Profile
             The leader or admin that is rejecting the action.
         """
-        if self.status == "pending":
+        if self.status == "pending" and self.can_approve_or_reject(consumer):
             self.approved_by = None
             self.status = "rejected"
             self.approved_at = None
