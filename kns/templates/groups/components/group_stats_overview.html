@@ -19,6 +19,16 @@
 </div>
 
 <div>
+  {% with title="Average age" %}
+    {% with value=group.average_age %}
+      {% with icon="ant-design:number-outlined" %}
+        {% include "groups/components/group_modal/group_stat_item.html" %}
+      {% endwith %}
+    {% endwith %}
+  {% endwith %}
+</div>
+
+<div>
   {% with title="Male members" %}
     {% with value=group.male_count %}
       {% with icon="fa-solid:male" %}

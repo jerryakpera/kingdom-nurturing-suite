@@ -3,6 +3,7 @@ Models for the `groups` app.
 """
 
 from collections import Counter
+from datetime import date
 from uuid import uuid4
 
 from cloudinary.models import CloudinaryField
@@ -386,6 +387,27 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         )
 
         return local_groups
+
+    def average_age(self):
+        """
+        Calculate the average age of all members in the group.
+
+        Returns
+        -------
+        float:
+            The average age of the group's members.
+            Returns '---' if there are no members with a valid age.
+        """
+        members_with_age = [
+            member.profile.get_age()
+            for member in self.members.all()
+            if member.profile.date_of_birth
+        ]
+
+        if members_with_age:
+            return sum(members_with_age) / len(members_with_age)
+
+        return "---"
 
 
 class GroupMember(TimestampedModel):

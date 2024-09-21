@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -120,6 +122,8 @@ class TestGroupMethods(TestCase):
 
         # Create profiles for the users
         self.profile1 = self.user1.profile
+        self.profile1.date_of_birth = date.today() - timedelta(days=365 * 30)
+        self.profile1.save()
 
         self.group = GroupFactory(
             name="Bible Study Group",
@@ -133,12 +137,16 @@ class TestGroupMethods(TestCase):
             password="password",
         )
         self.profile2 = self.user2.profile
+        self.profile2.date_of_birth = date.today() - timedelta(days=365 * 25)
+        self.profile2.save()
 
         self.user3 = User.objects.create_user(
             email="member3@example.com",
             password="password",
         )
         self.profile3 = self.user3.profile
+        self.profile3.date_of_birth = date.today() - timedelta(days=365 * 35)
+        self.profile3.save()
 
         self.user4 = User.objects.create_user(
             email="member4@example.com",
@@ -464,6 +472,52 @@ class TestGroupMethods(TestCase):
 
         # Ensure that the group itself (child_group_same_city) is excluded
         self.assertNotIn(self.child_group_same_city, local_groups)
+
+        # Test for the average_age method
+
+    def test_average_age(self):
+        # Get the actual ages of the members
+        actual_ages = [member.profile.get_age() for member in self.group.members.all()]
+
+        # Expected average age calculation based on printed values
+        expected_average_age = sum(actual_ages) / len(actual_ages)
+
+        # Assert the calculated average matches the expected average
+        self.assertAlmostEqual(
+            self.group.average_age(),
+            expected_average_age,
+        )
+
+    def test_average_age_with_no_birthdate(self):
+        # Set one profile without a birthdate
+        self.profile3.date_of_birth = None
+        self.profile3.save()
+
+        # Print the ages of the remaining profiles
+        print(f"Profile1 age: {self.profile1.get_age()}")
+        print(f"Profile2 age: {self.profile2.get_age()}")
+
+        # Only profile1 (30) and profile2 (25) should be counted
+        expected_average_age = (29 + 24) / 2
+
+        self.assertAlmostEqual(
+            self.group.average_age(),
+            expected_average_age,
+        )
+
+    def test_average_age_with_no_members_with_birthdate(self):
+        # Set all profiles without a birthdate
+        self.profile1.date_of_birth = None
+        self.profile1.save()
+
+        self.profile2.date_of_birth = None
+        self.profile2.save()
+
+        self.profile3.date_of_birth = None
+        self.profile3.save()
+
+        # Should return None since no members have a birthdate
+        self.assertEqual(self.group.average_age(), "---")
 
 
 class TestGroupSignals(TestCase):
