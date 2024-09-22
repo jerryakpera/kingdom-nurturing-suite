@@ -113,3 +113,85 @@ class GroupForm(forms.ModelForm):
             "folder": "kns/images/groups/",
         },
     )
+
+
+class GroupBasicFilterForm(forms.Form):
+    """
+    A form for filtering Group instances based on various criteria.
+
+    This form allows users to filter groups by their description,
+    location (country and city), and the leader's name. All fields
+    are optional, and the form is designed to support flexible filtering.
+    """
+
+    description = forms.CharField(
+        required=False,
+        label="Group Description",
+        help_text="Filter groups by their description",
+        widget=forms.TextInput(
+            attrs={
+                "id": "group_description_filter",
+                "name": "group_description_filter",
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
+    )
+
+    location_country = forms.CharField(
+        required=False,
+        label="Country",
+        help_text="Filter groups by the country they are in",
+        widget=forms.TextInput(
+            attrs={
+                "id": "location_country_filter",
+                "name": "location_country_filter",
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
+    )
+
+    location_city = forms.CharField(
+        required=False,
+        label="City",
+        help_text="Filter groups by the city they are in",
+        widget=forms.TextInput(
+            attrs={
+                "id": "location_city_filter",
+                "name": "location_city_filter",
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
+    )
+
+    leader = forms.CharField(
+        required=False,
+        label="Leader",
+        help_text="Filter groups by the leader's name",
+        widget=forms.TextInput(
+            attrs={
+                "id": "leader_filter",
+                "name": "leader_filter",
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
+    )
