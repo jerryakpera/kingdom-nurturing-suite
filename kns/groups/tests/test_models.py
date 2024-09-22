@@ -6,6 +6,7 @@ from django.urls import reverse
 from kns.custom_user.models import User
 from kns.groups.tests.factories import GroupFactory, GroupMemberFactory
 from kns.onboarding.models import ProfileCompletionTask
+from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 
 
 class TestGroupFactory(TestCase):
@@ -122,7 +123,9 @@ class TestGroupMethods(TestCase):
 
         # Create profiles for the users
         self.profile1 = self.user1.profile
-        self.profile1.date_of_birth = date.today() - timedelta(days=365 * 30)
+        self.profile1.date_of_birth = date.today() - timedelta(
+            days=365 * 30,
+        )
         self.profile1.save()
 
         self.group = GroupFactory(
@@ -137,7 +140,9 @@ class TestGroupMethods(TestCase):
             password="password",
         )
         self.profile2 = self.user2.profile
-        self.profile2.date_of_birth = date.today() - timedelta(days=365 * 25)
+        self.profile2.date_of_birth = date.today() - timedelta(
+            days=365 * 25,
+        )
         self.profile2.save()
 
         self.user3 = User.objects.create_user(
@@ -145,7 +150,9 @@ class TestGroupMethods(TestCase):
             password="password",
         )
         self.profile3 = self.user3.profile
-        self.profile3.date_of_birth = date.today() - timedelta(days=365 * 35)
+        self.profile3.date_of_birth = date.today() - timedelta(
+            days=365 * 35,
+        )
         self.profile3.save()
 
         self.user4 = User.objects.create_user(
@@ -192,6 +199,38 @@ class TestGroupMethods(TestCase):
             name="Grandchild Group Lagos",
             location_country="Nigeria",
             location_city="Lagos",
+        )
+
+        skill = Skill.objects.create(
+            title="Leadership",
+            content="Leadership skill",
+            author=self.profile1,
+        )
+
+        skill2 = Skill.objects.create(
+            title="Communication",
+            content="Communication skill",
+            author=self.profile1,
+        )
+
+        ProfileSkill.objects.create(
+            profile=self.profile3,
+            skill=skill,
+        )
+
+        ProfileSkill.objects.create(
+            profile=self.profile3,
+            skill=skill2,
+        )
+
+        ProfileInterest.objects.create(
+            profile=self.profile3,
+            interest=skill,
+        )
+
+        ProfileInterest.objects.create(
+            profile=self.profile3,
+            interest=skill2,
         )
 
     def test_group_members(self):
@@ -518,6 +557,52 @@ class TestGroupMethods(TestCase):
 
         # Should return None since no members have a birthdate
         self.assertEqual(self.group.average_age(), "---")
+
+    def test_unique_skills(self):
+        # Test that unique_skills returns the correct unique skills
+        unique_skills = self.group.unique_skills()
+        expected_skills = [
+            "Leadership",
+            "Communication",
+        ]
+
+        # Check if the expected skills are in the queryset
+        for skill in expected_skills:
+            self.assertIn(
+                skill,
+                unique_skills,
+            )
+
+        # Ensure there are no duplicates
+        self.assertEqual(
+            unique_skills.count(),
+            len(
+                set(expected_skills),
+            ),
+        )
+
+    def test_unique_interests(self):
+        # Test that unique_interests returns the correct unique interests
+        unique_interests = self.group.unique_interests()
+        expected_interests = [
+            "Leadership",
+            "Communication",
+        ]
+
+        # Check if the expected interests are in the queryset
+        for interest in expected_interests:
+            self.assertIn(
+                interest,
+                unique_interests,
+            )
+
+        # Ensure there are no duplicates
+        self.assertEqual(
+            unique_interests.count(),
+            len(
+                set(expected_interests),
+            ),
+        )
 
 
 class TestGroupSignals(TestCase):

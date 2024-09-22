@@ -409,6 +409,41 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
 
         return "---"
 
+    def unique_skills(self):
+        """
+        Return a queryset of unique skills of all members in the group.
+
+        Returns
+        -------
+        QuerySet:
+            A queryset of unique skill titles of the group's members.
+        """
+        return (
+            self.members.values_list("profile__skills__skill__title", flat=True)
+            .distinct()
+            .exclude(profile__skills__skill__title=None)
+        )
+
+    def unique_interests(self):
+        """
+        Return a queryset of unique interests of all members in the group.
+
+        Returns
+        -------
+        QuerySet:
+            A queryset of unique interest titles of the group's members.
+        """
+        return (
+            self.members.values_list(
+                "profile__interests__interest__title",
+                flat=True,
+            )
+            .distinct()
+            .exclude(
+                profile__interests__interest__title=None,
+            )
+        )
+
 
 class GroupMember(TimestampedModel):
     """

@@ -4,19 +4,30 @@ Views for the `groups` app.
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from kns.core.utils import log_this
 from kns.faith_milestones.forms import GroupFaithMilestonesForm
 from kns.faith_milestones.models import GroupFaithMilestone
-from kns.groups.forms import GroupForm
+from kns.groups.forms import (
+    GroupBasicFilterForm,
+    GroupDemographicsFilterForm,
+    GroupForm,
+    GroupMembersFilterForm,
+    GroupMentorshipAreasFilterForm,
+    GroupSkillsInterestsFilterForm,
+    GroupVocationsFilterForm,
+)
 from kns.groups.models import Group, GroupMember
 from kns.profiles.models import Profile
 from kns.profiles.utils import name_with_apostrophe
 
 
 @login_required
-def index(request):  # pragma: no cover
+def index(request):
     """
     View function to display a list of all groups.
 
@@ -39,13 +50,16 @@ def index(request):  # pragma: no cover
         leader=request.user.profile,
     ).exists()
 
-    if profile_group_in_exists:
+    # Add the tests for this if and else block to the test suite
+    if profile_group_in_exists:  # pragma: no cover
         group_in = GroupMember.objects.get(
             profile=request.user.profile,
         ).group
-        groups = group_in.get_descendants(include_self=True)
 
-    else:
+        groups = group_in.get_descendants(
+            include_self=True,
+        )
+    else:  # pragma: no cover
         if profile_group_led_exists:
             group_led = Group.objects.get(
                 leader=request.user.profile,
@@ -56,8 +70,305 @@ def index(request):  # pragma: no cover
         else:
             groups = Group.objects.all()
 
+    group_basic_filter_form = GroupBasicFilterForm(request.GET or None)
+    group_members_filter_form = GroupMembersFilterForm(request.GET or None)
+    group_demographics_filter_form = GroupDemographicsFilterForm(
+        request.GET or None,
+    )
+    group_skills_interests_filter_form = GroupSkillsInterestsFilterForm(
+        request.GET or None
+    )
+    group_vocations_filter_form = GroupVocationsFilterForm(
+        request.GET or None,
+    )
+    group_mentorship_areas_filter_form = GroupMentorshipAreasFilterForm(
+        request.GET or None
+    )
+    group_faith_milestones_form = GroupFaithMilestonesForm(
+        request.GET or None,
+    )
+
+    if request.method == "GET":
+        # Apply filters based on GroupBasicFilterForm data
+        if group_basic_filter_form.is_valid():
+            location_country = group_basic_filter_form.cleaned_data.get(
+                "location_country"
+            )
+            location_city = group_basic_filter_form.cleaned_data.get("location_city")
+            leader = group_basic_filter_form.cleaned_data.get("leader")
+
+            if location_country:
+                groups = groups.filter(
+                    location_country=location_country,
+                )
+            if location_city:
+                groups = groups.filter(
+                    location_city__icontains=location_city,
+                )
+            if leader:
+                groups = groups.filter(
+                    Q(leader__first_name__icontains=leader)
+                    | Q(leader__last_name__icontains=leader)
+                )
+
+        # Apply filters based on GroupMembersFilterForm data
+        if group_members_filter_form.is_valid():
+            num_members = group_members_filter_form.cleaned_data.get("num_members")
+            num_leaders = group_members_filter_form.cleaned_data.get("num_leaders")
+            num_skill_trainers = group_members_filter_form.cleaned_data.get(
+                "num_skill_trainers"
+            )
+            num_movement_trainers = group_members_filter_form.cleaned_data.get(
+                "num_movement_trainers"
+            )
+            num_mentors = group_members_filter_form.cleaned_data.get(
+                "num_mentors",
+            )
+            num_external_persons = group_members_filter_form.cleaned_data.get(
+                "num_external_persons"
+            )
+
+            # Apply filters based on member counts
+            if num_members is not None:
+                groups = groups.annotate(
+                    num_members=Count("members"),
+                ).filter(
+                    num_members__gte=num_members,
+                )
+
+            if num_leaders is not None:
+                groups = groups.annotate(
+                    num_leaders=Count(
+                        "members",
+                        filter=Q(
+                            members__profile__role="leader",
+                        ),
+                    )
+                ).filter(
+                    num_leaders__gte=num_leaders,
+                )
+
+            if num_external_persons is not None:
+                groups = groups.annotate(
+                    num_external_persons=Count(
+                        "members",
+                        filter=Q(
+                            members__profile__role="external_person",
+                        ),
+                    )
+                ).filter(
+                    num_external_persons__gte=num_external_persons,
+                )
+
+            if num_skill_trainers is not None:
+                groups = groups.annotate(
+                    num_skill_trainers=Count(
+                        "members",
+                        filter=Q(
+                            members__profile__is_skill_training_facilitator=True,
+                        ),
+                    )
+                ).filter(num_skill_trainers__gte=num_skill_trainers)
+
+            if num_movement_trainers is not None:
+                groups = groups.annotate(
+                    num_movement_trainers=Count(
+                        "members",
+                        filter=Q(
+                            members__profile__is_movement_training_facilitator=True,
+                        ),
+                    )
+                ).filter(num_movement_trainers__gte=num_movement_trainers)
+
+            if num_mentors is not None:
+                groups = groups.annotate(
+                    num_mentors=Count(
+                        "members",
+                        filter=Q(
+                            members__profile__is_mentor=True,
+                        ),
+                    )
+                ).filter(num_mentors__gte=num_mentors)
+
+            if num_external_persons is not None:
+                groups = groups.annotate(
+                    num_external_persons=Count(
+                        "members",
+                        filter=Q(
+                            members__profile__role="external_person",
+                        ),
+                    )
+                ).filter(
+                    num_external_persons__gte=num_external_persons,
+                )
+
+        # Apply filters based on GroupDemographicsFilterForm data
+        if group_demographics_filter_form.is_valid():
+            num_male_members = group_demographics_filter_form.cleaned_data.get(
+                "num_male_members"
+            )
+            num_female_members = group_demographics_filter_form.cleaned_data.get(
+                "num_female_members"
+            )
+            more_male_members = group_demographics_filter_form.cleaned_data.get(
+                "more_male_members"
+            )
+            more_female_members = group_demographics_filter_form.cleaned_data.get(
+                "more_female_members"
+            )
+
+            if num_male_members is not None:
+                groups = groups.annotate(
+                    num_male_members=Count(
+                        "members", filter=Q(members__profile__gender="male")
+                    )
+                ).filter(num_male_members__gte=num_male_members)
+            if num_female_members is not None:
+                groups = groups.annotate(
+                    num_female_members=Count(
+                        "members", filter=Q(members__profile__gender="female")
+                    )
+                ).filter(num_female_members__gte=num_female_members)
+
+            if more_male_members and not more_female_members:
+                groups = groups.annotate(
+                    num_male_members=Count(
+                        "members", filter=Q(members__profile__gender="male")
+                    ),
+                    num_female_members=Count(
+                        "members", filter=Q(members__profile__gender="female")
+                    ),
+                ).filter(num_male_members__gt=F("num_female_members"))
+
+            if more_female_members and not more_male_members:
+                groups = groups.annotate(
+                    num_male_members=Count(
+                        "members", filter=Q(members__profile__gender="male")
+                    ),
+                    num_female_members=Count(
+                        "members", filter=Q(members__profile__gender="female")
+                    ),
+                ).filter(num_female_members__gt=F("num_male_members"))
+
+        # Apply filters based on GroupSkillsInterestsFilterForm data
+        if group_skills_interests_filter_form.is_valid():
+            skills = group_skills_interests_filter_form.cleaned_data.get("skills")
+            interests = group_skills_interests_filter_form.cleaned_data.get("interests")
+            unique_skills_count = group_skills_interests_filter_form.cleaned_data.get(
+                "unique_skills_count"
+            )
+            unique_interests_count = (
+                group_skills_interests_filter_form.cleaned_data.get(
+                    "unique_interests_count"
+                )
+            )
+
+            if skills:
+                # Filter based on unique skills present in the groups
+                groups = groups.filter(
+                    members__profile__skills__skill__in=skills
+                ).distinct()
+
+            if interests:
+                # Filter based on unique interests present in the groups
+                groups = groups.filter(
+                    members__profile__interests__interest__in=interests
+                ).distinct()
+
+            if unique_skills_count is not None:
+                groups = groups.annotate(
+                    unique_skills_count=Count(
+                        "members__profile__skills",
+                    )
+                ).filter(
+                    unique_skills_count__gte=unique_skills_count,
+                )
+
+            if unique_interests_count is not None:
+                groups = groups.annotate(
+                    unique_interests_count=Count(
+                        "members__profile__interests",
+                    )
+                ).filter(
+                    unique_interests_count__gte=unique_interests_count,
+                )
+
+        # Apply filters based on GroupVocationsFilterForm data
+        if group_vocations_filter_form.is_valid():
+            unique_vocations_count = group_vocations_filter_form.cleaned_data.get(
+                "unique_vocations_count"
+            )
+            vocations = group_vocations_filter_form.cleaned_data.get("vocations")
+
+            if vocations:
+                groups = groups.filter(
+                    members__profile__vocations__vocation__in=vocations
+                ).distinct()
+
+            if unique_vocations_count is not None:
+                groups = groups.annotate(
+                    unique_vocations_count=Count(
+                        "members__profile__vocations",
+                    )
+                ).filter(
+                    unique_vocations_count__gte=unique_vocations_count,
+                )
+
+        # Apply filters based on GroupMentorshipAreasFilterForm data
+        if group_mentorship_areas_filter_form.is_valid():
+            unique_mentorship_areas_count = (
+                group_mentorship_areas_filter_form.cleaned_data.get(
+                    "unique_mentorship_areas_count"
+                )
+            )
+            mentorship_areas = group_mentorship_areas_filter_form.cleaned_data.get(
+                "mentorship_areas"
+            )
+
+            if mentorship_areas:
+                groups = groups.filter(
+                    members__profile__mentorship_areas__mentorship_area__in=mentorship_areas
+                ).distinct()
+
+            if unique_mentorship_areas_count is not None:
+                groups = groups.annotate(
+                    unique_mentorship_areas_count=Count(
+                        "members__profile__mentorship_areas",
+                    )
+                ).filter(
+                    unique_mentorship_areas_count__gte=unique_mentorship_areas_count,
+                )
+
+        if group_faith_milestones_form.is_valid():
+            faith_milestones = group_faith_milestones_form.cleaned_data.get(
+                "faith_milestones",
+            )
+
+            if faith_milestones:
+                groups = groups.filter(
+                    faith_milestones__faith_milestone__in=faith_milestones,
+                )
+
+    # Pagination
+    paginator = Paginator(groups, 6)
+    page = request.GET.get("page")
+
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:  # pragma: no cover
+        page_obj = paginator.page(paginator.num_pages)
+
     context = {
-        "groups": groups,
+        "page_obj": page_obj,
+        "group_basic_filter_form": group_basic_filter_form,
+        "group_members_filter_form": group_members_filter_form,
+        "group_faith_milestones_form": group_faith_milestones_form,
+        "group_vocations_filter_form": group_vocations_filter_form,
+        "group_demographics_filter_form": group_demographics_filter_form,
+        "group_skills_interests_filter_form": group_skills_interests_filter_form,
+        "group_mentorship_areas_filter_form": group_mentorship_areas_filter_form,
     }
 
     return render(
