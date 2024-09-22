@@ -6,7 +6,6 @@ from django.test import TestCase
 
 from kns.custom_user.models import User
 from kns.groups.models import Group
-from kns.profiles.models import Profile
 
 from ..forms import GroupBasicFilterForm, GroupForm
 from . import test_constants
