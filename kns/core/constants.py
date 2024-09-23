@@ -105,8 +105,6 @@ EVENT_REGISTRATION_LIMIT = 50
 ORGANIZER_MUST_FACILITATE = True
 MIN_DAYS_TO_MODIFY_SENSITIVE_CONTENT = 7
 
-CHANGE_ROLE_TO_LEADER_ACTION_TYPE = "change_role_to_leader"
-
 STATUS_CHOICES = [
     ("draft", "Draft"),
     ("published", "Published"),

@@ -482,57 +482,13 @@ class Profile(
         settings = Setting.get_or_create_setting()
         return settings.change_role_approval_required
 
-    def change_role_to_leader(self, leader):  # pragma: no cover
+    def change_role_to_leader(self):  # pragma: no cover
         """
         Change the role of a member to leader, with an optional approval process.
-
-        This method updates the role of the current member to "leader".
-        If approval is required, it creates an approval action instead of
-        directly changing the role.
-
-        Parameters
-        ----------
-        leader : Profile
-            The profile of the person initiating the role change.
-
-        Returns
-        -------
-        MakeLeaderActionApproval or None
-            If approval is required, returns an instance of `MakeLeaderActionApproval`
-            representing the created approval action. If no approval is required,
-            returns `None` after changing the role to leader.
         """
-        from kns.core import constants as core_constants
-        from kns.core.models import MakeLeaderActionApproval
-
-        approval_required = leader.needs_approval_to_change_group_members_role()
-
-        if not approval_required:
-            # Update the profile role to leader
-            self.role = "leader"
-            self.save()
-        else:
-            # Create the approval action
-            return MakeLeaderActionApproval.objects.create(
-                new_leader=self,
-                created_by=leader,
-                group_created_for=leader.group_led.parent,
-                action_type=core_constants.CHANGE_ROLE_TO_LEADER_ACTION_TYPE,
-            )
-
-    def pending_make_leader_approval_request(self):  # pragma: no cover
-        """
-        Check if there is a pending leader approval request for the profile.
-
-        This method checks whether there is a pending approval request
-        for the current profile to be made a leader.
-
-        Returns
-        -------
-        bool
-            True if a pending leader approval request exists, False otherwise.
-        """
-        return model_methods.pending_make_leader_approval_request(self)
+        # Update the profile role to leader
+        self.role = "leader"
+        self.save()
 
     def formatted_date_of_birth(self):
         """
@@ -612,21 +568,6 @@ class Profile(
             phone_str = f"(+{self.phone_prefix}) {self.phone}"
 
         return phone_str
-
-    def pending_approval_requests(self):
-        """
-        Retrieve all pending leader promotion requests for the group led by this profile.
-
-        This method calls a utility function to return all `MakeLeaderActionApproval` objects
-        with a 'pending' status that are associated with the group this profile is leading.
-
-        Returns
-        -------
-        QuerySet
-            A QuerySet containing all pending `MakeLeaderActionApproval` requests for the group
-            led by this profile.
-        """
-        return model_methods.pending_approval_requests(self)
 
     def get_vocations_as_string(self):
         """

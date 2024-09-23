@@ -6,7 +6,7 @@
 
 {% block profile_base_content %}
   <section class="space-y-6">
-    {% if profile.can_become_leader_role and is_member_of_user_group and not profile.pending_make_leader_approval_request %}
+    {% if profile.can_become_leader_role and is_member_of_user_group %}
       <a
         type="button"
         href="{% url "profiles:make_leader" profile_slug=profile.slug %}"
@@ -14,12 +14,6 @@
       >
         Make {{ profile.get_full_name }} a leader
       </a>
-    {% endif %}
-
-    {% if profile.pending_make_leader_approval_request and is_member_of_user_group %}
-      <div class="p-2 border-l-4 border-gray-700 bg-gray-200 text-sm font-semibold">
-        You have submitted a request to make {{ profile.get_full_name }} a leader role.
-      </div>
     {% endif %}
 
     <div>

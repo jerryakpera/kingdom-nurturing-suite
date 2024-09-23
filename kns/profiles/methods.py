@@ -365,35 +365,6 @@ def get_current_consent_form(profile):
     )
 
 
-def pending_make_leader_approval_request(profile):
-    """
-    Check if there is a pending approval request to make the profile a leader.
-
-    This function queries the `MakeLeaderActionApproval` model to determine
-    if there are any approval requests where the given profile is designated
-    as the new leader and the request is still pending.
-
-    Parameters
-    ----------
-    profile : Profile
-        The profile object for which the function checks for pending leader approval requests.
-
-    Returns
-    -------
-    bool
-        Returns `True` if there is a pending approval request for the profile,
-        otherwise returns `False`.
-    """
-    from kns.core.models import MakeLeaderActionApproval
-
-    pending_approval_request = MakeLeaderActionApproval.objects.filter(
-        new_leader=profile,
-        status="pending",
-    )
-
-    return pending_approval_request.exists()
-
-
 def can_become_leader_role(profile):
     """
     Determine if the profile can become a leader.
@@ -447,30 +418,3 @@ def can_become_member_role(profile):
         return False
 
     return True
-
-
-def pending_approval_requests(profile):
-    """
-    Retrieve all pending leader promotion requests for a specific group leader.
-
-    This function filters the `MakeLeaderActionApproval` objects to find
-    all requests with a 'pending' status that are associated with the
-    group led by the given profile.
-
-    Parameters
-    ----------
-    profile : Profile
-        The profile of the user who is the leader of a group.
-
-    Returns
-    -------
-    QuerySet
-        A QuerySet containing all pending `MakeLeaderActionApproval`
-        requests for the group led by the given profile.
-    """
-    from kns.core.models import MakeLeaderActionApproval
-
-    return MakeLeaderActionApproval.objects.filter(
-        status="pending",
-        group_created_for=profile.group_led,
-    )

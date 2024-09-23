@@ -4,14 +4,12 @@ from unittest.mock import Mock
 from django.test import TestCase
 from django.urls import reverse
 
-from kns.core import constants as core_constants
-from kns.core.models import MakeLeaderActionApproval, Setting
+from kns.core.models import Setting
 from kns.custom_user.models import User
 from kns.groups.models import Group
 from kns.groups.tests import factories, test_constants
 
 from .. import methods
-from ..methods import pending_make_leader_approval_request
 from ..models import ConsentForm
 
 
@@ -443,31 +441,3 @@ class ProfileMethodsTests(TestCase):
         group.add_member(self.profile)
 
         self.assertTrue(methods.can_become_member_role(self.profile))
-
-    def test_pending_make_leader_approval_request_exists(self):
-        """
-        Test that the function returns True when there is a pending request.
-        """
-
-        # Create a group
-        self.group = Group.objects.create(
-            leader=self.profile,
-            name="Test Group",
-            slug="test-group",
-            description=test_constants.VALID_GROUP_DESCRIPTION,
-        )
-
-        MakeLeaderActionApproval.objects.create(
-            new_leader=self.profile,
-            created_by=self.profile,
-            group_created_for=self.group,
-            action_type=core_constants.CHANGE_ROLE_TO_LEADER_ACTION_TYPE,
-        )
-
-        self.assertTrue(pending_make_leader_approval_request(self.profile))
-
-    def test_pending_make_leader_approval_request_not_exists(self):
-        """
-        Test that the function returns False when there is no pending request.
-        """
-        self.assertFalse(pending_make_leader_approval_request(self.profile))

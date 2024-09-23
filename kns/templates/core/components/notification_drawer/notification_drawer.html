@@ -35,38 +35,6 @@
       View a list of approval requests that you are yet to respond to
     </p>
   {% endif %}
-
-
-    {% for approval_request in request.user.profile.pending_approval_requests %}
-      <div class="border-b drop-shadow-md border-gray-200 p-2">
-        <div class="font-semibold text-sm">
-          {{ approval_request.action_type_display }}
-        </div>
-
-        <p class="text-sm text-gray-800">
-          {{ approval_request.notification_display }}
-        </p>
-
-        <div class="text-xs text-gray-600 mt-2">
-          {{ approval_request.created_at|date:"F j, Y" }}
-        </div>
-
-        <div class="flex items-center justify-end space-x-2">
-          <a
-            href="{% url "core:reject_make_leader_action_notification" action_approval_id=approval_request.id %}"
-            class="px-3 py-2 text-xs font-medium text-center text-white bg-red-700 rounded-lg hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300"
-          >
-            Reject
-          </a>
-          <a
-            href="{% url "core:approve_make_leader_action_notification" action_approval_id=approval_request.id %}"
-            class="px-3 py-2 text-xs font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
-          >
-            Approve
-          </a>
-        </div>
-      </div>
-    {% endfor %}
    </div>
 </div>
 

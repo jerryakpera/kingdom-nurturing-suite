@@ -2,7 +2,7 @@
   {% if page_obj.paginator.count > 0 %}
     <div class="flex flex-wrap">
       {% for group in page_obj %}
-        <div class="p-2 sm:w-1/2 md:w-1/3 lg:w-1/4">
+        <div class="p-2 sm:w-1/2 md:w-1/3 xl:w-1/4">
           {% include "groups/components/groups_list/groups_list_item.html" %}
         </div>
       {% endfor %}

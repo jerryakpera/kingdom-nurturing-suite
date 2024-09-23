@@ -1049,30 +1049,18 @@ def make_leader(request, profile_slug):  # pragma: no cover
 
         return redirect(profile.get_absolute_url())
 
-    action_approval = profile.change_role_to_leader(request.user.profile)
+    profile.change_role_to_leader()
 
-    if request.user.profile.needs_approval_to_change_group_members_role():
-        # User needs approval
-        messages.success(
-            request=request,
-            message=(
-                f"You have submitted a request to change "
-                f"{profile.get_full_name()} to a leader role"
-            ),
-        )
+    # Send the set password email
+    account_emails.send_set_password_email(
+        request=request,
+        profile=profile,
+    )
 
-        action_approval.notify_consumer(request)
-    else:
-        # Send the set password email
-        account_emails.send_set_password_email(
-            request=request,
-            profile=profile,
-        )
-
-        messages.success(
-            request=request,
-            message=f"{profile.get_full_name()} has been successfully promoted to a leader.",
-        )
+    messages.success(
+        request=request,
+        message=f"{profile.get_full_name()} has been successfully promoted to a leader.",
+    )
 
     return redirect(profile.get_absolute_url())
 
