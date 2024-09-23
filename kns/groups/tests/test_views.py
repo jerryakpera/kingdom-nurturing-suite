@@ -1157,6 +1157,24 @@ class TestGroupIndexView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "groups/pages/index.html")
 
+    def test_view_filters_search(self):
+        """
+        Test that groups can be filtered by their name.
+        """
+
+        response = self.client.get(
+            reverse("groups:index"),
+            {
+                "search": "Beta",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Beta Group")
+        self.assertNotContains(response, "Gamma Group")
+        self.assertNotContains(response, "Alpha Group")
+
     def test_view_filters_by_leader(self):
         """
         Test that groups can be filtered by leader.

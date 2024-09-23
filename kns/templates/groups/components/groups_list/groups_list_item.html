@@ -1,6 +1,6 @@
 {% load static %}
 
-<div class="h-full border border-gray-300 shadow-sm border-opacity-60 rounded-lg overflow-hidden bg-white">
+<div class="h-full border border-gray-300 shadow-sm border-opacity-60 rounded-lg overflow-hidden bg-white flex flex-col">
   {% if group.image %}
     <img
       alt="{{ group.name }}"
@@ -14,7 +14,7 @@
       class="lg:h-48 md:h-36 w-full object-cover object-center"
     >
   {% endif %}
-  <div class="p-6 sm:p-4 md:p-6">
+  <div class="p-6 sm:p-4 md:p-6 flex-grow flex flex-col justify-between">
     <h6 class="tracking-widest text-xs title-font font-semibold text-gray-600 mb-1">
       {% if group.location_country %}
         <span class="mb-0 fw-semibold">
@@ -44,11 +44,12 @@
       </a>
     </div>
 
-    <p class="leading-relaxed mb-3 text-sm">
+    <p class="leading-relaxed mb-3 text-sm flex-grow">
       {{ group.description }}
     </p>
 
-    <div class="flex items-center flex-wrap justify-between">
+    <!-- Align footer to the bottom -->
+    <div class="flex items-center flex-wrap justify-between mt-auto" id="{{ group.id }}-card-footer">
       <a class="w-28 h-8 text-xs font-medium text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSebg-knsSecondary-300 dark:bg-knsSecondary-600 dark:hover:bg-knsSecondary-700 dark:focus:ring-knsSebg-knsSecondary-800 gap-x-2 flex items-center justify-center cursor-pointer" href="{{ group.get_absolute_url }}">
         View group
         <iconify-icon icon="ph:arrow-right-fill" class="text-lg"></iconify-icon>
@@ -63,10 +64,11 @@
           <iconify-icon icon="mdi:family-tree" class="text-lg"></iconify-icon>
           {{ group.get_descendant_count }}
         </span>
+
+        <!-- Include the modal specific to this group -->
+        {% include "groups/components/group_modal/group_modal.html" %}
       </div>
 
-      <!-- Include the modal specific to this group -->
-      {% include "groups/components/group_modal/group_modal.html" %}
     </div>
   </div>
 </div>

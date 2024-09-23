@@ -394,8 +394,8 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
 
         Returns
         -------
-        float:
-            The average age of the group's members.
+        float or str:
+            The average age of the group's members, rounded to one decimal place.
             Returns '---' if there are no members with a valid age.
         """
         members_with_age = [
@@ -405,7 +405,10 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         ]
 
         if members_with_age:
-            return sum(members_with_age) / len(members_with_age)
+            return round(
+                sum(members_with_age) / len(members_with_age),
+                1,
+            )
 
         return "---"
 

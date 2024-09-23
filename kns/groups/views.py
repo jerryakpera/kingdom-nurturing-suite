@@ -89,6 +89,11 @@ def index(request):
     )
 
     if request.method == "GET":
+        # Search functionality
+        search_query = request.GET.get("search")
+        if search_query:
+            groups = groups.filter(Q(name__icontains=search_query))
+
         # Apply filters based on GroupBasicFilterForm data
         if group_basic_filter_form.is_valid():
             location_country = group_basic_filter_form.cleaned_data.get(
@@ -362,6 +367,7 @@ def index(request):
 
     context = {
         "page_obj": page_obj,
+        "search_query": search_query,
         "group_basic_filter_form": group_basic_filter_form,
         "group_members_filter_form": group_members_filter_form,
         "group_faith_milestones_form": group_faith_milestones_form,
