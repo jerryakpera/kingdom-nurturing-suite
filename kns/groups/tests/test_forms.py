@@ -453,8 +453,11 @@ class TestGroupSkillsInterestsFilterForm(TestCase):
             data=self.form_data,
         )
 
-        self.assertFalse(form.is_valid())
-        self.assertIn("unique_interests_count", form.errors)
+        self.assertTrue(form.is_valid())
+        self.assertEqual(
+            form.cleaned_data["unique_interests_count"],
+            25,
+        )
 
     def test_exceeding_large_number_unique_interests_count(self):
         self.form_data["unique_interests_count"] = 1000000
