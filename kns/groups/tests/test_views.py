@@ -426,6 +426,8 @@ class TestRegisterGroupView(TestCase):
         origin_group = Group.objects.create(
             leader=origin_user.profile,
             name="Origin group",
+            location_country="NG",
+            location_city="Bauchi",
             slug="origin-group",
             description=test_constants.VALID_GROUP_DESCRIPTION,
         )
@@ -531,6 +533,8 @@ class TestRegisterGroupView(TestCase):
             leader=self.profile,
             name="Existing Group",
             slug="existing-group",
+            location_country="NG",
+            location_city="Bauchi",
             description="An existing group description",
         )
 
@@ -783,6 +787,8 @@ class TestEditGroupMilestonesView(TestCase):
             leader=self.user.profile,
             name="Test Group",
             slug="test-group",
+            location_country="NG",
+            location_city="Bauchi",
             description="A test group description",
         )
 
@@ -951,6 +957,8 @@ class TestRemoveGroupMilestoneView(TestCase):
         self.group = Group.objects.create(
             leader=self.profile,
             name="Test Group",
+            location_country="NG",
+            location_city="Bauchi",
             slug="test-group",
             description=test_constants.VALID_GROUP_DESCRIPTION,
         )
@@ -1131,7 +1139,7 @@ class TestGroupIndexView(TestCase):
             leader=self.profile2,
             name="Beta Group",
             parent=self.group1,
-            location_country="Nigeria",
+            location_country="NG",
             location_city="Kaduna",
             description="Group for beta members.",
         )
@@ -1140,7 +1148,7 @@ class TestGroupIndexView(TestCase):
             leader=self.profile3,
             name="Gamma Group",
             parent=self.group1,
-            location_country="Nigeria",
+            location_country="NG",
             location_city="Kaduna",
             description="Group for gamma members.",
         )
@@ -1208,7 +1216,7 @@ class TestGroupIndexView(TestCase):
                 leader=user.profile,
                 name=f"Loop Group {i}",
                 parent=self.group1,
-                location_country="Nigeria",
+                location_country="NG",
                 location_city="Kaduna",
                 description="Group for gamma members.",
             )
@@ -1637,7 +1645,7 @@ class TestGroupIndexViewBasicFilters(TestCase):
         self.group2 = Group.objects.create(
             leader=self.profile2,
             name="Group Beta",
-            location_country="Nigeria",
+            location_country="NG",
             location_city="Bauchi",
         )
 
@@ -1974,7 +1982,7 @@ class TestGroupIndexViewSkillsInterestsFilters(TestCase):
         self.group2 = Group.objects.create(
             leader=self.profile2,
             name="Group Beta",
-            location_country="Nigeria",
+            location_country="NG",
             location_city="Bauchi",
         )
 
@@ -2147,7 +2155,7 @@ class TestGroupIndexViewVocationsFilters(TestCase):
         self.group2 = Group.objects.create(
             leader=self.profile2,
             name="Group Beta",
-            location_country="Nigeria",
+            location_country="NG",
             location_city="Bauchi",
         )
 
@@ -2286,7 +2294,7 @@ class TestGroupIndexViewMentorshipAreasFilters(TestCase):
         self.group2 = Group.objects.create(
             leader=self.profile2,
             name="Group Beta",
-            location_country="Nigeria",
+            location_country="NG",
             location_city="Bauchi",
         )
 

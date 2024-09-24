@@ -9,7 +9,6 @@ from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
-from kns.core.utils import log_this
 from kns.faith_milestones.forms import GroupFaithMilestonesForm
 from kns.faith_milestones.models import GroupFaithMilestone
 from kns.groups.forms import (
@@ -24,6 +23,8 @@ from kns.groups.forms import (
 from kns.groups.models import Group, GroupMember
 from kns.profiles.models import Profile
 from kns.profiles.utils import name_with_apostrophe
+
+from .utils import GroupStatistics
 
 
 @login_required
@@ -365,9 +366,13 @@ def index(request):
     except EmptyPage:  # pragma: no cover
         page_obj = paginator.page(paginator.num_pages)
 
+    # Create an instance of GroupStatistics with the filtered groups
+    groups_stats = GroupStatistics(groups).get_all_statistics()
+
     context = {
         "page_obj": page_obj,
         "search_query": search_query,
+        "groups_stats": groups_stats,
         "group_basic_filter_form": group_basic_filter_form,
         "group_members_filter_form": group_members_filter_form,
         "group_faith_milestones_form": group_faith_milestones_form,
