@@ -226,6 +226,22 @@ def index(request):
         .order_by("created_at")
     )
 
+    # Define a map for sortable fields
+    sortable_fields = {
+        "last_name": "last_name",
+        "first_name": "first_name",
+        "created_at": "created_at",
+    }
+
+    # Get the sorting parameter from the request
+    sort_by = request.GET.get("sort_by", "created_at")
+    sort_order = request.GET.get("order", "asc")
+
+    # Ensure the requested sort field is valid
+    if sort_by in sortable_fields:
+        order_prefix = "-" if sort_order == "desc" else ""
+        profiles = profiles.order_by(f"{order_prefix}{sortable_fields[sort_by]}")
+
     # Get the current user's group
     user_profile = request.user.profile
     users_group = (
@@ -394,7 +410,10 @@ def index(request):
         page_obj = paginator.page(paginator.num_pages)
 
     context = {
+        "sort_by": sort_by,
         "page_obj": page_obj,
+        "page_obj": page_obj,
+        "sort_order": sort_order,
         "search_query": search_query,
         "basic_info_form": basic_info_form,
         "mentorship_form": mentorship_form,
