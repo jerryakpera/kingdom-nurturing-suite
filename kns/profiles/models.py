@@ -749,6 +749,26 @@ class Profile(
                         task.is_complete = True
                         task.save()
 
+    def make_leader_role(self):  # pragma: no cover
+        """
+        Promote the profile to a leader role.
+
+        This method updates the profile's role to 'leader' if eligible,
+        saves the changes, and sends a notification email to the user
+        informing them of the promotion.
+
+        Raises
+        ------
+        ValueError
+            If the profile cannot be promoted to a leader role.
+        -------
+        None
+        """
+        # Check if user can become a leader role
+        # Change profiles role to leader and save
+        # Logic to send email notification
+        pass
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

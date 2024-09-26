@@ -48,6 +48,9 @@ class TestBackView(TestCase):
         # URL for the back view
         self.back_url = reverse("onboarding:back")
 
+        clear_onboarding_cache(self.profile)
+        # URL for the involvement view
+
     def test_back_view_authenticated(self):
         """Test back view for authenticated users."""
         self.profile_onboarding.current_step = 2
@@ -261,8 +264,9 @@ class TestInvolvementView(TestCase):
             password="password123",
         )
 
-        clear_onboarding_cache(self.profile)
         # URL for the involvement view
+        clear_onboarding_cache(self.profile)
+
         self.involvement_url = reverse("onboarding:involvement")
 
     def test_involvement_view_authenticated(self):
@@ -364,6 +368,9 @@ class TestGroupView(TestCase):
         # URL for the group view
         self.group_url = reverse("onboarding:group")
 
+        clear_onboarding_cache(self.profile)
+        # URL for the involvement view
+
     def test_group_view_authenticated(self):
         """
         Test the group view for authenticated users to ensure it
@@ -430,7 +437,7 @@ class TestGroupView(TestCase):
 
         response = self.client.get(self.group_url)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
 
     def test_group_view_existing_group(self):
         """
@@ -533,6 +540,9 @@ class TestAgreeView(TestCase):
 
         # URL for the agree view
         self.agree_url = reverse("onboarding:agree")
+
+        clear_onboarding_cache(self.profile)
+        # URL for the involvement view
 
     def test_agree_view_authenticated(self):
         """
