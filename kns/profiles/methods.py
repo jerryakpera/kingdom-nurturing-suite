@@ -7,6 +7,8 @@ from datetime import date
 
 from django.urls import reverse
 
+from kns.core.utils import log_this
+
 
 def is_leading_group(profile):
     """

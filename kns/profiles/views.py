@@ -984,7 +984,7 @@ def upload_consent_form(request, profile_slug):  # pragma: no cover
 
 
 @login_required
-def make_leader_page(request, profile_slug):  # pragma: no cover
+def make_leader_page(request, profile_slug):
     """
     View to promote a user profile to a leader role.
 
@@ -1007,7 +1007,13 @@ def make_leader_page(request, profile_slug):  # pragma: no cover
     """
 
     # Fetch the profile or return a 404 if not found
-    profile = get_object_or_404(Profile, slug=profile_slug)
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    if not request.user.profile.is_leading_group():
+        return redirect(profile.get_absolute_url())
 
     # Ensure the requesting user is leading the profile's group
     if not request.user.profile.group_led.is_member(profile):
@@ -1025,7 +1031,7 @@ def make_leader_page(request, profile_slug):  # pragma: no cover
 
 
 @login_required
-def make_leader(request, profile_slug):  # pragma: no cover
+def make_leader(request, profile_slug):
     """
     View to promote a user profile to a leader role.
 
@@ -1085,7 +1091,7 @@ def make_leader(request, profile_slug):  # pragma: no cover
 
 
 @login_required
-def make_member_page(request, profile_slug):  # pragma: no cover
+def make_member_page(request, profile_slug):
     """
     View to demote a user profile to a member role.
 
@@ -1108,7 +1114,10 @@ def make_member_page(request, profile_slug):  # pragma: no cover
     """
 
     # Fetch the profile or return a 404 if not found
-    profile = get_object_or_404(Profile, slug=profile_slug)
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
 
     # Ensure the requesting user is leading the profile's group
     if not request.user.profile.group_led.is_member(profile):
@@ -1126,7 +1135,7 @@ def make_member_page(request, profile_slug):  # pragma: no cover
 
 
 @login_required
-def make_member(request, profile_slug):  # pragma: no cover
+def make_member(request, profile_slug):
     """
     View to promote a user profile to a member role.
 
@@ -1171,15 +1180,12 @@ def make_member(request, profile_slug):  # pragma: no cover
 
     profile.change_role_to_member()
 
-    # Send the set password email
-    account_emails.send_set_password_email(
-        request=request,
-        profile=profile,
-    )
-
     messages.success(
         request=request,
-        message=f"{profile.get_full_name()} has been successfully promoted to a member.",
+        message=(
+            f"{name_with_apostrophe(profile.get_full_name())} role "
+            "has been changed to a member."
+        ),
     )
 
     return redirect(profile.get_absolute_url())

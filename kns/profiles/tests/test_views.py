@@ -13,6 +13,7 @@ from kns.classifications.models import (
     Subclassification,
 )
 from kns.core.models import Setting
+from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.models import FaithMilestone, ProfileFaithMilestone
 from kns.groups.models import Group
@@ -3141,3 +3142,554 @@ class TestIndexView(TestCase):
         self.assertContains(response, "John Doe")
         self.assertNotContains(response, "Jane Smith")
         self.assertNotContains(response, "Jack Reacher")
+
+
+class TestMakeLeaderPageView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+
+        self.profile.role = "leader"
+        self.profile.is_onboarded = True
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+
+        self.profile.save()
+
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Origin group",
+            location_country="NG",
+            location_city="Bauchi",
+            slug="origin-group",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="password",
+        )
+
+        self.other_user.verified = True
+        self.other_user.agreed_to_terms = True
+
+        self.other_user.save()
+
+        self.other_profile = self.other_user.profile
+
+        self.other_profile.first_name = "John"
+        self.other_profile.last_name = "Doe"
+        self.other_profile.gender = "Male"
+        self.other_profile.date_of_birth = "1990-01-01"
+        self.other_profile.place_of_birth_country = "US"
+        self.other_profile.place_of_birth_city = "New York"
+        self.other_profile.location_country = "US"
+        self.other_profile.location_city = "New York"
+        self.other_profile.role = "member"
+
+        self.other_profile.save()
+
+        self.group.add_member(self.other_profile)
+
+    def test_make_leader_page_loads_correctly(self):
+        """
+        Test that the make_leader_page view loads correctly.
+        """
+
+        url = reverse(
+            "profiles:make_leader_page",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/make_leader.html",
+        )
+
+        self.assertIn("profile", response.context)
+
+    def test_make_leader_page_with_invalid_slug(self):
+        """
+        Test that the make_leader_page returns a 404 error for an invalid slug.
+        """
+
+        url = reverse(
+            "profiles:make_leader_page",
+            kwargs={
+                "profile_slug": "invalid-slug",
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_make_leader_page_without_permission(self):
+        """
+        Test that the make_leader_page redirects if user is not a group leader.
+        """
+
+        self.group.members.all().delete()
+
+        url = reverse(
+            "profiles:make_leader_page",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertRedirects(response, self.other_profile.get_absolute_url())
+
+        self.assertEqual(response.status_code, 302)
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                f"You must be the leader of {self.other_profile.get_full_name()} "
+                "to perform this action."
+            ),
+        )
+
+    def test_make_leader_page_not_group_leader(self):
+        """
+        Test that the make_leader_page redirects if user is not a group leader.
+        """
+
+        self.group.leader = self.other_profile
+        self.group.save()
+
+        url = reverse(
+            "profiles:make_leader_page",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertRedirects(response, self.other_profile.get_absolute_url())
+
+        self.assertEqual(response.status_code, 302)
+
+
+class TestMakeLeaderView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+
+        self.profile.role = "leader"
+        self.profile.is_onboarded = True
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+
+        self.profile.save()
+
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Origin group",
+            location_country="NG",
+            location_city="Bauchi",
+            slug="origin-group",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="password",
+        )
+
+        self.other_user.verified = True
+        self.other_user.agreed_to_terms = True
+
+        self.other_user.save()
+
+        self.other_profile = self.other_user.profile
+
+        self.other_profile.first_name = "John"
+        self.other_profile.last_name = "Doe"
+        self.other_profile.gender = "Male"
+        self.other_profile.date_of_birth = "1990-01-01"
+        self.other_profile.place_of_birth_country = "US"
+        self.other_profile.place_of_birth_city = "New York"
+        self.other_profile.location_country = "US"
+        self.other_profile.location_city = "New York"
+        self.other_profile.role = "member"
+
+        self.other_profile.save()
+
+        self.group.add_member(self.other_profile)
+
+    def test_make_leader_success(self):
+        """
+        Test that a profile is successfully promoted to leader.
+        """
+
+        url = reverse(
+            "profiles:make_leader",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+
+        response = self.client.post(url)
+
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Refresh the profile after the change
+        self.other_profile.refresh_from_db()
+
+        self.assertEqual(
+            self.other_profile.role,
+            "leader",
+        )
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(
+            len(messages),
+            1,
+        )
+        self.assertEqual(
+            str(messages[0]),
+            f"{self.other_profile.get_full_name()} has been successfully promoted to a leader.",
+        )
+
+    def test_make_leader_without_permission(self):
+        """
+        Test that the make_leader view redirects if user is not a group leader.
+        """
+
+        self.group.members.all().delete()
+
+        url = reverse(
+            "profiles:make_leader",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+        response = self.client.post(url)
+
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                f"You must be the leader of {self.other_profile.get_full_name()}"
+                " to perform this action."
+            ),
+        )
+
+    def test_make_leader_not_eligible(self):
+        """Test that the make_leader view returns an error if the profile is not eligible."""
+        # Simulate that the other profile is not eligible to become a leader
+        self.other_profile.role = "leader"
+        self.other_profile.save()
+
+        url = reverse(
+            "profiles:make_leader",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+        response = self.client.post(url)
+
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            f"{self.other_profile.get_full_name()} is not eligible to become a leader.",
+        )
+
+
+class TestMakeMemberPageView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+
+        self.profile.role = "leader"
+        self.profile.is_onboarded = True
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+
+        self.profile.save()
+
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Origin group",
+            location_country="NG",
+            location_city="Bauchi",
+            slug="origin-group",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="password",
+        )
+        self.other_profile = self.other_user.profile
+
+        self.other_profile.first_name = "John"
+        self.other_profile.last_name = "Wayne"
+
+        self.other_profile.save()
+
+        self.group.add_member(self.other_profile)
+
+    def test_make_member_page_loads_correctly(self):
+        """
+        Test that the make_member_page view loads correctly.
+        """
+
+        url = reverse(
+            "profiles:make_member_page",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/make_member.html",
+        )
+
+        self.assertIn("profile", response.context)
+
+    def test_make_member_page_with_invalid_slug(self):
+        """Test that the make_member_page returns a 404 error for an invalid slug."""
+        url = reverse(
+            "profiles:make_member_page", kwargs={"profile_slug": "invalid-slug"}
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_make_member_page_without_permission(self):
+        """Test that the make_member_page redirects if user is not a group leader."""
+
+        self.group.members.all().delete()
+
+        url = reverse(
+            "profiles:make_member_page",
+            kwargs={"profile_slug": self.other_profile.slug},
+        )
+        response = self.client.get(url)
+
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                f"You must be the leader of {self.other_profile.get_full_name()}"
+                " to perform this action."
+            ),
+        )
+
+
+class TestMakeMemberView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+
+        self.profile.role = "leader"
+        self.profile.is_onboarded = True
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+
+        self.profile.save()
+
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Origin group",
+            location_country="NG",
+            location_city="Bauchi",
+            slug="origin-group",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="password",
+        )
+        self.other_profile = self.other_user.profile
+
+        self.other_profile.first_name = "John"
+        self.other_profile.last_name = "Wayne"
+
+        self.other_profile.save()
+
+        self.group.add_member(self.other_profile)
+
+    def test_make_member_success(self):
+        """Test that a profile is successfully demoted to member."""
+        self.other_profile.role = "leader"
+        self.other_profile.save()
+
+        url = reverse(
+            "profiles:make_member",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+
+        response = self.client.post(url)
+
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Refresh the profile after the change
+        self.other_profile.refresh_from_db()
+
+        # Assert the role has changed
+        self.assertEqual(
+            self.other_profile.role,
+            "member",
+        )
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                f"{name_with_apostrophe(self.other_profile.get_full_name())}"
+                " role has been changed to a member."
+            ),
+        )
+
+    def test_make_member_without_permission(self):
+        """Test that the make_member view redirects if user is not a group leader."""
+        url = reverse(
+            "profiles:make_member",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+
+        self.group.members.all().delete()
+
+        response = self.client.post(url)
+
+        self.assertRedirects(response, self.other_profile.get_absolute_url())
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                f"You must be the leader of {self.other_profile.get_full_name()}"
+                " to perform this action."
+            ),
+        )
+
+    def test_make_member_not_eligible(self):
+        """
+        Test that the make_member view returns an error if the profile is not eligible.
+        """
+
+        self.other_profile.role = "member"
+        self.other_profile.save()
+
+        url = reverse(
+            "profiles:make_member",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+        response = self.client.post(url)
+
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            f"{self.other_profile.get_full_name()} is not eligible to become a member.",
+        )

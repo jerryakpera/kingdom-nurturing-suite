@@ -14,6 +14,7 @@ from django.utils import timezone
 from django_countries.fields import CountryField
 
 from kns.core import modelmixins
+from kns.core.utils import log_this
 from kns.custom_user.models import User
 
 from . import constants
