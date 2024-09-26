@@ -65,6 +65,15 @@
         Settings
       </a>
 
+      {% if profile.can_become_member_role %}
+        <a
+          href="{% url "profiles:make_member_page" profile_slug=profile.slug %}"
+          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Make member
+        </a>
+      {% endif %}
+
       {% if profile.can_become_leader_role %}
         <a
           href="{% url "profiles:make_leader_page" profile_slug=profile.slug %}"

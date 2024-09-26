@@ -487,7 +487,18 @@ class Profile(
         Change the role of a member to leader, with an optional approval process.
         """
         # Update the profile role to leader
+        # TODO: Send notification email to user that their role has been changed
+        # TODO: Send in app notification that their role has been changed
         self.role = "leader"
+        self.save()
+
+    def change_role_to_member(self):  # pragma: no cover
+        """
+        Change the role of a member to member, with an optional approval process.
+        """
+        # Update the profile role to member
+        # TODO: Send notification email to user that their role has been changed
+        self.role = "member"
         self.save()
 
     def formatted_date_of_birth(self):

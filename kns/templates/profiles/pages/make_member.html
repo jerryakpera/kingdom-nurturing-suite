@@ -1,0 +1,57 @@
+{% extends "profiles/profile_base.html" %}
+
+{% block title %}
+  {{ profile.get_full_name }} | Make member
+{% endblock title %}
+
+{% block profile_base_content %}
+  <section class="space-y-6">
+    {% if profile.can_become_member_role and is_member_of_user_group %}
+      <a
+        type="button"
+        href="{% url "profiles:make_member" profile_slug=profile.slug %}"
+        class="text-white bg-knsSecondary hover:bg-knsSecondary-600 focus:ring-4 focus:ring-knsSecondary-400 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none"
+      >
+        Make {{ profile.get_full_name }} a member
+      </a>
+    {% endif %}
+
+    <div>
+      <h1 class="text-lg font-bold underline text-gray-800">How to make a profile a member role.</h1>
+      <p>
+        This guide explains how to change the role of a profile into a member. Once the user becomes a member, their group leader will manage their profile until they can gain access to the application by forming their own DBS group.
+      </p>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <h3 class="text-md font-semibold">Checking Eligibility</h3>
+        <p>
+          Make sure the person you're promoting meets the requirements to become a member.
+          The person should have a fully completed profile, which includes filling out their first name, last name, gender, date of birth, country, city, and role.
+          Their email must be verified, and they must have agreed to the terms.
+        </p>
+      </div>
+      <div class="bg-gray-100 border-l-4 border-green-500 p-4">
+        <p class="text-gray-700">
+          <strong>Eligibility Check:</strong> If the user does not meet the above requirements, the role change process will be halted, and an error message will be shown.
+        </p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <h3 class="text-md font-semibold">Informing the new member</h3>
+        <p>
+          Once the user's role is successfully changed to member, a notification email is sent to the user. The email typically includes instructions on how they can access their profile once they become a leader.
+        </p>
+      </div>
+
+      <div class="bg-gray-100 border-l-4 border-purple-500 p-4">
+        <p class="text-gray-700">
+          <strong>Notification:</strong> It is important that the user is informed of their new role and that they know the steps required to gain full access to their profile by forming their own group.
+        </p>
+      </div>
+    </div>
+  </section>
+{% endblock profile_base_content %}

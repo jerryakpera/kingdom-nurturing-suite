@@ -21,7 +21,7 @@
 
 <div>
   <div data-tooltip-target="tooltip-members">
-    {% with title="Total members in group" %}
+    {% with title="Total people in group" %}
       {% with value=group.members.count %}
         {% with icon="fluent:people-add-32-light" %}
           {% include "groups/components/group_tree/group_tree_stat_item.html" %}
@@ -35,7 +35,7 @@
     id="tooltip-members"
     class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 tooltip"
   >
-    Total members in group
+    Total people in group
     <div class="tooltip-arrow" data-popper-arrow></div>
   </div>
 </div>

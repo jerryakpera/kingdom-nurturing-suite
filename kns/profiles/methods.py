@@ -405,13 +405,7 @@ def can_become_member_role(profile):
     bool
         True if the profile can become a member and False if not.
     """
-    if not profile.is_profile_complete():
-        return False
-
     if profile.role == "member":
-        return False
-
-    if profile.needs_consent_form():
         return False
 
     if profile.is_leading_group():

@@ -101,6 +101,16 @@ urlpatterns = [
         name="make_leader",
     ),
     path(
+        "<slug:profile_slug>/make-member-page",
+        views.make_member_page,
+        name="make_member_page",
+    ),
+    path(
+        "<slug:profile_slug>/make-member",
+        views.make_member,
+        name="make_member",
+    ),
+    path(
         "<slug:profile_slug>/activities",
         views.profile_activities,
         name="profile_activities",
