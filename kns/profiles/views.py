@@ -1075,12 +1075,7 @@ def make_leader(request, profile_slug):
         return redirect(profile.get_absolute_url())
 
     profile.change_role_to_leader()
-
-    # Send the set password email
-    account_emails.send_set_password_email(
-        request=request,
-        profile=profile,
-    )
+    profile.send_email_to_new_leader(request=request)  # pragma: no cover
 
     messages.success(
         request=request,

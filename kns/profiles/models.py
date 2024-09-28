@@ -16,7 +16,7 @@ from django_countries.fields import CountryField
 from kns.core import modelmixins
 from kns.custom_user.models import User
 
-from . import constants
+from . import constants, emails
 from . import methods as model_methods
 
 
@@ -154,6 +154,12 @@ class Profile(
     )
 
     email_token = models.CharField(
+        max_length=250,
+        null=True,
+        blank=True,
+    )
+
+    set_password_token = models.CharField(
         max_length=250,
         null=True,
         blank=True,
@@ -779,6 +785,22 @@ class Profile(
                     if not task.is_complete:
                         task.is_complete = True
                         task.save()
+
+    def send_email_to_new_leader(self, request):  # pragma: no cover
+        """
+        Send an email notification to a new leader when they are assigned to a group.
+        The email is sent to inform the leader about their new role and responsibilities.
+
+        Parameters
+        ----------
+        request : HttpRequest
+            The current HTTP request object, containing user information.
+        """
+        emails.send_new_leader_email(
+            request=request,
+            profile=self,
+            profiles_leader=request.user.profile,
+        )
 
 
 @receiver(post_save, sender=User)
