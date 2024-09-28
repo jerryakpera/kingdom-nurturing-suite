@@ -259,19 +259,6 @@ class TestProfileModel(TestCase):
             expected_url,
         )
 
-    def test_get_involvements_url(self):
-        expected_url = reverse(
-            "profiles:profile_involvements",
-            kwargs={
-                "profile_slug": self.profile.slug,
-            },
-        )
-
-        self.assertEqual(
-            self.profile.get_involvements_url(),
-            expected_url,
-        )
-
     def test_get_trainings_url(self):
         expected_url = reverse(
             "profiles:profile_trainings",

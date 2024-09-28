@@ -79,19 +79,6 @@ class ProfileMethodsTests(TestCase):
             expected_url,
         )
 
-    def test_get_involvements_url(self):
-        """Test that the correct involvements URL is returned."""
-        expected_url = reverse(
-            "profiles:profile_involvements",
-            kwargs={
-                "profile_slug": self.profile.slug,
-            },
-        )
-        self.assertEqual(
-            methods.get_involvements_url(self.profile),
-            expected_url,
-        )
-
     def test_get_trainings_url(self):
         """Test that the correct trainings URL is returned."""
         expected_url = reverse(

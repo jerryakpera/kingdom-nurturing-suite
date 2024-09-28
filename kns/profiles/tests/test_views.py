@@ -252,51 +252,6 @@ class TestViews(TestCase):
             profile_classification.no + 1,
         )
 
-    def test_profile_involvements_view(self):
-        """
-        Test the profile_involvements view to ensure it renders the specific profile.
-        """
-        url = reverse(
-            "profiles:profile_involvements",
-            kwargs={
-                "profile_slug": self.profile.slug,
-            },
-        )
-        response = self.client.get(url)
-
-        # Check if the response status code is 200 OK
-        self.assertEqual(response.status_code, 200)
-
-        # Check if the correct template is used
-        self.assertTemplateUsed(
-            response,
-            "profiles/pages/profile_involvements.html",
-        )
-
-        # Ensure the profile involvementss are present
-        self.assertIn(
-            "Test User",
-            response.content.decode(),
-        )
-
-    def test_profile_involvements_view_not_found(self):
-        """
-        Test the profile_involvements view with a non-existent profile slug.
-        """
-        url = reverse(
-            "profiles:profile_involvements",
-            kwargs={
-                "profile_slug": "non-existent",
-            },
-        )
-        response = self.client.get(url)
-
-        # Check if the response status code is 404 Not Found
-        self.assertEqual(
-            response.status_code,
-            404,
-        )
-
     def test_profile_trainings_view(self):
         """
         Test the profile_trainings view to ensure it renders the specific profile.

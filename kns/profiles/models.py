@@ -240,21 +240,6 @@ class Profile(
         """
         return model_methods.get_absolute_url(self)
 
-    def get_involvements_url(self):
-        """
-        Get the URL for the profile's involvements view.
-
-        This method uses the `get_involvements_url` function from
-        `model_methods` to generate the URL for the profile's
-        involvements view.
-
-        Returns
-        -------
-        str
-            The URL for the profile's involvements view.
-        """
-        return model_methods.get_involvements_url(self)
-
     def get_trainings_url(self):
         """
         Get the URL for the profile's trainings view.

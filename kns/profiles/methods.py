@@ -195,28 +195,6 @@ def get_discipleships_url(profile):
     )
 
 
-def get_involvements_url(profile):
-    """
-    Return the involvements URL to access a detail view of this profile.
-
-    Parameters
-    ----------
-    profile : Profile
-        The profile instance.
-
-    Returns
-    -------
-    str
-        The involvements URL of the profile's detail view.
-    """
-    return reverse(
-        "profiles:profile_involvements",
-        kwargs={
-            "profile_slug": profile.slug,
-        },
-    )
-
-
 def get_mentorships_url(profile):
     """
     Return the mentorships URL to access a detail view of this profile.
