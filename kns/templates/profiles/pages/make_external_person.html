@@ -1,5 +1,7 @@
 {% extends "profiles/profile_base.html" %}
 
+{% load profiles_custom_tags %}
+
 {% block title %}
   {{ profile.get_full_name }} | Make External Person
 {% endblock title %}
@@ -7,13 +9,13 @@
 {% block profile_base_content %}
   <section class="space-y-6">
     {% if profile.can_become_external_person_role and is_member_of_user_group %}
-      <a
-        type="button"
-        href="{% url "profiles:make_external_person" profile_slug=profile.slug %}"
-        class="text-white bg-knsSecondary hover:bg-knsSecondary-600 focus:ring-4 focus:ring-knsSecondary-400 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none"
+      <button
+        data-confirm-url="{% url 'profiles:make_external_person' profile_slug=profile.slug %}"
+        data-confirm-message="Are you sure you want to update {{ profile.get_full_name|name_with_apostrophe }} role to External Person?"
+        class="text-white cursor-pointer bg-knsSecondary hover:bg-knsSecondary-600 focus:ring-4 focus:ring-knsSecondary-400 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none"
       >
-        Make {{ profile.get_full_name }} an External Person
-      </a>
+        Make {{ profile.get_full_name }} an external person
+      </button>
     {% endif %}
 
     <div>
