@@ -1282,6 +1282,7 @@ def make_member(request, profile_slug):
         return redirect(profile.get_absolute_url())
 
     profile.change_role_to_member()
+    profile.send_email_to_new_member(request=request)  # pragma: no cover
 
     messages.success(
         request=request,

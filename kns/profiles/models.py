@@ -788,7 +788,7 @@ class Profile(
 
     def send_email_to_new_leader(self, request):  # pragma: no cover
         """
-        Send an email notification to a new leader when they are assigned to a group.
+        Send an email notification to a user when their role is elevated to `leader`.
         The email is sent to inform the leader about their new role and responsibilities.
 
         Parameters
@@ -797,6 +797,21 @@ class Profile(
             The current HTTP request object, containing user information.
         """
         emails.send_new_leader_email(
+            request=request,
+            profile=self,
+            profiles_leader=request.user.profile,
+        )
+
+    def send_email_to_new_member(self, request):  # pragma: no cover
+        """
+        Send an email notification to a user when their role is update to `member`.
+
+        Parameters
+        ----------
+        request : HttpRequest
+            The current HTTP request object, containing user information.
+        """
+        emails.send_new_member_email(
             request=request,
             profile=self,
             profiles_leader=request.user.profile,
