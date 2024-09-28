@@ -8,11 +8,41 @@
 
 {% block group_base_content %}
   <section>
-    <div class="space-y-3">
-      <h3 class="font-semibold text-md uppercase">Group Overview</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 lg:gap-4 xl:gap-6">
+      <div class="space-y-1">
+        <h3 class="font-semibold text-sm uppercase text-gray-700">Group Overview</h3>
 
-      <div class="w-full grid grid-cols-3 xs:grid-cols-4 md:grid-cols-3 lg:grid-cols-3 gap-2 lg:gap-4 justify-center">
-        {% include "groups/components/group_stats_overview.html" %}
+        <div class="w-full grid grid-cols-3 xs:grid-cols-4 md:grid-cols-3 lg:grid-cols-3 gap-2 lg:gap-4 justify-center" style="grid-auto-rows: minmax(0, 1fr);">
+          {% include "groups/components/group_stats_overview.html" %}
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <h3 class="font-semibold text-sm uppercase text-gray-700">Child Groups</h3>
+
+        {% if not child_groups %}
+          <div class="bg-red-50 text-red-900 text-sm font-medium p-1.5 border border-red-300 rounded-md">
+            Group has no child groups to display
+          </div>
+        {% else %}
+          {% with family_groups=child_groups %}
+            {% include "groups/components/groups_list/family_groups_list.html" %}
+          {% endwith %}
+        {% endif %}
+      </div>
+
+      <div class="space-y-1 md:col-span-2">
+        <h3 class="font-semibold text-sm uppercase text-gray-700">Sister Groups</h3>
+
+        {% if not sister_groups %}
+          <div class="bg-red-50 text-red-900 text-sm font-medium p-1.5 border border-red-300 rounded-md">
+            Group has no sister groups to display
+          </div>
+        {% else %}
+          {% with family_groups=sister_groups %}
+            {% include "groups/components/groups_list/family_groups_list.html" %}
+          {% endwith %}
+        {% endif %}
       </div>
     </div>
   </section>

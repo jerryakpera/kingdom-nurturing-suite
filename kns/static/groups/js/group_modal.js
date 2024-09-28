@@ -11,11 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const $targetEl = document.getElementById(modalId);
 
     const options = {
-      placement: 'bottom-right',
-      backdrop: 'dynamic',
-      backdropClasses:
-        'bg-gray-900/50 dark:bg-gray-900/80 fixed inset-0 z-40 top-0 left-0 right-0',
       closable: true,
+      backdrop: 'dynamic',
+      placement: 'top-right',
+      backdropClasses: 'bg-gray-900/90 fixed inset-0 z-40',
     };
 
     const modal = new Modal($targetEl, options);

@@ -16,10 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Default modal options
     const defaultOptions = {
-      placement: 'top-left',
-      backdrop: 'dynamic',
-      backdropClasses: 'bg-gray-900/90 fixed inset-0 z-40',
       closable: true,
+      backdrop: 'dynamic',
+      placement: 'top-left',
+      backdropClasses: 'bg-gray-900/90 fixed inset-0 z-40',
     };
 
     // Merge the default options with user-provided options

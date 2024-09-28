@@ -1,24 +1,80 @@
 <div class="p-2">
-  <div class="h-full border border-gray-200 shadow-sm p-2 rounded-md">
-    <div class="w-full flex flex-col items-center space-y-1">
-      <div class="text-xs font-semibold">
-        {{ profile.get_role_display_str }}
-      </div>
-      {% include "profiles/components/profile_card/profile_rounded_picture.html" %}
-      <a href="{{ profile.get_absolute_url }}" class="text-knsPrimary font-bold text-sm">
-        {{ profile.get_full_name }}
-      </a>
-      {% if profile.location_country %}
-        <div class="text-gray-400 text-xs font-light flex items-center gap-x-1">
-          <span class="mb-0 fw-semibold">
-            <img
-              alt="Event location flag"
-              src="{{ profile.location_country.flag }}"
-            />
-          </span>
-          {{ profile.location_display }}
+  <div class="shadow-sm border rounded-md border-gray-200">
+    <div class="h-full p-2">
+      <div class="w-full flex flex-col items-center space-y-2">
+        <div class="text-center w-full flex justify-center flex-col items-center">
+          <a href="{{ profile.get_absolute_url }}" class="text-knsPrimary font-medium hover:text-knsPrimary-700">
+            {{ profile.get_full_name }}
+          </a>
+
+          {% if profile.location_country %}
+            <div class="text-gray-700 text-xs font-light flex items-center gap-x-1">
+              <span class="mb-0 fw-semibold">
+                <img
+                  alt="Event location flag"
+                  src="{{ profile.location_country.flag }}"
+                />
+
+              </span>
+              {{ profile.location_display }}
+            </div>
+          {% else %}
+            <div class="text-xs">
+              ---
+            </div>
+          {% endif %}
         </div>
-      {% endif %}
+
+        <a href="{{ profile.get_absolute_url }}">
+          {% include "profiles/components/profile_card/profile_rounded_picture.html" %}
+        </a>
+
+        <div class="w-full text-center">
+          <div class="text-xs font-semibold">
+            {{ profile.get_role_display_str }}
+          </div>
+
+          {% if profile.role == "leader" %}
+            {% if profile.group_led %}
+              <div>
+                <a href="{{ profile.group_led.get_absolute_url }}">
+                  {{ profile.group_led.name }}
+                </a>
+              </div>
+            {% elif profile.group_in %}
+              <div>
+                <a href="{{ profile.group_in.get_absolute_url }}">
+                  {{ profile.group_in.name }}
+                </a>
+              </div>
+            {% else %}
+              <div class="text-xs">
+                ---
+              </div>
+            {% endif %}
+          {% endif %}
+
+          {% if profile.role != "leader" %}
+            {% if profile.group_in %}
+              <div>
+                <a href="{{ profile.group_in.get_absolute_url }}">
+                  {{ profile.group_in.group.name }}
+                </a>
+              </div>
+            {% else %}
+              <div class="text-xs">
+                ---
+              </div>
+            {% endif %}
+          {% endif %}
+
+
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-gray-300 w-full rounded-b-md p-2">
+      {% include "profiles/components/profile_icons/profile_icons.html" %}
     </div>
   </div>
 </div>

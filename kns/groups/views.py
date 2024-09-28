@@ -9,6 +9,7 @@ from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from kns.core.utils import log_this
 from kns.faith_milestones.forms import GroupFaithMilestonesForm
 from kns.faith_milestones.models import GroupFaithMilestone
 from kns.groups.forms import (
@@ -413,6 +414,8 @@ def group_overview(request, group_slug):
 
     context = {
         "group": group,
+        "sister_groups": group.get_siblings(include_self=False)[:9],
+        "child_groups": group.get_children()[:9],
     }
 
     return render(
