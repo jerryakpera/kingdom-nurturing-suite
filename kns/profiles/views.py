@@ -1114,12 +1114,9 @@ def make_external_person_page(request, profile_slug):
         slug=profile_slug,
     )
 
-    log_this(1)
-
     if not request.user.profile.is_leading_group():
         return redirect(profile.get_absolute_url())
 
-    log_this(2)
     # Ensure the requesting user is leading the profile's group
     if not request.user.profile.group_led.is_member(profile):
         messages.error(
@@ -1178,12 +1175,7 @@ def make_external_person(request, profile_slug):
         return redirect(profile.get_absolute_url())
 
     profile.change_role_to_external_person()
-
-    # Send the set password email
-    account_emails.send_set_password_email(
-        request=request,
-        profile=profile,
-    )
+    profile.send_email_to_new_external_person(request=request)  # pragma: no cover
 
     messages.success(
         request=request,

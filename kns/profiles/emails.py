@@ -116,3 +116,49 @@ def send_new_member_email(request, profile, profiles_leader):
         recipient_list=[profile.email],
         html_message=html_message,
     )
+
+
+def send_new_external_person_email(request, profile, profiles_leader):
+    """
+    Send an email to a user notifying them that their role has been
+    changed to `external_person` on KNS.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object, used to retrieve the current site domain.
+    profile : Profile
+        The profile object of the user who has been assigned a new leader role.
+    profiles_leader : Profile
+        The profile of the user assigning the leader role, included in the email
+        as the current leader.
+
+    Returns
+    -------
+    None
+        This function sends an email to the user and updates the profile's
+        `email_token` with a generated verification token, but does not return a value.
+    """
+    subject = "You are now an external person role on KNS"
+
+    # Get the current domain
+    current_site = get_current_site(request)
+
+    # Render the HTML email template
+    html_message = render_to_string(
+        "profiles/emails/new_external_person_email.html",
+        {
+            "profile": profile,
+            "domain": current_site.domain,
+            "profiles_leader": profiles_leader,
+        },
+    )
+
+    # Send the email
+    send_mail(
+        subject=subject,
+        message="",
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[profile.email],
+        html_message=html_message,
+    )

@@ -817,6 +817,22 @@ class Profile(
             profiles_leader=request.user.profile,
         )
 
+    def send_email_to_new_external_person(self, request):  # pragma: no cover
+        """
+        Send an email notification to a user when their role is update
+        to `external_person`.
+
+        Parameters
+        ----------
+        request : HttpRequest
+            The current HTTP request object, containing user information.
+        """
+        emails.send_new_external_person_email(
+            request=request,
+            profile=self,
+            profiles_leader=request.user.profile,
+        )
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
