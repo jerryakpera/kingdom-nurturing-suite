@@ -111,6 +111,16 @@ urlpatterns = [
         name="make_member",
     ),
     path(
+        "<slug:profile_slug>/make-external-page",
+        views.make_external_person_page,
+        name="make_external_person_page",
+    ),
+    path(
+        "<slug:profile_slug>/make-external",
+        views.make_external_person,
+        name="make_external_person",
+    ),
+    path(
         "<slug:profile_slug>/activities",
         views.profile_activities,
         name="profile_activities",

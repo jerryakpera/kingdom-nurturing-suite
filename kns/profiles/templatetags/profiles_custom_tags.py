@@ -4,8 +4,6 @@ Custom tags for the `profiles` app.
 
 from django import template
 
-from kns.core.utils import log_this
-from kns.groups.models import Group, GroupMember
 from kns.profiles import utils as profile_utils
 
 register = template.Library()

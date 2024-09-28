@@ -14,7 +14,6 @@ from django.utils import timezone
 from django_countries.fields import CountryField
 
 from kns.core import modelmixins
-from kns.core.utils import log_this
 from kns.custom_user.models import User
 
 from . import constants
@@ -439,7 +438,7 @@ class Profile(
             # There is no consent form so return True
             return True
 
-    def can_become_leader_role(self):  # pragma: no cover
+    def can_become_leader_role(self):
         """
         Determine if the profile can become a leader role.
 
@@ -449,6 +448,17 @@ class Profile(
             True if the profile can become a leader, False otherwise.
         """
         return model_methods.can_become_leader_role(self)
+
+    def can_become_external_person_role(self):
+        """
+        Determine if the profile can become an external person role.
+
+        Returns
+        -------
+        bool
+            True if the profile can become an external person, False otherwise.
+        """
+        return model_methods.can_become_external_person_role(self)
 
     def can_become_member_role(self):
         """
@@ -483,9 +493,9 @@ class Profile(
         settings = Setting.get_or_create_setting()
         return settings.change_role_approval_required
 
-    def change_role_to_leader(self):  # pragma: no cover
+    def change_role_to_leader(self):
         """
-        Change the role of a member to leader, with an optional approval process.
+        Change the role of a profile to leader.
         """
         # Update the profile role to leader
         # TODO: Send notification email to user that their role has been changed
@@ -493,13 +503,22 @@ class Profile(
         self.role = "leader"
         self.save()
 
-    def change_role_to_member(self):  # pragma: no cover
+    def change_role_to_member(self):
         """
-        Change the role of a member to member, with an optional approval process.
+        Change the role of a profile to leader.
         """
         # Update the profile role to member
         # TODO: Send notification email to user that their role has been changed
         self.role = "member"
+        self.save()
+
+    def change_role_to_external_person(self):
+        """
+        Change the role of a profile to `external_person`.
+        """
+        # Update the profile role to member
+        # TODO: Send notification email to user that their role has been changed
+        self.role = "external_person"
         self.save()
 
     def formatted_date_of_birth(self):
@@ -760,26 +779,6 @@ class Profile(
                     if not task.is_complete:
                         task.is_complete = True
                         task.save()
-
-    def make_leader_role(self):  # pragma: no cover
-        """
-        Promote the profile to a leader role.
-
-        This method updates the profile's role to 'leader' if eligible,
-        saves the changes, and sends a notification email to the user
-        informing them of the promotion.
-
-        Raises
-        ------
-        ValueError
-            If the profile cannot be promoted to a leader role.
-        -------
-        None
-        """
-        # Check if user can become a leader role
-        # Change profiles role to leader and save
-        # Logic to send email notification
-        pass
 
 
 @receiver(post_save, sender=User)

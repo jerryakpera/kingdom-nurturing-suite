@@ -5,7 +5,6 @@ Views for the `Onboarding` app.
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from kns.core.utils import log_this
 from kns.groups.forms import GroupForm
 from kns.groups.models import Group, GroupMember
 from kns.profiles.forms import AgreeToTermsForm, BioDetailsForm, ProfileInvolvementForm

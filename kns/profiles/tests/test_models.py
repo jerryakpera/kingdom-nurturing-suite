@@ -83,9 +83,9 @@ class TestProfileModel(TestCase):
         self.profile.last_name = "Doe"
         self.profile.gender = "Male"
         self.profile.date_of_birth = "1990-01-01"
-        self.profile.place_of_birth_country = "USA"
+        self.profile.place_of_birth_country = "US"
         self.profile.place_of_birth_city = "New York"
-        self.profile.location_country = "USA"
+        self.profile.location_country = "US"
         self.profile.location_city = "New York"
         self.profile.role = "leader"
         self.profile.slug = "john-doe"
@@ -311,6 +311,40 @@ class TestProfileModel(TestCase):
             expected_url,
         )
 
+    def test_get_mentorships_url(self):
+        expected_url = reverse(
+            "profiles:profile_mentorships",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        self.assertEqual(
+            self.profile.get_mentorships_url(),
+            expected_url,
+        )
+
+    def test_get_discipleships_url(self):
+        expected_url = reverse(
+            "profiles:profile_discipleships",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+
+        self.assertEqual(
+            self.profile.get_discipleships_url(),
+            expected_url,
+        )
+
+    def test_get_role_display_str(self):
+        self.profile.role = "external_person"
+
+        self.assertEqual(
+            self.profile.get_role_display_str(),
+            "External Person",
+        )
+
     def test_is_eligible_to_register_group(self):
         # Set up necessary data and mock methods as needed
         self.profile.is_mentor = True
@@ -331,6 +365,52 @@ class TestProfileModel(TestCase):
 
         self.assertFalse(self.profile.is_profile_complete())
 
+    def test_can_become_leader_role_true(self):
+        """
+        Test that the can_become_member_role method returns True when the
+        profile is eligible to become a member.
+        """
+        self.profile.first_name = "John"
+        self.profile.last_name = "Doe"
+        self.profile.gender = "Male"
+        self.profile.date_of_birth = date(1990, 1, 1)
+        self.profile.place_of_birth_country = "US"
+        self.profile.place_of_birth_city = "New York"
+        self.profile.location_country = "US"
+        self.profile.location_city = "New York"
+        self.profile.role = "member"
+        self.profile.slug = "john-doe"
+
+        self.profile.save()
+
+        self.profile.user.verified = True
+        self.profile.user.agreed_to_terms = True
+
+        assert self.profile.can_become_leader_role() is True
+
+    def test_can_become_external_person_role_true(self):
+        """
+        Test that the can_become_member_role method returns True when the
+        profile is eligible to become a member.
+        """
+        self.profile.first_name = "John"
+        self.profile.last_name = "Doe"
+        self.profile.gender = "Male"
+        self.profile.date_of_birth = date(1990, 1, 1)
+        self.profile.place_of_birth_country = "US"
+        self.profile.place_of_birth_city = "New York"
+        self.profile.location_country = "US"
+        self.profile.location_city = "New York"
+        self.profile.role = "member"
+        self.profile.slug = "john-doe"
+
+        self.profile.save()
+
+        self.profile.user.verified = True
+        self.profile.user.agreed_to_terms = True
+
+        assert self.profile.can_become_external_person_role() is True
+
     def test_can_become_member_role_true(self):
         """
         Test that the can_become_member_role method returns True when the
@@ -340,9 +420,9 @@ class TestProfileModel(TestCase):
         self.profile.last_name = "Doe"
         self.profile.gender = "Male"
         self.profile.date_of_birth = date(1990, 1, 1)
-        self.profile.place_of_birth_country = "USA"
+        self.profile.place_of_birth_country = "US"
         self.profile.place_of_birth_city = "New York"
-        self.profile.location_country = "USA"
+        self.profile.location_country = "US"
         self.profile.location_city = "New York"
         self.profile.role = "leader"
         self.profile.slug = "john-doe"
@@ -600,6 +680,131 @@ class TestProfileModel(TestCase):
         expected_result = "Software Engineering, Data Science"
 
         assert self.profile.get_mentorship_areas_as_str() == expected_result
+
+    def test_change_role_to_leader(self):
+        """
+        Test that the change_role_to_leader method changes the profile's role to 'leader'.
+        """
+        self.profile.role = "member"
+        self.profile.save()
+
+        self.profile.change_role_to_leader()
+        self.profile.refresh_from_db()
+
+        assert self.profile.role == "leader"
+
+    def test_change_role_to_member(self):
+        """
+        Test that the change_role_to_member method changes the profile's role to 'member'.
+        """
+        self.profile.role = "leader"
+        self.profile.save()
+
+        self.profile.change_role_to_member()
+        self.profile.refresh_from_db()
+
+        assert self.profile.role == "member"
+
+    def test_change_role_to_external_person(self):
+        """
+        Test that the change_role_to_external_person method changes the
+        profile's role to 'external_person'.
+        """
+        self.profile.role = "leader"
+        self.profile.save()
+
+        self.profile.change_role_to_external_person()
+        self.profile.refresh_from_db()
+
+        assert self.profile.role == "external_person"
+
+    def test_formatted_date_of_birth_with_date(self):
+        """
+        Test that the formatted_date_of_birth method returns the correct
+        formatted date when a date is set.
+        """
+        self.profile.date_of_birth = date(1990, 5, 15)
+        self.profile.save()
+
+        expected_output = "May 15, 1990"
+        assert self.profile.formatted_date_of_birth() == expected_output
+
+    def test_formatted_date_of_birth_without_date(self):
+        """
+        Test that the formatted_date_of_birth method returns '---' when no date of birth is set.
+        """
+        self.profile.date_of_birth = None
+        self.profile.save()
+
+        assert self.profile.formatted_date_of_birth() == "---"
+
+    def test_place_of_birth_display_with_country_and_city(self):
+        """
+        Test that the place_of_birth_display method returns a formatted
+        string with both country and city.
+        """
+        self.profile.place_of_birth_country = "US"
+        self.profile.place_of_birth_city = "New York"
+        self.profile.save()
+
+        expected_output = "United States of America, New York"
+        assert self.profile.place_of_birth_display() == expected_output
+
+    def test_place_of_birth_display_with_only_country(self):
+        """
+        Test that the place_of_birth_display method returns only the country
+        if the city is not set.
+        """
+        self.profile.place_of_birth_country = "US"
+        self.profile.place_of_birth_city = None
+        self.profile.save()
+
+        expected_output = "United States of America"
+        assert self.profile.place_of_birth_display() == expected_output
+
+    def test_place_of_birth_display_without_country_and_city(self):
+        """
+        Test that the place_of_birth_display method returns '---' if
+        neither country nor city is set.
+        """
+        self.profile.place_of_birth_country = None
+        self.profile.place_of_birth_city = None
+        self.profile.save()
+
+        assert self.profile.place_of_birth_display() == "---"
+
+    def test_location_display_with_country_and_city(self):
+        """
+        Test that the location_display method returns a formatted string
+        with both country and city.
+        """
+        self.profile.location_country = "US"
+        self.profile.location_city = "Los Angeles"
+        self.profile.save()
+
+        expected_output = "United States of America, Los Angeles"
+        assert self.profile.location_display() == expected_output
+
+    def test_location_display_with_only_country(self):
+        """
+        Test that the location_display method returns only the country if the city is not set.
+        """
+        self.profile.location_country = "US"
+        self.profile.location_city = None
+        self.profile.save()
+
+        expected_output = "United States of America"
+        assert self.profile.location_display() == expected_output
+
+    def test_location_display_without_country_and_city(self):
+        """
+        Test that the location_display method returns '---' if neither country nor city is set.
+        """
+        self.profile.location_country = None
+        self.profile.location_city = None
+        self.profile.save()
+
+        assert self.profile.location_display() == "---"
 
 
 class TestConsentFormModel:

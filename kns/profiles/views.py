@@ -1091,6 +1091,114 @@ def make_leader(request, profile_slug):
 
 
 @login_required
+def make_external_person_page(request, profile_slug):
+    """
+    View to display the HTML for changing the profiles role to an external person role.
+
+    This view checks if the requesting user has the necessary permissions
+    to change a group members profile to an external person role. If the checks
+    pass, the target profile's role is updated to 'external_person', and an email is
+    sent to the users email notifying them of the change.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to retrieve and promote.
+
+    Returns
+    -------
+    HttpResponse
+        Redirects to the profile detail page with a success or error message.
+    """
+
+    # Fetch the profile or return a 404 if not found
+    profile = get_object_or_404(
+        Profile,
+        slug=profile_slug,
+    )
+
+    log_this(1)
+
+    if not request.user.profile.is_leading_group():
+        return redirect(profile.get_absolute_url())
+
+    log_this(2)
+    # Ensure the requesting user is leading the profile's group
+    if not request.user.profile.group_led.is_member(profile):
+        messages.error(
+            request=request,
+            message=f"You must be the leader of {profile.get_full_name()} to perform this action.",
+        )
+
+        return redirect(profile.get_absolute_url())
+
+    return render(
+        request=request,
+        template_name="profiles/pages/make_external_person.html",
+    )
+
+
+@login_required
+def make_external_person(request, profile_slug):
+    """
+    View to change a user profile to an external person role.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object used to process the request.
+    profile_slug : str
+        The slug of the profile to retrieve and promote.
+
+    Returns
+    -------
+    HttpResponse
+        Redirects to the profile detail page with a success or error message.
+    """
+
+    # Fetch the profile or return a 404 if not found
+    profile = get_object_or_404(Profile, slug=profile_slug)
+
+    if not request.user.profile.is_leading_group():
+        return redirect(profile.get_absolute_url())
+
+    # Ensure the requesting user is leading the profile's group
+    if not request.user.profile.group_led.is_member(profile):
+        messages.error(
+            request=request,
+            message=f"You must be the leader of {profile.get_full_name()} to perform this action.",
+        )
+
+        return redirect(profile.get_absolute_url())
+
+    # Verify that the profile can be made into an external person
+    if not profile.can_become_external_person_role():
+        messages.error(
+            request=request,
+            message=f"{profile.get_full_name()} is not eligible to become an external person.",
+        )
+
+        return redirect(profile.get_absolute_url())
+
+    profile.change_role_to_external_person()
+
+    # Send the set password email
+    account_emails.send_set_password_email(
+        request=request,
+        profile=profile,
+    )
+
+    messages.success(
+        request=request,
+        message=f"{profile.get_full_name()} is now an external person.",
+    )
+
+    return redirect(profile.get_absolute_url())
+
+
+@login_required
 def make_member_page(request, profile_slug):
     """
     View to demote a user profile to a member role.

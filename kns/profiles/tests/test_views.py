@@ -3693,3 +3693,374 @@ class TestMakeMemberView(TestCase):
             str(messages[0]),
             f"{self.other_profile.get_full_name()} is not eligible to become a member.",
         )
+
+
+class TestMakeExternalPersonPageView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+
+        self.profile.role = "leader"
+        self.profile.is_onboarded = True
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.save()
+
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Origin group",
+            location_country="NG",
+            location_city="Bauchi",
+            slug="origin-group",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="password",
+        )
+        self.other_profile = self.other_user.profile
+
+        self.other_profile.first_name = "John"
+        self.other_profile.last_name = "Wayne"
+        self.other_profile.save()
+
+        self.group.add_member(self.other_profile)
+
+    def test_make_external_person_page_loads_correctly(self):
+        """
+        Test that the make_external_person_page view loads correctly.
+        """
+        url = reverse(
+            "profiles:make_external_person_page",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "profiles/pages/make_external_person.html",
+        )
+
+        self.assertIn(
+            "profile",
+            response.context,
+        )
+
+    def test_make_external_person_page_with_invalid_slug(self):
+        """
+        Test that the make_external_person_page returns a 404 error for an invalid slug.
+        """
+        url = reverse(
+            "profiles:make_external_person_page",
+            kwargs={
+                "profile_slug": "invalid-slug",
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_make_external_person_page_without_permission(self):
+        """
+        Test that the make_external_person_page redirects if user is not a group leader.
+        """
+
+        self.group.members.all().delete()
+
+        url = reverse(
+            "profiles:make_external_person_page",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Check for error message
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                f"You must be the leader of {self.other_profile.get_full_name()} "
+                "to perform this action."
+            ),
+        )
+
+    def test_make_external_person_page_for_non_group_member(self):
+        """
+        Test that the make_external_person_page redirects if the target profile is not
+        a member of the requesting user's group.
+        """
+        other_group = Group.objects.create(
+            leader=self.other_profile,
+            name="Other group",
+            location_country="US",
+            location_city="New York",
+            slug="other-group",
+            description="A different group",
+        )
+
+        self.group.members.all().delete()
+        other_group.add_member(self.other_profile)
+
+        url = reverse(
+            "profiles:make_external_person_page",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Check for error message
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                f"You must be the leader of {self.other_profile.get_full_name()} "
+                "to perform this action."
+            ),
+        )
+
+    def test_make_external_person_page_for_non_group_leader_user(self):
+        """
+        Test that the make_external_person_page redirects if the user profile is not
+        a leader of a group.
+        """
+        self.group.leader = self.other_profile
+        self.group.save()
+
+        url = reverse(
+            "profiles:make_external_person_page",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+
+        response = self.client.get(url)
+
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Check for error message
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 0)
+
+
+class TestMakeExternalPersonView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testleader@example.com",
+            password="testpassword",
+        )
+        self.client.login(
+            email="testleader@example.com",
+            password="testpassword",
+        )
+
+        # Set up the leader profile and group
+        self.leader_profile = self.user.profile
+        self.leader_profile.role = "leader"
+        self.leader_profile.is_onboarded = True
+        self.leader_profile.first_name = "Leader"
+        self.leader_profile.last_name = "Profile"
+        self.leader_profile.save()
+
+        self.group = Group.objects.create(
+            leader=self.leader_profile,
+            name="Test Group",
+            location_country="NG",
+            location_city="Bauchi",
+            slug="test-group",
+            description="Group description",
+        )
+
+        # Set up another profile in the group
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="password",
+        )
+
+        self.other_user.verified = True
+        self.other_user.agreed_to_terms = True
+        self.other_user.save()
+
+        self.other_profile = self.other_user.profile
+
+        self.other_profile.first_name = "John"
+        self.other_profile.last_name = "Doe"
+        self.other_profile.gender = "Male"
+        self.other_profile.date_of_birth = "1990-01-01"
+        self.other_profile.place_of_birth_country = "US"
+        self.other_profile.place_of_birth_city = "New York"
+        self.other_profile.location_country = "US"
+        self.other_profile.location_city = "New York"
+        self.other_profile.role = "member"
+
+        self.other_profile.save()
+
+        self.group.add_member(self.other_profile)
+
+    def test_make_external_person_success(self):
+        """
+        Test that a profile is successfully changed to an external person.
+        """
+
+        url = reverse(
+            "profiles:make_external_person",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+
+        response = self.client.post(url)
+
+        # Assert the redirect to the profile detail page
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Refresh the profile to reflect the changes
+        self.other_profile.refresh_from_db()
+
+        # Assert the role has been changed to external person
+        self.assertEqual(
+            self.other_profile.role,
+            "external_person",
+        )
+
+        # Check for success message
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            f"{self.other_profile.get_full_name()} is now an external person.",
+        )
+
+    def test_make_external_person_without_permission(self):
+        """
+        Test that the view redirects if the user is not a group leader.
+        """
+
+        # Log in as another user who is not the leader
+        other_user = User.objects.create_user(
+            email="unauthorized@example.com",
+            password="password",
+        )
+
+        other_user.profile.is_onboarded = True
+        other_user.profile.save()
+
+        self.client.login(
+            email="unauthorized@example.com",
+            password="password",
+        )
+
+        url = reverse(
+            "profiles:make_external_person",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+
+        response = self.client.post(url)
+
+        # Assert the redirect back to the profile page
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Check for the error message
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 0)
+
+    def test_make_external_person_not_eligible(self):
+        """Test that the view returns an error if the profile cannot become an external person."""
+        # Make the profile ineligible to become an external person
+        self.other_profile.role = "external_person"
+        self.other_profile.save()
+
+        url = reverse(
+            "profiles:make_external_person",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+
+        response = self.client.post(url)
+
+        # Assert the redirect to the profile detail page
+        self.assertRedirects(response, self.other_profile.get_absolute_url())
+
+        # Check for the error message
+        messages = list(response.wsgi_request._messages)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            f"{self.other_profile.get_full_name()} is not eligible to become an external person.",
+        )
+
+    def test_make_external_person_not_leader_of_external_person(self):
+        """
+        Test that the view returns an error if the profile cannot become an
+        external person.
+        """
+        # Make the profile ineligible to become an external person
+        self.group.members.all().delete()
+
+        url = reverse(
+            "profiles:make_external_person",
+            kwargs={
+                "profile_slug": self.other_profile.slug,
+            },
+        )
+
+        response = self.client.post(url)
+
+        # Assert the redirect to the profile detail page
+        self.assertRedirects(
+            response,
+            self.other_profile.get_absolute_url(),
+        )
+
+        # Check for the error message
+        messages = list(response.wsgi_request._messages)
+
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            (
+                f"You must be the leader of {self.other_profile.get_full_name()} "
+                "to perform this action."
+            ),
+        )

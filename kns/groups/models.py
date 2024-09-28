@@ -15,7 +15,6 @@ from django.urls import reverse
 from mptt.models import MPTTModel, TreeForeignKey
 
 from kns.core.modelmixins import ModelWithLocation, TimestampedModel
-from kns.core.utils import log_this
 from kns.onboarding.models import ProfileCompletionTask
 from kns.profiles.models import Profile
 

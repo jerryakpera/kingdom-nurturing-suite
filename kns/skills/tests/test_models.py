@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.test import TestCase
 
-from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 
@@ -36,8 +35,6 @@ class TestSkillModel(TestCase):
             content="<p>Advanced Python programming skills.</p>",
             author=self.profile,
         )
-
-        log_this(skill)
 
         self.assertEqual(skill.title, "Python Programming")
         self.assertEqual(

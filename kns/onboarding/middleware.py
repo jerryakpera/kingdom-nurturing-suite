@@ -5,8 +5,6 @@ Middlewares for the `onboarding` app.
 from django.shortcuts import redirect
 from django.urls import resolve, reverse
 
-from kns.core.utils import log_this
-
 from .models import ProfileOnboarding
 
 

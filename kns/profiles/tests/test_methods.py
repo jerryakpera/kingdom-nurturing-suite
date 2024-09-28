@@ -186,6 +186,8 @@ class ProfileMethodsTests(TestCase):
     def test_is_eligible_to_register_group_false_due_to_visitor_status(self):
         """Test that a profile marked as a visitor cannot register a new group."""
         self.profile.user.is_visitor = True
+        self.profile.user.save()
+
         self.assertFalse(
             methods.is_eligible_to_register_group(self.profile),
         )
@@ -415,3 +417,32 @@ class ProfileMethodsTests(TestCase):
         group.add_member(self.profile)
 
         self.assertTrue(methods.can_become_member_role(self.profile))
+
+    def test_can_become_external_person_role_false_due_to_incomplete_profile(self):
+        """Test that a profile cannot become an external person if the profile is incomplete."""
+        self.profile.is_profile_complete = Mock(return_value=False)
+        self.profile.role = "member"
+        self.assertFalse(methods.can_become_external_person_role(self.profile))
+
+    def test_can_become_external_person_role_false_due_to_already_external_person(self):
+        """
+        Test that a profile cannot become an external person if the role
+        is already external_person.
+        """
+        self.profile.is_profile_complete = Mock(return_value=True)
+        self.profile.role = "external_person"
+        self.assertFalse(methods.can_become_external_person_role(self.profile))
+
+    def test_can_become_external_person_role_false_due_to_leading_group(self):
+        """Test that a profile cannot become an external person if leading a group."""
+        self.profile.is_profile_complete = Mock(return_value=True)
+        self.profile.role = "leader"
+        self.profile.is_leading_group = Mock(return_value=True)
+        self.assertFalse(methods.can_become_external_person_role(self.profile))
+
+    def test_can_become_external_person_role_true(self):
+        """Test that a profile can become an external person if all conditions are met."""
+        self.profile.is_profile_complete = Mock(return_value=True)
+        self.profile.role = "member"
+        self.profile.is_leading_group = Mock(return_value=False)
+        self.assertTrue(methods.can_become_external_person_role(self.profile))

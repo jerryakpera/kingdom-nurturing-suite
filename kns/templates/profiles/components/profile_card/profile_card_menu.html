@@ -74,6 +74,15 @@
         </a>
       {% endif %}
 
+      {% if profile.can_become_external_person_role %}
+        <a
+          href="{% url "profiles:make_external_person_page" profile_slug=profile.slug %}"
+          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Make external person
+        </a>
+      {% endif %}
+
       {% if profile.can_become_leader_role %}
         <a
           href="{% url "profiles:make_leader_page" profile_slug=profile.slug %}"
