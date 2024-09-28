@@ -6,10 +6,12 @@
 
 {% block profile_base_content %}
   <section>
-    <div class="grid grid-cols-1 xs:grid-cols-2 my-4 gap-2">
-      {% include "profiles/components/levels/profile_levels.html" %}
-      {% include "profiles/components/classifications/profile_classifications.html" %}
-    </div>
+    {% if profile.role != 'external_person' and not profile.user.is_visitor %}
+      <div class="grid grid-cols-1 xs:grid-cols-2 my-4 gap-2">
+        {% include "profiles/components/levels/profile_levels.html" %}
+        {% include "profiles/components/classifications/profile_classifications.html" %}
+      </div>
+    {% endif %}
 
     <div class="mt-4">
       {% include "mentorships/components/profile_mentorship_card.html" %}

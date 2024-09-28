@@ -141,11 +141,6 @@ urlpatterns = [
         name="profile_trainings",
     ),
     path(
-        "<slug:profile_slug>/involvements",
-        views.profile_involvements,
-        name="profile_involvements",
-    ),
-    path(
         "<slug:profile_slug>/discipleships",
         views.profile_discipleships,
         name="profile_discipleships",

@@ -47,7 +47,7 @@
     {% include "profiles/components/profile_icons/profile_icons.html" %}
   </div>
 
-  <div class="px-4 mt-4 space-y-4">
+  <div class="px-4 my-4 space-y-4">
     {% if profile.contact_details_is_visible %}
       <div>
         <div class="text-xs text-gray-500 uppercase font-semibold">Location</div>
@@ -94,7 +94,9 @@
     {% endif %}
   </div>
 
-  <div class="mt-4">
-    {% include "faith_milestones/components/profile_faith_milestones.html" %}
-  </div>
+  {% if profile.role != 'external_person' and not profile.user.is_visitor %}
+    <div>
+      {% include "faith_milestones/components/profile_faith_milestones.html" %}
+    </div>
+  {% endif %}
 </div>

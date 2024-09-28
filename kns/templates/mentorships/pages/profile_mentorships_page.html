@@ -28,6 +28,26 @@
       </div>
     </div>
 
+    <div
+      class="p-1.5 border {% if profile.is_mentor %}border-green-300 bg-green-50 {% endif %} {% if not profile.is_mentor %}border-red-300 bg-red-50{% endif %} mb-3 rounded-md">
+      <div class="text-sm flex gap-x-2 items-center">
+        {% if profile.is_mentor %}
+          <iconify-icon icon="mdi:thumbs-up" class="text-lg text-green-600"></iconify-icon>
+        {% else %}
+          <iconify-icon icon="mdi:thumbs-down" class="text-lg text-red-600"></iconify-icon>
+        {% endif %}
+        {% if profile.is_mentor %}
+          <span class="text-green-900">
+            {{ profile.get_full_name }} is available to mentor others
+          </span>
+        {% else %}
+          <span class="text-red-900">
+            {{ profile.get_full_name }} is not available to mentor others
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
     {% include "mentorships/components/mentorship_areas_list/profile_mentorship_areas_list.html" %}
 
     {% comment %} <div class="space-y-6 mt-6">

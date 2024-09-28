@@ -496,45 +496,6 @@ def profile_overview(request, profile_slug):
 
 
 @login_required
-def profile_involvements(request, profile_slug):
-    """
-    View to render a page displaying involvements for a specific profile.
-
-    Parameters
-    ----------
-    request : HttpRequest
-        The request object used to generate the response.
-    profile_slug : str
-        The slug of the profile to retrieve.
-
-    Returns
-    -------
-    HttpResponse
-        The rendered template with the involvements of the specified
-        profile.
-
-    Raises
-    ------
-    Profile.DoesNotExist
-        If no Profile with the given slug exists.
-    """
-    profile = get_object_or_404(
-        Profile,
-        slug=profile_slug,
-    )
-
-    context = {
-        "profile": profile,
-    }
-
-    return render(
-        request=request,
-        template_name="profiles/pages/profile_involvements.html",
-        context=context,
-    )
-
-
-@login_required
 def profile_levels(request, profile_slug):  # pragma: no cover
     """
     View to render a page displaying levels history for a specific profile.

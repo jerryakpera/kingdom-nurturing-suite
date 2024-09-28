@@ -43,70 +43,27 @@
         </div>
 
         <div
-          class="p-3 border-l-4 {% if profile.is_movement_training_facilitator %}border-green-600 bg-green-100 {% endif %} {% if not profile.is_movement_training_facilitator %}border-red-600 bg-red-100{% endif %}">
-          <div class="text-sm font-bold flex gap-x-2 items-center">
+          class="p-1.5 border {% if profile.is_movement_training_facilitator %}border-green-300 bg-green-50 {% endif %} {% if not profile.is_movement_training_facilitator %}border-red-300 bg-red-50{% endif %} rounded-md">
+          <div class="text-sm font-medium flex gap-x-2 items-center">
             {% if profile.is_movement_training_facilitator %}
-              <iconify-icon icon="mdi:thumbs-up" class="text-lg text-green-600"></iconify-icon>
+              <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
             {% else %}
-              <iconify-icon icon="mdi:thumbs-down" class="text-lg text-red-600"></iconify-icon>
+              <iconify-icon icon="mdi:thumbs-down" class="text-md text-red-600"></iconify-icon>
             {% endif %}
-            {% if profile.is_movement_training_facilitator %}Willing {% else %}Not willing{% endif %}
-             to facilitate movement trainings
+
+            {% if profile.is_movement_training_facilitator %}
+              <span class="text-green-900">
+                {{ profile.get_full_name }} is available to facilitate movement trainings
+              </span>
+            {% else %}
+              <span class="text-red-900">
+                {{ profile.get_full_name }} is notavailable to facilitate movement trainings
+              </span>
+            {% endif %}
           </div>
-          {% if profile.is_movement_training_facilitator %}
-            <p class="text-black text-sm">
-              {{ profile.get_full_name }} is available to facilitate movement trainings
-            </p>
-          {% else %}
-            <p class="text-black text-sm">
-              {{ profile.reason_is_not_movement_training_facilitator }}
-            </p>
-          {% endif %}
         </div>
 
-        <div
-          class="p-3 border-l-4 {% if profile.is_skill_training_facilitator %}border-green-600 bg-green-100 {% endif %} {% if not profile.is_skill_training_facilitator %}border-red-600 bg-red-100{% endif %}">
-          <div class="text-sm font-bold flex gap-x-2 items-center">
-            {% if profile.is_skill_training_facilitator %}
-              <iconify-icon icon="mdi:thumbs-up" class="text-lg text-green-600"></iconify-icon>
-            {% else %}
-              <iconify-icon icon="mdi:thumbs-down" class="text-lg text-red-600"></iconify-icon>
-            {% endif %}
-            {% if profile.is_skill_training_facilitator %}Willing {% else %}Not willing{% endif %}
-             to facilitate skill trainings
-          </div>
-          {% if profile.is_skill_training_facilitator %}
-            <p class="text-black text-sm">
-              {{ profile.get_full_name }} is available to facilitate skill trainings
-            </p>
-          {% else %}
-            <p class="text-black text-sm">
-              {{ profile.reason_is_not_skill_training_facilitator }}
-            </p>
-          {% endif %}
-        </div>
 
-        <div
-          class="p-3 border-l-4 {% if profile.is_mentor %}border-green-600 bg-green-100 {% endif %} {% if not profile.is_mentor %}border-red-600 bg-red-100{% endif %}">
-          <div class="text-sm font-bold flex gap-x-2 items-center">
-            {% if profile.is_mentor %}
-              <iconify-icon icon="mdi:thumbs-up" class="text-lg text-green-600"></iconify-icon>
-            {% else %}
-              <iconify-icon icon="mdi:thumbs-down" class="text-lg text-red-600"></iconify-icon>
-            {% endif %}
-            {% if profile.is_mentor %}Willing {% else %}Not willing{% endif %}
-             to mentor others
-          </div>
-          {% if profile.is_mentor %}
-            <p class="text-black text-sm">
-              {{ profile.get_full_name }} is available to mentor others
-            </p>
-          {% else %}
-            <p class="text-black text-sm">
-              {{ profile.reason_is_not_mentor }}
-            </p>
-          {% endif %}
-        </div>
       </div>
 
     </div>
@@ -126,6 +83,27 @@
           {% endif %}
         </div>
         <div class="flex flex-col space-y-6">
+
+          <div
+            class="p-1.5 border rounded-md {% if profile.is_skill_training_facilitator %}border-green-600 bg-green-50 {% endif %} {% if not profile.is_skill_training_facilitator %}border-red-600 bg-red-50{% endif %}">
+            <div class="text-sm font-medium flex gap-x-2 items-center">
+              {% if profile.is_skill_training_facilitator %}
+                <iconify-icon icon="mdi:thumbs-up" class="text-md text-green-600"></iconify-icon>
+              {% else %}
+                <iconify-icon icon="mdi:thumbs-down" class="text-md text-red-600"></iconify-icon>
+              {% endif %}
+              {% if profile.is_skill_training_facilitator %}
+                <span class="text-green-900">
+                  {{ profile.get_full_name }} is available to facilitate skill trainings
+                </span>
+              {% else %}
+                <span class="text-red-900">
+                  {{ profile.get_full_name }} is not available to facilitate skill trainings
+                </span>
+              {% endif %}
+            </div>
+          </div>
+
           {% for profile_skill in profile.skills.all %}
             {% with skill=profile_skill.skill %}
               <div class="pb-1 border-b border-gray-200">
@@ -151,46 +129,48 @@
         </div>
       </div>
 
-      <div class="w-full pr-4">
-        <div class="flex justify-between items-center border-b border-gray-400 pb-2 mb-2">
-          <h3 class="text-lg font-bold uppercase">Interests</h3>
+      {% if profile.role != 'external_person' and not profile.user.is_visitor %}
+        <div class="w-full pr-4">
+          <div class="flex justify-between items-center border-b border-gray-400 pb-2 mb-2">
+            <h3 class="text-lg font-bold uppercase">Interests</h3>
 
-          {% if request.user|can_edit_profile:profile %}
-            <a
-              href="{% url "profiles:edit_profile_skills" profile_slug=profile.slug %}"
-              class="px-2 py-1.5 items-center text-xs sm:text-sm text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300"
-            >
-              Edit
-            </a>
-          {% endif %}
-        </div>
-        <div class="flex flex-col space-y-6">
-          {% for profile_interest in profile.interests.all %}
-            {% with interest=profile_interest.interest %}
-              <div class="pb-1 border-b border-gray-200">
-                <h6 class="font-semibold text-md">
-                  {{ interest }}
-                </h6>
-                <p>
-                  {{ interest.content }}
-                  <div>
-                    <a
-                      href="#"
-                      class="text-sm font-semibold text-blue-700 hover:text-blue-800"
-                    >
-                      Read more
-                    </a>
-                  </div>
-                </p>
+            {% if request.user|can_edit_profile:profile %}
+              <a
+                href="{% url "profiles:edit_profile_skills" profile_slug=profile.slug %}"
+                class="px-2 py-1.5 items-center text-xs sm:text-sm text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSecondary-300"
+              >
+                Edit
+              </a>
+            {% endif %}
+          </div>
+          <div class="flex flex-col space-y-6">
+            {% for profile_interest in profile.interests.all %}
+              {% with interest=profile_interest.interest %}
+                <div class="pb-1 border-b border-gray-200">
+                  <h6 class="font-semibold text-md">
+                    {{ interest }}
+                  </h6>
+                  <p>
+                    {{ interest.content }}
+                    <div>
+                      <a
+                        href="#"
+                        class="text-sm font-semibold text-blue-700 hover:text-blue-800"
+                      >
+                        Read more
+                      </a>
+                    </div>
+                  </p>
+                </div>
+              {% endwith %}
+            {% empty %}
+              <div class="text-sm font-semibold text-gray-600">
+                No interests to display
               </div>
-            {% endwith %}
-          {% empty %}
-            <div class="text-sm font-semibold text-gray-600">
-              No interests to display
-            </div>
-          {% endfor %}
+            {% endfor %}
+          </div>
         </div>
-      </div>
+      {% endif %}
     </div>
   </section>
 {% endblock profile_base_content %}

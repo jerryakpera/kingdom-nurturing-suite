@@ -1,7 +1,7 @@
 {% load profiles_custom_tags %}
 
 {% if profile.mentorship_areas.count == 0 %}
-  <div class="text-sm font-medium p-2 bg-red-50 border border-red-200 w-full">
+  <div class="text-sm p-2 bg-red-50 border border-red-300 text-red-900 rounded-md w-full">
     {{ profile.get_full_name }} currently has no mentorship areas.
   </div>
 {% endif %}
