@@ -24,10 +24,27 @@
             </div>
           {% endif %}
         </div>
+      </div>
+    </div>
 
-        <a href="{{ profile.get_absolute_url }}">
-          {% include "profiles/components/profile_card/profile_rounded_picture.html" %}
-        </a>
+    <a href="{{ profile.get_absolute_url }}">
+      {% if not profile.image %}
+        <img
+          class="w-full h-40 object-cover"
+          src="https://dummyimage.com/720x400"
+          alt="blog"
+        >
+      {% else %}
+        <img
+          src="{{ profile.image.url }}"
+          alt="{{ profile.get_full_name }}"
+          class="w-full h-40 object-cover"
+        >
+      {% endif %}
+    </a>
+
+    <div class="h-full p-2">
+      <div class="w-full flex flex-col items-center space-y-2">
 
         <div class="w-full text-center">
           <div class="text-xs font-semibold">
