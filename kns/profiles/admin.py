@@ -5,6 +5,7 @@ Django admin site configuration for the profiles app.
 from django.contrib import admin
 
 from kns.classifications.models import ProfileClassification
+from kns.discipleships.models import Discipleship
 from kns.faith_milestones.models import ProfileFaithMilestone
 from kns.levels.models import ProfileLevel
 from kns.mentorships.models import ProfileMentorshipArea
@@ -12,13 +13,7 @@ from kns.onboarding.models import ProfileCompletionTask
 from kns.skills.models import ProfileInterest, ProfileSkill
 from kns.vocations.models import ProfileVocation
 
-from .models import (
-    ConsentForm,
-    Discipleship,
-    EncryptionReason,
-    Profile,
-    ProfileEncryption,
-)
+from .models import ConsentForm, EncryptionReason, Profile, ProfileEncryption
 
 
 class ProfileEncryptionInline(admin.TabularInline):

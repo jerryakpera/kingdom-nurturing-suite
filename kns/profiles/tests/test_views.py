@@ -15,12 +15,13 @@ from kns.classifications.models import (
 from kns.core.models import Setting
 from kns.core.utils import log_this
 from kns.custom_user.models import User
+from kns.discipleships.models import Discipleship
 from kns.faith_milestones.models import FaithMilestone, ProfileFaithMilestone
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
 from kns.levels.models import Level, ProfileLevel, Sublevel
 from kns.mentorships.models import MentorshipArea, ProfileMentorshipArea
-from kns.profiles.models import Discipleship, EncryptionReason, ProfileEncryption
+from kns.profiles.models import EncryptionReason, ProfileEncryption
 from kns.profiles.utils import name_with_apostrophe
 from kns.skills.models import ProfileInterest, ProfileSkill, Skill
 from kns.vocations.models import ProfileVocation, Vocation

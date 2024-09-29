@@ -23,6 +23,8 @@ from kns.classifications.models import (
 )
 from kns.core.utils import log_this
 from kns.custom_user.models import User
+from kns.discipleships.forms import GroupMemberDiscipleForm
+from kns.discipleships.models import Discipleship
 from kns.faith_milestones.forms import ProfileFaithMilestonesForm
 from kns.faith_milestones.models import ProfileFaithMilestone
 from kns.levels.forms import ProfileLevelForm
@@ -36,13 +38,7 @@ from kns.vocations.models import ProfileVocation
 
 from . import constants as profile_constants
 from . import forms as profile_forms
-from .models import (
-    ConsentForm,
-    Discipleship,
-    EncryptionReason,
-    Profile,
-    ProfileEncryption,
-)
+from .models import ConsentForm, EncryptionReason, Profile, ProfileEncryption
 from .utils import name_with_apostrophe
 
 
@@ -654,7 +650,7 @@ def profile_discipleships(request, profile_slug):
         ],
     )
 
-    group_member_discipleship_form = profile_forms.GroupMemberDiscipleForm(
+    group_member_discipleship_form = GroupMemberDiscipleForm(
         request.POST,
         profile=profile,
     )

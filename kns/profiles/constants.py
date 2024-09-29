@@ -1,21 +1,10 @@
 """
 This module contains various constants used throughout the application.
-
-Constants:
-- GENDER_OPTIONS: List of tuples representing gender options for user profiles.
-- PROFILE_ROLE_OPTIONS: List of tuples representing different roles a profile can have.
 """
 
 BOOLEAN_CHOICES = [
     (True, "Yes"),
     (False, "No"),
-]
-
-DISCIPLESHIP_GROUP_CHOICES = [
-    ("group_member", "Group member"),
-    ("first_12", "First 12"),
-    ("first_3", "First 3"),
-    ("sent_forth", "Sent forth"),
 ]
 
 # GENDER_OPTIONS

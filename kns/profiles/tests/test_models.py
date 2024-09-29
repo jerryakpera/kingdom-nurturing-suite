@@ -9,13 +9,13 @@ from django.utils import timezone
 
 from kns.core.models import Setting
 from kns.custom_user.models import User
+from kns.discipleships.models import Discipleship
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
 from kns.mentorships.models import MentorshipArea, ProfileMentorshipArea
 from kns.onboarding.models import ProfileCompletion, ProfileCompletionTask
 from kns.profiles.models import (
     ConsentForm,
-    Discipleship,
     EncryptionReason,
     Profile,
     ProfileEncryption,

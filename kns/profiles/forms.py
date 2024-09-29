@@ -19,7 +19,7 @@ from kns.vocations.models import Vocation
 
 from . import constants as profile_constants
 from . import utils as profile_utils
-from .models import ConsentForm, Discipleship, EncryptionReason, Profile
+from .models import ConsentForm, EncryptionReason, Profile
 
 
 class BioDetailsForm(forms.ModelForm):
@@ -767,67 +767,6 @@ class ProfileEncryptionForm(forms.Form):
                 }
             ),
         )
-
-
-class GroupMemberDiscipleForm(forms.ModelForm):
-    """
-    A form for selecting a disciple for a discipleship relationship
-    within a group led by the current profile.
-
-    Parameters
-    ----------
-    *args
-        Variable length argument list.
-    **kwargs
-        Arbitrary keyword arguments.
-    """
-
-    class Meta:
-        model = Discipleship
-        fields = ["disciple"]
-
-    disciple = forms.ModelChoiceField(
-        required=True,
-        queryset=Profile.objects.none(),
-        label=(
-            "Select a person in your group to add to your Group "
-            "members discipleship group"
-        ),
-        widget=forms.Select(
-            attrs={
-                "class": (
-                    "bg-gray-50 border border-gray-300"
-                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
-                    "focus:border-blue-500 block w-full p-2.5 "
-                ),
-            },
-        ),
-    )
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the form and filter the 'disciple' field's queryset
-        based on the profile's group members.
-
-        Parameters:
-        -----------
-        profile : Profile
-            The profile leading the group, used to filter potential disciples.
-        *args
-            Variable length argument list.
-        **kwargs
-            Arbitrary keyword arguments.
-        """
-
-        profile = kwargs.pop("profile", None)
-        super(GroupMemberDiscipleForm, self).__init__(*args, **kwargs)
-
-        if profile:
-            self.fields["disciple"].queryset = Profile.objects.filter(
-                group_in__in=profile.group_led.members.all(),
-                user__verified=True,
-                user__agreed_to_terms=True,
-            )
 
 
 class BasicInfoFilterForm(forms.Form):
