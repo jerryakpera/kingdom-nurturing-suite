@@ -313,7 +313,7 @@ class TestProfileModel(TestCase):
 
     def test_get_discipleships_url(self):
         expected_url = reverse(
-            "profiles:profile_discipleships",
+            "discipleships:profile_discipleships",
             kwargs={
                 "profile_slug": self.profile.slug,
             },

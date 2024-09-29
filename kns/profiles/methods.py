@@ -188,7 +188,7 @@ def get_discipleships_url(profile):
         The discipleships URL of the profile's detail view.
     """
     return reverse(
-        "profiles:profile_discipleships",
+        "discipleships:profile_discipleships",
         kwargs={
             "profile_slug": profile.slug,
         },
