@@ -4,13 +4,105 @@ Views for the `discipleships` app.
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
+from kns.core.utils import log_this
 from kns.discipleships.forms import GroupMemberDiscipleForm
 from kns.discipleships.models import Discipleship
 
+from .forms import DiscipleshipFilterForm
 from .models import Profile
+
+
+@login_required
+def index(request):
+    """
+    View to render a list of discipleships with filtering and searching functionality.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The request object used to generate the response.
+
+    Returns
+    -------
+    HttpResponse
+        The rendered template with the filtered and searched list of discipleships.
+    """
+    # Instantiate the filter form
+    filter_form = DiscipleshipFilterForm(request.GET)
+
+    # Capture filter and search values from the GET request
+    filter_groups = request.GET.getlist("filter_group")
+    filter_groups = [group for group in filter_groups if group]
+
+    filter_status = request.GET.get("filter_status", "")
+    search_query = request.GET.get("search", "")
+
+    discipleships = Discipleship.objects.all()
+
+    if not request.user.is_visitor:
+        # Get the current user's group
+        user_profile = request.user.profile
+        users_group = (
+            user_profile.group_in.group
+            if hasattr(
+                user_profile,
+                "group_in",
+            )
+            else user_profile.group_led
+        )
+
+        if users_group:  # pragma: no cover
+            # Get all descendant groups of the user's led group
+            descendant_groups = users_group.get_descendants(
+                include_self=True,
+            )
+
+            discipleships = discipleships.filter(
+                Q(disciple__group_in__group__in=descendant_groups)
+                | Q(discipler__group_in__group__in=descendant_groups)
+                | Q(discipler__group_led__in=descendant_groups)
+                | Q(disciple__group_led__in=descendant_groups)
+            )
+
+    # Apply search filter
+    if search_query:
+        discipleships = discipleships.filter(
+            Q(disciple__first_name__icontains=search_query)
+            | Q(disciple__last_name__icontains=search_query)
+            | Q(discipler__first_name__icontains=search_query)
+            | Q(discipler__last_name__icontains=search_query)
+        )
+
+    # Apply group filtering (supporting multiple groups)
+    if filter_groups:
+        discipleships = discipleships.filter(group__in=filter_groups)
+
+    # Apply status filtering
+    if filter_status:
+        if filter_status == "ongoing":
+            discipleships = discipleships.filter(
+                completed_at__isnull=True,
+            )
+        elif filter_status == "completed":
+            discipleships = discipleships.filter(
+                completed_at__isnull=False,
+            )
+
+    context = {
+        "filter_form": filter_form,
+        "search_query": search_query,
+        "discipleships": discipleships,
+    }
+
+    return render(
+        request=request,
+        template_name="discipleships/pages/index.html",
+        context=context,
+    )
 
 
 @login_required
@@ -124,35 +216,41 @@ def profile_discipleships(request, profile_slug):
 
     return render(
         request=request,
-        template_name="profiles/pages/profile_discipleships.html",
+        template_name="discipleships/pages/profile_discipleships.html",
         context=context,
     )
 
 
 @login_required
-def move_to_group_member(request, discipleship_id):
+def move_to_discipleship_group(request, discipleship_id, new_group):
     """
-    Move a disciple to the 'group_member' group.
-
-    This view moves a disciple from their current discipleship group to the 'group_member'
-    group. The action is only allowed if the current user is the author of the discipleship.
-    If the move is successful, a success message is displayed.
+    Move a disciple to a new discipleship group and mark the current discipleship as completed.
 
     Parameters
     ----------
     request : HttpRequest
-        The HTTP request object used to process the request.
+        The request object used to generate the response.
     discipleship_id : int
-        The ID of the discipleship to be moved.
+        The ID of the current discipleship to be moved.
+    new_group : str
+        The name of the new group to which the disciple should be moved.
 
     Returns
     -------
     HttpResponse
-        Redirects to the discipler's discipleships page with a success message if the move
-        is successful, or an error message if the action is not allowed.
-    """
-    discipleship = get_object_or_404(Discipleship, id=discipleship_id)
+        A redirect to the discipler's discipleships URL with a success or error message.
 
+    Raises
+    ------
+    Discipleship.DoesNotExist
+        If no Discipleship with the given ID exists.
+    """
+    discipleship = get_object_or_404(
+        Discipleship,
+        id=discipleship_id,
+    )
+
+    # Only allow the author of the discipleship to move the disciple
     if request.user.profile != discipleship.author:
         messages.error(
             request=request,
@@ -161,165 +259,26 @@ def move_to_group_member(request, discipleship_id):
 
         return redirect(discipleship.discipler.get_discipleships_url())
 
-    group_member_discipleship = Discipleship(
+    # Create a new discipleship in the specified group
+    new_discipleship = Discipleship.objects.create(
         disciple=discipleship.disciple,
         discipler=discipleship.discipler,
         author=discipleship.author,
-        group="group_member",
+        group=new_group,
     )
 
-    group_member_discipleship.save()
+    # Mark the old discipleship as completed
+    discipleship.completed_at = timezone.now()
+    discipleship.save()
 
+    # Get display-friendly name for the group
+    group_display = new_discipleship.group_display()
     messages.success(
         request=request,
-        message=f"{discipleship.disciple.get_full_name()} moved to group members.",
-    )
-
-    return redirect(discipleship.discipler.get_discipleships_url())
-
-
-@login_required
-def move_to_first_12(request, discipleship_id):
-    """
-    Move a disciple to the 'first_12' group.
-
-    This view moves a disciple from their current discipleship group to the 'first_12'
-    group. The action is only allowed if the current user is the author of the discipleship.
-    If the move is successful, a success message is displayed.
-
-    Parameters
-    ----------
-    request : HttpRequest
-        The HTTP request object used to process the request.
-    discipleship_id : int
-        The ID of the discipleship to be moved.
-
-    Returns
-    -------
-    HttpResponse
-        Redirects to the discipler's discipleships page with a success message if the move
-        is successful, or an error message if the action is not allowed.
-    """
-    discipleship = get_object_or_404(Discipleship, id=discipleship_id)
-
-    if request.user.profile != discipleship.author:
-        messages.error(
-            request=request,
-            message="You cannot complete this action",
-        )
-
-        return redirect(discipleship.discipler.get_discipleships_url())
-
-    first_12_discipleship = Discipleship(
-        disciple=discipleship.disciple,
-        discipler=discipleship.discipler,
-        author=discipleship.author,
-        group="first_12",
-    )
-
-    first_12_discipleship.save()
-
-    messages.success(
-        request=request,
-        message=f"{discipleship.disciple.get_full_name()} moved to first 12.",
-    )
-
-    return redirect(discipleship.discipler.get_discipleships_url())
-
-
-@login_required
-def move_to_first_3(request, discipleship_id):
-    """
-    Move a disciple to the 'first_3' group.
-
-    This view moves a disciple from their current discipleship group to the 'first_3'
-    group. The action is only allowed if the current user is the author of the discipleship.
-    If the move is successful, a success message is displayed.
-
-    Parameters
-    ----------
-    request : HttpRequest
-        The HTTP request object used to process the request.
-    discipleship_id : int
-        The ID of the discipleship to be moved.
-
-    Returns
-    -------
-    HttpResponse
-        Redirects to the discipler's discipleships page with a success message if the move
-        is successful, or an error message if the action is not allowed.
-    """
-    discipleship = get_object_or_404(Discipleship, id=discipleship_id)
-
-    if request.user.profile != discipleship.author:
-        messages.error(
-            request=request,
-            message="You cannot complete this action",
-        )
-
-        return redirect(discipleship.discipler.get_discipleships_url())
-
-    first_3_discipleship = Discipleship(
-        disciple=discipleship.disciple,
-        discipler=discipleship.discipler,
-        author=discipleship.author,
-        group="first_3",
-    )
-
-    first_3_discipleship.save()
-
-    messages.success(
-        request=request,
-        message=f"{discipleship.disciple.get_full_name()} moved to first 3.",
-    )
-
-    return redirect(discipleship.discipler.get_discipleships_url())
-
-
-@login_required
-def move_to_sent_forth(request, discipleship_id):
-    """
-    Move a disciple to the 'sent_forth' group.
-
-    This view moves a disciple from their current discipleship group to the 'sent_forth'
-    group. The action is only allowed if the current user is the author of the discipleship.
-    If the move is successful, a success message is displayed.
-
-    Parameters
-    ----------
-    request : HttpRequest
-        The HTTP request object used to process the request.
-    discipleship_id : int
-        The ID of the discipleship to be moved.
-
-    Returns
-    -------
-    HttpResponse
-        Redirects to the discipler's discipleships page with a success message if the move
-        is successful, or an error message if the action is not allowed.
-    """
-    discipleship = get_object_or_404(Discipleship, id=discipleship_id)
-
-    if request.user.profile != discipleship.author:
-        messages.error(
-            request=request,
-            message="You cannot complete this action",
-        )
-
-        return redirect(discipleship.discipler.get_discipleships_url())
-
-    sent_forth_discipleship = Discipleship(
-        disciple=discipleship.disciple,
-        discipler=discipleship.discipler,
-        author=discipleship.author,
-        group="sent_forth",
-    )
-
-    sent_forth_discipleship.save()
-
-    messages.success(
-        request=request,
-        message=f"{discipleship.disciple.get_full_name()} sent forth.",
+        message=(
+            f"{discipleship.disciple.get_full_name()} moved to "
+            f"your {group_display} discipleship group."
+        ),
     )
 
     return redirect(discipleship.discipler.get_discipleships_url())

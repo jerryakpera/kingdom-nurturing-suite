@@ -68,3 +68,54 @@ class GroupMemberDiscipleForm(forms.ModelForm):
                 user__verified=True,
                 user__agreed_to_terms=True,
             )
+
+
+class DiscipleshipFilterForm(forms.Form):
+    """
+    A form for filtering discipleship groups.
+    """
+
+    filter_group = forms.ChoiceField(
+        required=False,
+        label="Filter Discipleship Group",
+        choices=[
+            ("", "----------"),
+            ("group_member", "Group member"),
+            ("first_12", "First 12"),
+            ("first_3", "First 3"),
+            ("sent_forth", "Sent forth"),
+        ],
+        widget=forms.Select(
+            attrs={
+                "id": "filter_group",
+                "name": "filter_group",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-blue-500 focus:border-blue-500 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
+    )
+
+    filter_status = forms.ChoiceField(
+        required=False,
+        label="Filter Discipleship Status",
+        choices=[
+            ("", "----------"),
+            ("all", "All"),
+            ("ongoing", "Ongoing"),
+            ("completed", "Completed"),
+        ],
+        widget=forms.Select(
+            attrs={
+                "id": "filter_status",
+                "name": "filter_status",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-blue-500 focus:border-blue-500 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
+    )

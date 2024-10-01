@@ -1,11 +1,192 @@
 from django.contrib.messages import get_messages
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
+from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.discipleships.models import Discipleship
 from kns.groups.models import Group
 from kns.groups.tests import test_constants
+
+
+class TestIndexView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        # Set up a profile for the user
+        self.profile = self.user.profile
+        self.profile.first_name = "John"
+        self.profile.last_name = "Doe"
+        self.profile.is_onboarded = True
+        self.profile.save()
+
+        # Create groups for testing
+        self.group = Group.objects.create(
+            leader=self.profile,
+            name="Test Group",
+            description="A test group",
+        )
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="otherpassword",
+        )
+        self.other_profile = self.other_user.profile
+        self.other_profile.first_name = "Jane"
+        self.other_profile.last_name = "Pritchet"
+        self.other_profile.save()
+
+        self.group.add_member(self.other_profile)
+
+        # Create discipleships for testing
+        self.discipleship1 = Discipleship.objects.create(
+            disciple=self.other_profile,
+            discipler=self.profile,
+            group="group_member",
+            author=self.profile,
+        )
+
+        self.discipleship2 = Discipleship.objects.create(
+            disciple=self.profile,
+            discipler=self.other_profile,
+            group="first_12",
+            author=self.other_profile,
+        )
+
+    def test_index_view_loads_correctly(self):
+        """
+        Test that the index view loads correctly and renders the filter form.
+        """
+        url = reverse("discipleships:index")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "discipleships/pages/index.html",
+        )
+        self.assertIn("filter_form", response.context)
+
+    def test_index_view_with_search_query(self):
+        """
+        Test that the index view applies search filters correctly.
+        """
+        url = reverse("discipleships:index")
+        response = self.client.get(
+            url,
+            {"search": "John"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            self.discipleship1,
+            response.context["discipleships"],
+        )
+
+    def test_index_view_with_ongoing_status_filter(self):
+        """
+        Test that the index view filters discipleships by status.
+        """
+
+        self.discipleship1.completed_at = timezone.now()
+        self.discipleship1.save()
+
+        url = reverse("discipleships:index")
+        response = self.client.get(
+            url,
+            {
+                "filter_status": "ongoing",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(
+            self.discipleship1,
+            response.context["discipleships"],
+        )
+        self.assertIn(
+            self.discipleship2,
+            response.context["discipleships"],
+        )
+
+    def test_index_view_with_completed_status_filter(self):
+        """
+        Test that the index view filters discipleships by status.
+        """
+
+        self.discipleship1.completed_at = timezone.now()
+        self.discipleship1.save()
+
+        url = reverse("discipleships:index")
+        response = self.client.get(
+            url,
+            {
+                "filter_status": "completed",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            self.discipleship1,
+            response.context["discipleships"],
+        )
+        self.assertNotIn(
+            self.discipleship2,
+            response.context["discipleships"],
+        )
+
+    def test_index_view_with_group_filter(self):
+        """
+        Test that the index view filters discipleships by group.
+        """
+        url = reverse("discipleships:index")
+        response = self.client.get(
+            url,
+            {
+                "filter_group": "group_member",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            self.discipleship1,
+            response.context["discipleships"],
+        )
+        self.assertNotIn(
+            self.discipleship2,
+            response.context["discipleships"],
+        )
+
+    def test_index_view_with_multiple_filters(self):
+        """Test that the index view applies multiple filters correctly."""
+        url = reverse("discipleships:index")
+        response = self.client.get(
+            url,
+            {
+                "search": "John",
+                "filter_status": "ongoing",
+                "filter_group": "first_12",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            self.discipleship2,
+            response.context["discipleships"],
+        )
+        self.assertNotIn(
+            self.discipleship1,
+            response.context["discipleships"],
+        )
 
 
 class TestProfileDiscipleshipsView(TestCase):
@@ -68,7 +249,7 @@ class TestProfileDiscipleshipsView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(
             response,
-            "profiles/pages/profile_discipleships.html",
+            "discipleships/pages/profile_discipleships.html",
         )
         self.assertIn(
             "group_member_discipleship_form",
@@ -246,13 +427,19 @@ class TestMoveDiscipleshipViews(TestCase):
 
         self.profile = self.user.profile
         self.profile.is_onboarded = True
+        self.profile.first_name = "John"
+        self.profile.last_name = "Doe"
         self.profile.save()
 
         self.other_user = User.objects.create_user(
             email="otheruser@example.com",
             password="password",
         )
+
         self.other_profile = self.other_user.profile
+        self.other_profile.first_name = "James"
+        self.other_profile.last_name = "Pilot"
+        self.other_profile.save()
 
         # Create a discipleship instance for testing
         self.discipleship = Discipleship.objects.create(
@@ -264,15 +451,15 @@ class TestMoveDiscipleshipViews(TestCase):
 
     def test_move_to_group_member(self):
         url = reverse(
-            "discipleships:move_to_group_member",
+            "discipleships:move_to_discipleship_group",
             kwargs={
                 "discipleship_id": self.discipleship.id,
+                "new_group": "group_member",
             },
         )
 
         response = self.client.post(url)
 
-        # Check if the discipleship was moved to 'group_member'
         self.assertTrue(
             Discipleship.objects.filter(
                 disciple=self.other_profile,
@@ -280,29 +467,26 @@ class TestMoveDiscipleshipViews(TestCase):
                 group="group_member",
             ).exists()
         )
-
-        # Check if the response redirects correctly
         self.assertEqual(response.status_code, 302)
 
-        # Check if the success message is in the messages
         messages_list = list(get_messages(response.wsgi_request))
         self.assertEqual(len(messages_list), 1)
         self.assertEqual(
             str(messages_list[0]),
-            f"{self.other_profile.get_full_name()} moved to group members.",
+            f"{self.other_profile.get_full_name()} moved to your Group member discipleship group.",
         )
 
     def test_move_to_first_12(self):
         url = reverse(
-            "discipleships:move_to_first_12",
+            "discipleships:move_to_discipleship_group",
             kwargs={
                 "discipleship_id": self.discipleship.id,
+                "new_group": "first_12",
             },
         )
 
         response = self.client.post(url)
 
-        # Check if the discipleship was moved to 'first_12'
         self.assertTrue(
             Discipleship.objects.filter(
                 disciple=self.other_profile,
@@ -310,29 +494,26 @@ class TestMoveDiscipleshipViews(TestCase):
                 group="first_12",
             ).exists()
         )
-
-        # Check if the response redirects correctly
         self.assertEqual(response.status_code, 302)
 
-        # Check if the success message is in the messages
         messages_list = list(get_messages(response.wsgi_request))
         self.assertEqual(len(messages_list), 1)
         self.assertEqual(
             str(messages_list[0]),
-            f"{self.other_profile.get_full_name()} moved to first 12.",
+            f"{self.other_profile.get_full_name()} moved to your First 12 discipleship group.",
         )
 
     def test_move_to_first_3(self):
         url = reverse(
-            "discipleships:move_to_first_3",
+            "discipleships:move_to_discipleship_group",
             kwargs={
                 "discipleship_id": self.discipleship.id,
+                "new_group": "first_3",
             },
         )
 
         response = self.client.post(url)
 
-        # Check if the discipleship was moved to 'first_3'
         self.assertTrue(
             Discipleship.objects.filter(
                 disciple=self.other_profile,
@@ -340,29 +521,26 @@ class TestMoveDiscipleshipViews(TestCase):
                 group="first_3",
             ).exists()
         )
-
-        # Check if the response redirects correctly
         self.assertEqual(response.status_code, 302)
 
-        # Check if the success message is in the messages
         messages_list = list(get_messages(response.wsgi_request))
         self.assertEqual(len(messages_list), 1)
         self.assertEqual(
             str(messages_list[0]),
-            f"{self.other_profile.get_full_name()} moved to first 3.",
+            f"{self.other_profile.get_full_name()} moved to your First 3 discipleship group.",
         )
 
     def test_move_to_sent_forth(self):
         url = reverse(
-            "discipleships:move_to_sent_forth",
+            "discipleships:move_to_discipleship_group",
             kwargs={
                 "discipleship_id": self.discipleship.id,
+                "new_group": "sent_forth",
             },
         )
 
         response = self.client.post(url)
 
-        # Check if the discipleship was moved to 'sent_forth'
         self.assertTrue(
             Discipleship.objects.filter(
                 disciple=self.other_profile,
@@ -370,20 +548,16 @@ class TestMoveDiscipleshipViews(TestCase):
                 group="sent_forth",
             ).exists()
         )
-
-        # Check if the response redirects correctly
         self.assertEqual(response.status_code, 302)
 
-        # Check if the success message is in the messages
         messages_list = list(get_messages(response.wsgi_request))
         self.assertEqual(len(messages_list), 1)
         self.assertEqual(
             str(messages_list[0]),
-            f"{self.other_profile.get_full_name()} sent forth.",
+            f"{self.other_profile.get_full_name()} moved to your Sent forth discipleship group.",
         )
 
     def test_move_disallow_if_not_author(self):
-        # Create another discipleship with different author
         another_discipleship = Discipleship.objects.create(
             disciple=self.other_profile,
             discipler=self.profile,
@@ -392,15 +566,15 @@ class TestMoveDiscipleshipViews(TestCase):
         )
 
         url = reverse(
-            "discipleships:move_to_group_member",
+            "discipleships:move_to_discipleship_group",
             kwargs={
                 "discipleship_id": another_discipleship.id,
+                "new_group": "group_member",
             },
         )
 
         response = self.client.post(url)
 
-        # Check if the response redirects back to the discipler's discipleships page with an error
         self.assertEqual(response.status_code, 302)
 
         messages_list = list(get_messages(response.wsgi_request))
@@ -410,8 +584,8 @@ class TestMoveDiscipleshipViews(TestCase):
             "You cannot complete this action",
         )
 
-    def test_move_to_group_member_not_author(self):
-        self.other_profile = self.other_user.profile
+    def test_move_not_author(self):
+        # Test moving to different groups as another user
         self.other_profile.is_onboarded = True
         self.other_profile.save()
 
@@ -421,114 +595,19 @@ class TestMoveDiscipleshipViews(TestCase):
         )
 
         url = reverse(
-            "discipleships:move_to_group_member",
+            "discipleships:move_to_discipleship_group",
             kwargs={
                 "discipleship_id": self.discipleship.id,
+                "new_group": "first_12",
             },
         )
 
         response = self.client.post(url)
 
-        # Check if the response redirects correctly
         self.assertEqual(response.status_code, 302)
 
-        # Check if the success message is in the messages
-        messages_list = list(get_messages(response.wsgi_request))
-        self.assertEqual(len(messages_list), 1)
-        self.assertEqual(
-            str(messages_list[0]),
-            "You cannot complete this action",
-        )
-
-    def test_move_to_first_12_not_author(self):
-        self.other_profile = self.other_user.profile
-        self.other_profile.is_onboarded = True
-        self.other_profile.save()
-
-        self.client.login(
-            email=self.other_user.email,
-            password="password",
-        )
-
-        url = reverse(
-            "discipleships:move_to_first_12",
-            kwargs={
-                "discipleship_id": self.discipleship.id,
-            },
-        )
-
-        response = self.client.post(url)
-
-        # Check if the response redirects correctly
-        self.assertEqual(response.status_code, 302)
-
-        # Check if the success message is in the messages
         messages_list = list(get_messages(response.wsgi_request))
 
-        self.assertEqual(len(messages_list), 1)
-        self.assertEqual(
-            str(messages_list[0]),
-            "You cannot complete this action",
-        )
-
-    def test_move_to_first_3_not_author(self):
-        self.other_profile = self.other_user.profile
-        self.other_profile.is_onboarded = True
-        self.other_profile.save()
-
-        self.client.login(
-            email=self.other_user.email,
-            password="password",
-        )
-
-        url = reverse(
-            "discipleships:move_to_first_3",
-            kwargs={
-                "discipleship_id": self.discipleship.id,
-            },
-        )
-
-        response = self.client.post(url)
-
-        # Check if the response redirects correctly
-        self.assertEqual(response.status_code, 302)
-
-        # Check if the success message is in the messages
-        messages_list = list(get_messages(response.wsgi_request))
-        self.assertEqual(len(messages_list), 1)
-        self.assertEqual(
-            str(messages_list[0]),
-            "You cannot complete this action",
-        )
-
-    def test_move_to_sent_forth_not_author(self):
-        self.other_profile = self.other_user.profile
-        self.other_profile.is_onboarded = True
-        self.other_profile.save()
-
-        self.client.login(
-            email=self.other_user.email,
-            password="password",
-        )
-
-        self.other_profile = self.other_user.profile
-        self.other_profile.is_onboarded = True
-        self.other_profile.save()
-
-        url = reverse(
-            "discipleships:move_to_sent_forth",
-            kwargs={
-                "discipleship_id": self.discipleship.id,
-            },
-        )
-
-        response = self.client.post(url)
-
-        # Check if the response redirects correctly
-        self.assertEqual(response.status_code, 302)
-
-        # Check if the success message is in the messages
-        messages_list = list(get_messages(response.wsgi_request))
         self.assertEqual(len(messages_list), 1)
         self.assertEqual(
             str(messages_list[0]),

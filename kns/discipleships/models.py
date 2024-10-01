@@ -22,7 +22,6 @@ class Discipleship(
 
     class Meta:
         ordering = ("-created_at",)
-        # Other Meta options, if any
 
     disciple = models.ForeignKey(
         Profile,
@@ -53,6 +52,12 @@ class Discipleship(
         related_name="discipleships_created",
         on_delete=models.CASCADE,
         help_text="The profile that created this discipleship relationship.",
+    )
+
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="The date and time when the discipleship program was completed.",
     )
 
     slug = models.SlugField(

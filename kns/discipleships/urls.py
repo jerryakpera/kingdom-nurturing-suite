@@ -6,28 +6,18 @@ app_name = "discipleships"
 
 urlpatterns = [
     path(
-        "<int:discipleship_id>/group-member/",
-        views.move_to_group_member,
-        name="move_to_group_member",
-    ),
-    path(
-        "<int:discipleship_id>/first-12/",
-        views.move_to_first_12,
-        name="move_to_first_12",
-    ),
-    path(
-        "<int:discipleship_id>/first-3/",
-        views.move_to_first_3,
-        name="move_to_first_3",
-    ),
-    path(
-        "<int:discipleship_id>/send-forth/",
-        views.move_to_sent_forth,
-        name="move_to_sent_forth",
+        route="move/<str:new_group>/<int:discipleship_id>/",
+        view=views.move_to_discipleship_group,
+        name="move_to_discipleship_group",
     ),
     path(
         "<slug:profile_slug>/discipleships",
         views.profile_discipleships,
         name="profile_discipleships",
+    ),
+    path(
+        "",
+        views.index,
+        name="index",
     ),
 ]

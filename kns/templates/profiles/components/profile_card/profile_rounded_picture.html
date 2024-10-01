@@ -1,6 +1,6 @@
 {% if not profile.image %}
   <img
-    class="rounded-3xl w-36 h-36 object-cover"
+    class="rounded-3xl w-24 h-24 sm:w-36 sm:h-36 object-cover"
     src="https://dummyimage.com/720x400"
     alt="blog"
   >
@@ -8,6 +8,6 @@
   <img
     src="{{ profile.image.url }}"
     alt="{{ profile.get_full_name }}"
-    class="rounded-3xl w-36 h-36 object-cover"
+    class="rounded-3xl w-24 h-24 sm:w-36 sm:h-36 object-cover"
   >
 {% endif %}

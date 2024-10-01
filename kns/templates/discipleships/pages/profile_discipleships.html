@@ -9,7 +9,7 @@
     </h1>
 
     {% if profile == request.user.profile and request.user.profile.group_led.members.count > 0 %}
-      {% include "profiles/forms/group_member_discipleship_form.html" %}
+      {% include "discipleships/forms/group_member_discipleship_form.html" %}
     {% endif %}
 
     {% if request.user.profile.group_led.members.count == 0 %}
@@ -22,16 +22,16 @@
 
     <div class="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-1 md:grid-cols-2 gap-2">
       {% for discipleship in group_member_discipleships %}
-        {% include "profiles/components/discipleships/discipleship_item.html" %}
+        {% include "discipleships/components/discipleship_item.html" %}
       {% endfor %}
       {% for discipleship in first_12_discipleships %}
-        {% include "profiles/components/discipleships/discipleship_item.html" %}
+        {% include "discipleships/components/discipleship_item.html" %}
       {% endfor %}
       {% for discipleship in first_3_discipleships %}
-        {% include "profiles/components/discipleships/discipleship_item.html" %}
+        {% include "discipleships/components/discipleship_item.html" %}
       {% endfor %}
       {% for discipleship in sent_forth_discipleships %}
-        {% include "profiles/components/discipleships/discipleship_item.html" %}
+        {% include "discipleships/components/discipleship_item.html" %}
       {% endfor %}
     </div>
   </section>

@@ -1,0 +1,41 @@
+<div class="bg-gray-100 border-gray-300 border rounded-md shadow-sm">
+  <div class="flex flex-col space-y-1">
+    <div class="flex justify-between items-center p-3 mb-2 border-b border-gray-300">
+      <h4 class="font-medium text-black text-sm">
+        {{ discipleship.group_display }} discipleship
+      </h4>
+
+      {% if discipleship.group != 'sent_forth' and discipleship.discipler == request.user.profile %}
+        {% include "discipleships/components/discipleship_item_menu.html" %}
+      {% endif %}
+    </div>
+    <div class="flex justify-around p-2">
+      <a class="space-y-1 justify-center block" href="{{ discipleship.discipler.get_absolute_url }}">
+        <div class="text-xs sm:text-sm text-center font-semibold">
+          {{ discipleship.discipler.get_full_name }}
+        </div>
+        {% with profile=discipleship.discipler %}
+          <div class="w-full flex justify-center">
+            {% include "profiles/components/profile_card/profile_rounded_picture.html" %}
+          </div>
+        {% endwith %}
+        <div class="text-xs text-center font-medium">
+          Discipler
+        </div>
+      </a>
+      <a class="space-y-1 justify-center block" href="{{ discipleship.disciple.get_absolute_url }}">
+        <div class="text-xs sm:text-sm text-center font-semibold">
+          {{ discipleship.disciple.get_full_name }}
+        </div>
+        {% with profile=discipleship.disciple %}
+          <div class="w-full flex justify-center">
+            {% include "profiles/components/profile_card/profile_rounded_picture.html" %}
+          </div>
+        {% endwith %}
+        <div class="text-xs text-center font-medium">
+          Disciple
+        </div>
+      </a>
+    </div>
+  </div>
+</div>

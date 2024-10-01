@@ -1,0 +1,28 @@
+<form method="GET" class="flex gap-x-2 items-end w-full">
+  <div class="grid grid-cols-2 items-center gap-x-2 w-full">
+    {% for field in filter_form %}
+      <div class="space-y-0">
+        <label for="{{ field.id_for_label }}" class="text-xs text-gray-500">
+          {{ field.label }}
+        </label>
+        {{ field }}
+      </div>
+    {% endfor %}
+  </div>
+
+  {% for key, value in request.GET.items %}
+    {% if key != "search" and key != "page" and key != "filter_group" and key != "filter_status" %}
+      <input type="hidden" name="{{ key }}" value="{{ value }}">
+    {% endif %}
+  {% endfor %}
+
+  <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2 py-2 flex items-center gap-x-1">
+    <iconify-icon icon="mdi:filter" class="text-xl"></iconify-icon>
+    <span class="hidden xs:block">Filter</span>
+  </button>
+
+  <a href="/discipleships" class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-2 py-2 flex items-center gap-x-1">
+    <iconify-icon icon="ri:reset-left-line" class="text-xl"></iconify-icon>
+    <span class="hidden xs:block">Reset</span>
+  </a>
+</form>
