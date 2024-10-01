@@ -4,6 +4,7 @@ Views for the `discipleships` app.
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Max, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -41,6 +42,7 @@ def index(request):
     filter_status = request.GET.get("filter_status", "")
     search_query = request.GET.get("search", "")
 
+    # Query all discipleships
     discipleships = Discipleship.objects.all()
 
     if not request.user.is_visitor:
@@ -61,6 +63,7 @@ def index(request):
                 include_self=True,
             )
 
+            # Filter discipleships related to the user's group and its descendants
             discipleships = discipleships.filter(
                 Q(disciple__group_in__group__in=descendant_groups)
                 | Q(discipler__group_in__group__in=descendant_groups)
@@ -92,10 +95,22 @@ def index(request):
                 completed_at__isnull=False,
             )
 
+    # Pagination
+    paginator = Paginator(discipleships, 6)  # Show 12 discipleships per page
+    page = request.GET.get("page")
+
+    try:
+        page_obj = paginator.page(page)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:  # pragma: no cover
+        page_obj = paginator.page(paginator.num_pages)
+
+    # Update the context with the paginated results
     context = {
         "filter_form": filter_form,
         "search_query": search_query,
-        "discipleships": discipleships,
+        "page_obj": page_obj,  # Use the paginated object instead of full list
     }
 
     return render(

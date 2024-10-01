@@ -83,13 +83,15 @@ class TestIndexView(TestCase):
         url = reverse("discipleships:index")
         response = self.client.get(
             url,
-            {"search": "John"},
+            {
+                "search": "John",
+            },
         )
 
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             self.discipleship1,
-            response.context["discipleships"],
+            response.context["page_obj"],
         )
 
     def test_index_view_with_ongoing_status_filter(self):
@@ -111,11 +113,11 @@ class TestIndexView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(
             self.discipleship1,
-            response.context["discipleships"],
+            response.context["page_obj"],
         )
         self.assertIn(
             self.discipleship2,
-            response.context["discipleships"],
+            response.context["page_obj"],
         )
 
     def test_index_view_with_completed_status_filter(self):
@@ -137,11 +139,11 @@ class TestIndexView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             self.discipleship1,
-            response.context["discipleships"],
+            response.context["page_obj"],
         )
         self.assertNotIn(
             self.discipleship2,
-            response.context["discipleships"],
+            response.context["page_obj"],
         )
 
     def test_index_view_with_group_filter(self):
@@ -159,11 +161,11 @@ class TestIndexView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             self.discipleship1,
-            response.context["discipleships"],
+            response.context["page_obj"],
         )
         self.assertNotIn(
             self.discipleship2,
-            response.context["discipleships"],
+            response.context["page_obj"],
         )
 
     def test_index_view_with_multiple_filters(self):
@@ -181,12 +183,50 @@ class TestIndexView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(
             self.discipleship2,
-            response.context["discipleships"],
+            response.context["page_obj"],
         )
         self.assertNotIn(
             self.discipleship1,
-            response.context["discipleships"],
+            response.context["page_obj"],
         )
+
+    def test_index_view_pagination(self):
+        """
+        Test that the index view paginates the list of discipleships correctly.
+        """
+        # Create enough discipleships to require multiple pages
+        for i in range(15):
+            user = User.objects.create_user(
+                email=f"testuser{i}@example.com",
+                password="testpassword",
+            )
+            disciples_profile = user.profile
+
+            self.group.add_member(disciples_profile)
+
+            Discipleship.objects.create(
+                disciple=disciples_profile,
+                discipler=self.profile,
+                group="group_member",
+                author=self.profile,
+            )
+
+        # Ensure pagination is working correctly by checking the number of items per page
+        url = reverse("discipleships:index")
+        response = self.client.get(url, {"page": 1})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["page_obj"]), 6)
+
+        # Test the second page
+        response = self.client.get(url, {"page": 2})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context["page_obj"]), 6)
+
+        # Check if there are more pages
+        paginator = response.context["page_obj"].paginator
+        self.assertEqual(paginator.num_pages, 3)
 
 
 class TestProfileDiscipleshipsView(TestCase):
