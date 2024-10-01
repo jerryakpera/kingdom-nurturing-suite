@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% load profiles_custom_tags %}
+
+{% block title %}
+  KNS | {{ discipleship.disciple.get_full_name|name_with_apostrophe }} discipleship journey
+{% endblock %}
+
+{% block base_content %}
+  <section class="container-default py-4 md:py-8 space-y-2">
+    <div>
+      <h1 class="text-xl xs:text-2xl font-semibold font-serif">
+        {{ discipleship.disciple.get_full_name|name_with_apostrophe }} discipleship journey
+      </h1>
+      <p class="text-xs sm:text-sm md:text-md">
+        <a href="{{ discipleship.discipler.get_absolute_url }}" class="font-bold text-blue-600 hover:text-blue-700">
+          {{ discipleship.discipler }}
+        </a>
+         started discipling <a href="{{ discipleship.disciple.get_absolute_url }}" class="font-bold text-blue-600 hover:text-blue-700">{{ discipleship.disciple }}</a> on
+        <span class="font-bold">{{ discipleship.created_at|date:"F j, Y" }}</span>. So far the discipleship has progressed
+        to the {{ discipleship.group_display }} discipleship group after {{ discipleship.running_time }}.
+      </p>
+    </div>
+
+    <div>
+      {% include "discipleships/components/history/discipleship_timeline.html" %}
+    </div>
+  </section>
+{% endblock base_content %}

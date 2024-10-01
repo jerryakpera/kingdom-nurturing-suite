@@ -116,6 +116,12 @@ class Setting(models.Model):
         verbose_name="Publish Testimony Permission Required",
         help_text="Specifies if approval is required to publish a testimony.",
     )
+    send_forth_disciple_approval_required = models.BooleanField(
+        default=constants.SEND_FORTH_DISCIPLE_PERMISSION_REQUIRED,
+        choices=constants.BOOLEAN_CHOICES,
+        verbose_name="Send forth disciple permission required",
+        help_text="Specifies if approval is required to send forth a disciple.",
+    )
     publish_good_practice_approval_required = models.BooleanField(
         default=constants.PUBLISH_GOOD_PRACTICE_PERMISSION_REQUIRED,
         choices=constants.BOOLEAN_CHOICES,

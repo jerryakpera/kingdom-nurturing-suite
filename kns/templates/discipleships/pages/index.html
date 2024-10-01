@@ -46,14 +46,14 @@
           {% include "discipleships/components/no_discipleships_banner.html" %}
         </div>
       {% else %}
-        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4">
           {% for discipleship in page_obj %}
             {% include "discipleships/components/discipleship_item.html" %}
           {% endfor %}
         </div>
 
         <div class="w-full flex justify-center mt-10">
-          {% include "core\components\pagination.html" %}
+          {% include "core/components/pagination.html" %}
         </div>
       {% endif %}
     </div>

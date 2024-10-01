@@ -16,6 +16,11 @@ urlpatterns = [
         name="profile_discipleships",
     ),
     path(
+        "<slug:discipleship_slug>/",
+        views.discipleship_history,
+        name="discipleship_history",
+    ),
+    path(
         "",
         views.index,
         name="index",

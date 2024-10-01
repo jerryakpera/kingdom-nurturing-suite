@@ -2,9 +2,11 @@
 Models for the `discipleships` app.
 """
 
+from datetime import timedelta
 from uuid import uuid4
 
 from django.db import models
+from django.utils import timezone
 
 from kns.core import modelmixins
 from kns.profiles.models import Profile
@@ -98,3 +100,78 @@ class Discipleship(
         }
 
         return groups_key[self.group]
+
+    def running_time(self):
+        """
+        Calculate the running time of the discipleship in months and weeks.
+
+        Returns
+        -------
+        str
+            A string indicating the number of months and weeks the discipleship has been running.
+        """
+        # Get the end date for calculation (completed_at or now)
+        end_date = self.completed_at or timezone.now()
+
+        # Calculate the total duration
+        duration = end_date - self.created_at
+
+        # Calculate months and remaining weeks
+        total_months = duration.days // 30
+        remaining_days = duration.days % 30
+        total_weeks = remaining_days // 7
+
+        # Construct the output string
+        result = []
+        if total_months:
+            result.append(f"{total_months} month{'s' if total_months > 1 else ''}")
+        if total_weeks:
+            result.append(f"{total_weeks} week{'s' if total_weeks > 1 else ''}")
+
+        return " and ".join(result) if result else "less than a week"
+
+    def total_running_time(self):
+        """
+        Calculate the running time of the first discipleship between the
+        discipler and disciple and handle the case where 'sent_forth'
+        group should stop the running time.
+
+        Returns
+        -------
+        str
+            A string indicating the number of months and weeks the
+            discipleship has been running.
+        """
+        # Retrieve all discipleships between the same discipler and disciple, ordered by created_at
+        discipleships = Discipleship.objects.filter(
+            disciple=self.disciple, discipler=self.discipler
+        ).order_by("created_at")
+
+        # Get the first discipleship's creation date
+        first_discipleship_date = discipleships.first().created_at
+
+        # Check if there is a 'sent_forth' group discipleship
+        sent_forth_discipleship = discipleships.filter(group="sent_forth").first()
+        if sent_forth_discipleship:
+            end_date = sent_forth_discipleship.created_at
+        else:
+            # If no 'sent_forth' discipleship, use the current time
+            # or the completed_at date
+            end_date = self.completed_at or timezone.now()
+
+        # Calculate the total duration
+        duration = end_date - first_discipleship_date
+
+        # Calculate months and remaining weeks
+        total_months = duration.days // 30
+        remaining_days = duration.days % 30
+        total_weeks = remaining_days // 7
+
+        # Construct the output string
+        result = []
+        if total_months:
+            result.append(f"{total_months} month{'s' if total_months > 1 else ''}")
+        if total_weeks:
+            result.append(f"{total_weeks} week{'s' if total_weeks > 1 else ''}")
+
+        return " and ".join(result) if result else "less than a week"

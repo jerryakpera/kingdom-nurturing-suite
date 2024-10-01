@@ -282,6 +282,9 @@ def move_to_discipleship_group(request, discipleship_id, new_group):
         group=new_group,
     )
 
+    if new_group == "sent_forth":
+        new_discipleship.completed_at = timezone.now()
+
     # Mark the old discipleship as completed
     discipleship.completed_at = timezone.now()
     discipleship.save()
@@ -297,3 +300,46 @@ def move_to_discipleship_group(request, discipleship_id, new_group):
     )
 
     return redirect(discipleship.discipler.get_discipleships_url())
+
+
+@login_required
+def discipleship_history(request, discipleship_slug):
+    """
+    Retrieve the history of discipleship relationships for a specific disciple and discipler.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The request object used to generate the response.
+    discipleship_slug : str
+        The slug of the specific discipleship to retrieve.
+
+    Returns
+    -------
+    HttpResponse
+        A rendered template displaying the history of the discipleship relationships.
+
+    Raises
+    ------
+    Http404
+        If no Discipleship with the given slug exists.
+    """
+    discipleship = get_object_or_404(
+        Discipleship,
+        slug=discipleship_slug,
+    )
+
+    discipleships = Discipleship.objects.filter(
+        disciple=discipleship.disciple, discipler=discipleship.discipler
+    ).order_by("created_at")
+
+    context = {
+        "discipleship": discipleship,
+        "discipleships": discipleships,
+    }
+
+    return render(
+        request=request,
+        context=context,
+        template_name="discipleships/pages/history.html",
+    )

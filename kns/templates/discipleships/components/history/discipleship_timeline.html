@@ -1,0 +1,25 @@
+<ol class="relative border-s border-gray-500">
+  {% for discipleship_item in discipleships %}
+    <li class="mb-10 ms-4">
+      <div class="absolute w-3 h-3 bg-gray-500 rounded-full mt-1.5 -start-1.5 border border-white"></div>
+      <time class="mb-1 text-sm font-normal leading-none text-gray-700">
+        On <span class="font-bold">{{ discipleship_item.created_at|date:"F j, Y" }}</span> {{ discipleship_item.disciple.get_full_name }} moved to the {{ discipleship_item.group_display }} discipleship group
+      </time>
+      {% if discipleship_item.group == "sent_forth" %}
+        <h3 class="text-lg font-semibold text-gray-900">
+          {{ discipleship_item.disciple.get_full_name }} has been sent forth.
+        </h3>
+      {% endif %}
+
+      {% if discipleship_item.group != "sent_forth" %}
+        <h3 class="text-lg font-semibold text-gray-900">
+          {% if discipleship_item.completed_at %}
+            {{ discipleship_item.disciple.get_full_name }} was in the {{ discipleship_item.group_display }} group for {{ discipleship_item.running_time }}.
+          {% else %}
+            {{ discipleship_item.disciple.get_full_name }} has been in the {{ discipleship_item.group_display }} group for {{ discipleship_item.running_time }}.
+          {% endif %}
+        </h3>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ol>

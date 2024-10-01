@@ -653,3 +653,107 @@ class TestMoveDiscipleshipViews(TestCase):
             str(messages_list[0]),
             "You cannot complete this action",
         )
+
+
+class TestDiscipleshipHistoryView(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        self.profile = self.user.profile
+        self.profile.is_onboarded = True
+        self.profile.save()
+
+        self.other_user = User.objects.create_user(
+            email="otheruser@example.com",
+            password="otherpassword",
+        )
+        self.other_profile = self.other_user.profile
+        self.other_profile.is_onboarded = True
+        self.other_profile.save()
+
+        # Create discipleship instance for testing
+        self.discipleship = Discipleship.objects.create(
+            disciple=self.other_profile,
+            discipler=self.profile,
+            author=self.profile,
+            group="group_member",
+            slug="test-discipleship",
+        )
+
+        # Create additional discipleships for history testing
+        self.discipleship_history = Discipleship.objects.create(
+            disciple=self.other_profile,
+            discipler=self.profile,
+            author=self.profile,
+            group="first_12",
+            slug="test-discipleship-history",
+        )
+
+    def test_discipleship_history_view_loads_correctly(self):
+        """
+        Test that the discipleship_history view loads correctly
+        and renders the history template.
+        """
+        url = reverse(
+            "discipleships:discipleship_history",
+            kwargs={"discipleship_slug": self.discipleship.slug},
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response,
+            "discipleships/pages/history.html",
+        )
+        self.assertIn("discipleship", response.context)
+        self.assertIn("discipleships", response.context)
+
+    def test_discipleship_history_view_with_invalid_slug(self):
+        """
+        Test that the discipleship_history view returns a 404 error
+        when the discipleship slug does not exist.
+        """
+        url = reverse(
+            "discipleships:discipleship_history",
+            kwargs={"discipleship_slug": "invalid-slug"},
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_discipleship_history_view_with_correct_history(self):
+        """
+        Test that the discipleship_history view retrieves the correct history
+        for the discipleship.
+        """
+        url = reverse(
+            "discipleships:discipleship_history",
+            kwargs={"discipleship_slug": self.discipleship.slug},
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.discipleship, response.context["discipleships"])
+        self.assertEqual(len(response.context["discipleships"]), 2)  # Check count
+
+    def test_discipleship_history_view_for_nonexistent_discipleship(self):
+        """
+        Test that the view handles a nonexistent discipleship gracefully.
+        """
+        # Create a discipleship with a different slug
+        non_existent_slug = "nonexistent-discipleship"
+        url = reverse(
+            "discipleships:discipleship_history",
+            kwargs={"discipleship_slug": non_existent_slug},
+        )
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)

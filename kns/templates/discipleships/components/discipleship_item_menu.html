@@ -4,56 +4,58 @@
 </button>
 
 <!-- Dropdown menu -->
-<div id="dropdownDivider_discipleship_{{discipleship.id}}" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
-  <ul class="py-2 text-gray-700" aria-labelledby="discipleship_menu_{{discipleship.id}}">
-    {% if discipleship.group != 'group_member' and discipleship.group != 'sent_forth' %}
-      <li>
-        <button
-          data-confirm-url="{% url 'discipleships:move_to_discipleship_group' new_group='group_member' discipleship_id=discipleship.id %}"
-          data-confirm-message="Move {{ discipleship.disciple }} to your Group Members discipleship group"
-          class="block text-sm w-full text-left px-4 py-2 hover:bg-gray-100"
-        >
-          Move to Group member
-        </button>
-      </li>
-    {% endif %}
+<div id="dropdownDivider_discipleship_{{discipleship.id}}" class="z-10 hidden bg-white if divide-y divide-gray-100 rounded-lg shadow w-44">
+  {% if not discipleship.completed_at %}
+    <ul class="py-2 text-gray-700" aria-labelledby="discipleship_menu_{{discipleship.id}}">
+      {% if discipleship.group != 'group_member' and discipleship.group != 'sent_forth' %}
+        <li>
+          <button
+            data-confirm-url="{% url 'discipleships:move_to_discipleship_group' new_group='group_member' discipleship_id=discipleship.id %}"
+            data-confirm-message="Move {{ discipleship.disciple }} to your Group Members discipleship group"
+            class="block text-sm w-full text-left px-4 py-2 hover:bg-gray-100"
+          >
+            Move to Group member
+          </button>
+        </li>
+      {% endif %}
 
-    {% if discipleship.group != 'sent_forth' and discipleship.group != 'first_12' %}
-      <li>
-        <button
-          data-confirm-url="{% url 'discipleships:move_to_discipleship_group' new_group='first_12' discipleship_id=discipleship.id %}"
-          data-confirm-message="Move {{ discipleship.disciple }} to your First 12 discipleship group"
-          class="block text-sm w-full text-left px-4 py-2 hover:bg-gray-100"
-        >
-          Move to First 12
-        </button>
-      </li>
-    {% endif %}
+      {% if discipleship.group != 'sent_forth' and discipleship.group != 'first_12' %}
+        <li>
+          <button
+            data-confirm-url="{% url 'discipleships:move_to_discipleship_group' new_group='first_12' discipleship_id=discipleship.id %}"
+            data-confirm-message="Move {{ discipleship.disciple }} to your First 12 discipleship group"
+            class="block text-sm w-full text-left px-4 py-2 hover:bg-gray-100"
+          >
+            Move to First 12
+          </button>
+        </li>
+      {% endif %}
 
-    {% if discipleship.group != 'sent_forth' and discipleship.group != 'first_3' %}
-      <li>
-        <button
-          data-confirm-url="{% url 'discipleships:move_to_discipleship_group' new_group='first_3' discipleship_id=discipleship.id %}"
-          data-confirm-message="Move {{ discipleship.disciple }} to your First 3 discipleship group"
-          class="block text-sm w-full text-left px-4 py-2 hover:bg-gray-100"
-        >
-          Move to First 3
-        </button>
-      </li>
-    {% endif %}
+      {% if discipleship.group != 'sent_forth' and discipleship.group != 'first_3' %}
+        <li>
+          <button
+            data-confirm-url="{% url 'discipleships:move_to_discipleship_group' new_group='first_3' discipleship_id=discipleship.id %}"
+            data-confirm-message="Move {{ discipleship.disciple }} to your First 3 discipleship group"
+            class="block text-sm w-full text-left px-4 py-2 hover:bg-gray-100"
+          >
+            Move to First 3
+          </button>
+        </li>
+      {% endif %}
 
-    {% if discipleship.group != 'sent_forth' %}
-      <li>
-        <button
-          data-confirm-url="{% url 'discipleships:move_to_discipleship_group' new_group='sent_forth' discipleship_id=discipleship.id %}"
-          data-confirm-message="Move {{ discipleship.disciple }} to your Sent Forth discipleship group"
-          class="block text-sm w-full text-left px-4 py-2 hover:bg-gray-100"
-        >
-          Send forth
-        </button>
-      </li>
-    {% endif %}
-  </ul>
+      {% if discipleship.group != 'sent_forth' %}
+        <li>
+          <button
+            data-confirm-url="{% url 'discipleships:move_to_discipleship_group' new_group='sent_forth' discipleship_id=discipleship.id %}"
+            data-confirm-message="Move {{ discipleship.disciple }} to your Sent Forth discipleship group"
+            class="block text-sm w-full text-left px-4 py-2 hover:bg-gray-100"
+          >
+            Send forth
+          </button>
+        </li>
+      {% endif %}
+    </ul>
+  {% endif %}
 
   <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
     <li>
