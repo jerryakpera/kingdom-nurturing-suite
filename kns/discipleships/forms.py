@@ -29,10 +29,8 @@ class GroupMemberDiscipleForm(forms.ModelForm):
     disciple = forms.ModelChoiceField(
         required=True,
         queryset=Profile.objects.none(),
-        label=(
-            "Select a person in your group to add to your Group "
-            "members discipleship group"
-        ),
+        label="Start discipling a member of your group",
+        help_text="Select someone from your group to begin discipling.",
         widget=forms.Select(
             attrs={
                 "class": (
