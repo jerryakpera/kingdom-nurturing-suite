@@ -1,30 +1,37 @@
 <div class="flex flex-col space-y-0.5">
   {% comment %} User not verified banner {% endcomment %}
   {% if not request.user.verified %}
-    <div id="verified_banner" class="py-4 text-black bg-knsPrimary-300 border border-knsPrimary-200" role="alert">
+    <div id="verified_banner" class="py-4 text-red-900 bg-red-200 border border-red-900" role="alert">
       <div class="container-default flex items-center justify-between">
         <div class="flex items-center">
           <iconify-icon icon="heroicons:exclaimation-circle-solid" class="text-xl"></iconify-icon>
           <span class="sr-only">Info</span>
 
           <div class="ms-3 text-sm font-medium">
-            You have not verified your email address. To have full access to all features you must verify your email address.
+            You have not verified your email address.
+            {% if request.user.profile.is_email_token_valid %}
+              We have emailed you instructions on verifying your email address.
+            {% else %}
+              To have full access to all features you must verify your email address.
+            {% endif %}
           </div>
         </div>
 
-        <a
-          href="{% url "accounts:verification_email" user_id=request.user.id %}"
-          class="text-sm font-medium text-knsPrimary">
-          Resend verification email
-        </a>
+        {% if request.user.profile.is_email_token_valid %}
+          <a
+            href="{% url "accounts:verification_email" user_id=request.user.id %}"
+            class="text-sm text-red-900 font-bold">
+            Resend verification email
+          </a>
+        {% endif %}
       </div>
     </div>
   {% endif %}
 
   {% comment %} User not agreed to terms banner {% endcomment %}
   {% if not request.user.agreed_to_terms %}
-    <div id="agreed_to_terms_banner" class="py-4 text-black bg-knsPrimary-300 border border-knsPrimary-200" role="alert">
-      <div class="container-default flex flex-col space-y-3">
+    <div id="agreed_to_terms_banner" class="py-4 text-red-900 bg-red-200 border border-red-900" role="alert">
+      <div class="container-default flex items-center flex-col sm:flex-row">
         <div class="flex items-start sm:items-center">
           <iconify-icon icon="heroicons:exclaimation-circle-solid" class="text-xl"></iconify-icon>
           <span class="sr-only">Info</span>

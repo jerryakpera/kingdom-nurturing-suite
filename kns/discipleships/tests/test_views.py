@@ -3,7 +3,6 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.discipleships.models import Discipleship
 from kns.groups.models import Group

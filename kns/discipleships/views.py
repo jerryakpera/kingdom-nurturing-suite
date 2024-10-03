@@ -9,7 +9,6 @@ from django.db.models import Max, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from kns.core.utils import log_this
 from kns.discipleships.forms import GroupMemberDiscipleForm
 from kns.discipleships.models import Discipleship
 

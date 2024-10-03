@@ -2,6 +2,7 @@
 Models for the profiles app.
 """
 
+from datetime import timedelta
 from uuid import uuid4
 
 from cloudinary.models import CloudinaryField
@@ -13,6 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django_countries.fields import CountryField
 
+from kns.accounts.utils import verify_token
 from kns.core import modelmixins
 from kns.custom_user.models import User
 
@@ -102,8 +104,6 @@ class Profile(
     contact_details_is_visible = models.BooleanField(
         default=True,
     )
-    # TODO: Add setting to determine if the user receives
-    # email notifications
 
     place_of_birth_country = CountryField(
         null=True,
@@ -149,6 +149,11 @@ class Profile(
     )
     reason_is_not_mentor = models.CharField(
         max_length=500,
+        null=True,
+        blank=True,
+    )
+
+    email_token_created_at = models.DateTimeField(
         null=True,
         blank=True,
     )
@@ -817,6 +822,59 @@ class Profile(
             profile=self,
             profiles_leader=request.user.profile,
         )
+
+    def save_email_token(self, token):
+        """
+        Save the email verification token and sets the creation timestamp.
+
+        This method is used to save the given email verification token to the
+        user's profile and record the exact time the token was created. This
+        timestamp will later be used to validate the token's expiration.
+
+        Parameters
+        ----------
+        token : str
+            The email verification token that is saved to the profile.
+
+        Returns
+        -------
+        None
+            The token and creation timestamp are saved to the database, but no
+            value is returned.
+        """
+        self.email_token = token
+        self.email_token_created_at = timezone.now()
+
+        self.save()
+
+    def is_email_token_valid(self):
+        """
+        Check if the email verification token is still valid.
+
+        This method checks whether the email token associated with the user's
+        profile has expired. The token is considered valid if the current time
+        is within the allowed expiration window, which is defined by
+        `TOKEN_EXPIRATION_HOURS`. If no token is present or the token has
+        expired, the method returns `False`.
+
+        Returns
+        -------
+        bool
+            True if the token is valid and within the expiration period,
+            False if it has expired or does not exist.
+        """
+        # Ensure token and its creation time are present
+        if self.email_token and self.email_token_created_at:
+            expiration_time = self.email_token_created_at + timedelta(
+                hours=constants.TOKEN_EXPIRATION_HOURS,
+            )
+
+            # Check if current time is within the expiration window
+            if timezone.now() < expiration_time:
+                return True
+
+        # If token has expired or is not present
+        return False
 
 
 @receiver(post_save, sender=User)

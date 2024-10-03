@@ -38,13 +38,19 @@ class AuthenticationViewsTests(TestCase):
         self.profile.save()
 
         self.token = generate_verification_token(self.user)
+
+        self.profile.save_email_token(self.token)
+
         self.uidb64 = urlsafe_base64_encode(
             force_bytes(self.user.pk),
         )
 
         self.url = reverse(
             "accounts:verify_email",
-            args=[self.uidb64, self.token],
+            args=[
+                self.uidb64,
+                self.token,
+            ],
         )
 
     def test_index_view(self):

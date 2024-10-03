@@ -11,8 +11,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
-from kns.core.utils import log_this
 from kns.custom_user.models import User
+from kns.profiles.models import Profile
 
 from .decorators import guest_required
 from .emails import send_password_change_email, send_verification_email
@@ -219,9 +219,12 @@ def verify_email(request, uidb64, token):
     """
     uid = decode_uid(uidb64)
     user = get_object_or_404(User, pk=uid)
+    profile = Profile.objects.get(user=user)
 
-    if user and verify_token(user, token):
+    if user and profile.is_email_token_valid() and verify_token(user, token):
         user.verified = True
+        user.agreed_to_terms = True
+
         user.save()
 
         messages.success(

@@ -92,8 +92,7 @@ def send_verification_email(request, user):
     )
 
     # Save the token to the user's profile (if you are storing it)
-    user.profile.email_token = token
-    user.profile.save()
+    user.profile.save_email_token(token)
 
 
 def send_set_password_email(request, profile):
@@ -148,8 +147,7 @@ def send_set_password_email(request, profile):
     )
 
     # Save the token to the profile
-    profile.email_token = token
-    profile.save()
+    profile.save_email_token(token)
 
 
 def send_welcome_email(request, profile, leader):

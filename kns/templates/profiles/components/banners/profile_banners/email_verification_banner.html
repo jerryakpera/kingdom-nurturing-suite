@@ -1,4 +1,4 @@
-<div id="verified_banner" class="p-4 text-black bg-amber-300 border border-amber-200 rounded-md" role="alert">
+<div id="verified_banner" class="p-3 border border-red-900 text-red-900 bg-red-100 rounded-md" role="alert">
   <div class="flex flex-col space-y-4">
     <div class="flex items-center">
       <iconify-icon icon="heroicons:exclaimation-circle-solid" class="text-xl"></iconify-icon>
@@ -6,10 +6,11 @@
 
       <div class="ms-3 text-sm font-medium">
         {{ profile.get_full_name }} is yet to verify their email address.
+        {% if profile.is_email_token_valid %} We have sent instructions to their email on how to verify their email address.{% endif %}
       </div>
     </div>
 
-    {% if profile.role == 'member' or profile.role == 'external_person' %}
+    {% if not profile.is_email_token_valid %}
       <div class="flex justify-end">
         <a
           href="{% url "accounts:verification_email" user_id=profile.user.id %}"
