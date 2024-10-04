@@ -22,6 +22,10 @@ class GroupForm(forms.ModelForm):
     """
 
     class Meta:
+        """
+        Meta class for the GroupForm form.
+        """
+
         model = Group
         fields = [
             "name",
@@ -64,6 +68,8 @@ class GroupForm(forms.ModelForm):
                     "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
                     "block w-full p-2.5"
                 ),
+                "data-minlength": constants.GROUP_DESCRIPTION_MIN_LENGTH,
+                "data-maxlength": constants.GROUP_DESCRIPTION_MAX_LENGTH,
             }
         ),
         validators=[
