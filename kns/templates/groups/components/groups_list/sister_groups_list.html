@@ -1,0 +1,7 @@
+<div class="w-full grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-4" style="grid-auto-rows: minmax(0, 1fr);">
+  {% for family_group in sister_groups %}
+    <div class="col-span-1">
+      {% include "./family_group_list_item.html" %}
+    </div>
+  {% endfor %}
+</div>

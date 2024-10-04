@@ -8,8 +8,8 @@
 
 {% block group_base_content %}
   <section>
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 lg:gap-4 xl:gap-6">
-      <div class="space-y-1">
+    <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-3 gap-2 lg:gap-4 xl:gap-6 gap-y-6">
+      <div class="space-y-1 col-span-1 md:col-span-2">
         <h3 class="font-semibold text-sm uppercase text-gray-700">Group Overview</h3>
 
         <div class="w-full grid grid-cols-3 xs:grid-cols-4 md:grid-cols-3 lg:grid-cols-3 gap-2 lg:gap-4 justify-center" style="grid-auto-rows: minmax(0, 1fr);">
@@ -17,7 +17,7 @@
         </div>
       </div>
 
-      <div class="space-y-1">
+      <div class="space-y-1 md:col-span-1 lg:col-span-1">
         <h3 class="font-semibold text-sm uppercase text-gray-700">Child Groups</h3>
 
         {% if not child_groups %}
@@ -25,13 +25,11 @@
             Group has no child groups to display
           </div>
         {% else %}
-          {% with family_groups=child_groups %}
-            {% include "groups/components/groups_list/family_groups_list.html" %}
-          {% endwith %}
+          {% include "groups/components/groups_list/child_groups_list.html" %}
         {% endif %}
       </div>
 
-      <div class="space-y-1 md:col-span-2">
+      <div class="space-y-1 col-span-3">
         <h3 class="font-semibold text-sm uppercase text-gray-700">Sister Groups</h3>
 
         {% if not sister_groups %}
@@ -39,9 +37,7 @@
             Group has no sister groups to display
           </div>
         {% else %}
-          {% with family_groups=sister_groups %}
-            {% include "groups/components/groups_list/family_groups_list.html" %}
-          {% endwith %}
+          {% include "groups/components/groups_list/sister_groups_list.html" %}
         {% endif %}
       </div>
     </div>
