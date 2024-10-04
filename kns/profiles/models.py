@@ -129,8 +129,11 @@ class Profile(
     is_movement_training_facilitator = models.BooleanField(
         default=False,
     )
-    reason_is_not_movement_training_facilitator = models.CharField(
-        max_length=150,
+    reason_is_not_movement_training_facilitator = models.TextField(
+        validators=[
+            MinLengthValidator(constants.REJECT_REASON_MIN_LENGTH),
+            MaxLengthValidator(constants.REJECT_REASON_MAX_LENGTH),
+        ],
         null=True,
         blank=True,
     )
@@ -138,8 +141,11 @@ class Profile(
     is_skill_training_facilitator = models.BooleanField(
         default=False,
     )
-    reason_is_not_skill_training_facilitator = models.CharField(
-        max_length=150,
+    reason_is_not_skill_training_facilitator = models.TextField(
+        validators=[
+            MinLengthValidator(constants.REJECT_REASON_MIN_LENGTH),
+            MaxLengthValidator(constants.REJECT_REASON_MAX_LENGTH),
+        ],
         null=True,
         blank=True,
     )
@@ -147,8 +153,11 @@ class Profile(
     is_mentor = models.BooleanField(
         default=False,
     )
-    reason_is_not_mentor = models.CharField(
-        max_length=500,
+    reason_is_not_mentor = models.TextField(
+        validators=[
+            MinLengthValidator(constants.REJECT_REASON_MIN_LENGTH),
+            MaxLengthValidator(constants.REJECT_REASON_MAX_LENGTH),
+        ],
         null=True,
         blank=True,
     )

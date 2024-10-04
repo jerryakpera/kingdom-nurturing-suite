@@ -223,21 +223,57 @@ class TestProfileInvolvementForm(TestCase):
         Test that the form is valid when all facilitator options are
         False and reasons are provided.
         """
-
         form_data = {
             "is_movement_training_facilitator": False,
-            "reason_is_not_movement_training_facilitator": "Not interested.",
+            "reason_is_not_movement_training_facilitator": (
+                "Not interested in facilitating movement trainings due "
+                "to time constraints and other commitments."
+            ),
             "is_skill_training_facilitator": False,
-            "reason_is_not_skill_training_facilitator": "Not enough time.",
+            "reason_is_not_skill_training_facilitator": (
+                "Not enough time to commit to skill training sessions."
+            ),
             "is_mentor": False,
-            "reason_is_not_mentor": "Lack of experience.",
+            "reason_is_not_mentor": (
+                "Lack of experience in mentoring roles and responsibilities."
+            ),
         }
 
         form = ProfileInvolvementForm(data=form_data, instance=self.profile)
-
         self.assertTrue(
             form.is_valid(),
             "The form should be valid when reasons are provided for all False options",
+        )
+
+    def test_valid_form_with_mixed_facilitator_options(self):
+        """Test that the form is valid with mixed facilitator options and corresponding reasons."""
+
+        form_data = {
+            "is_movement_training_facilitator": True,
+            "is_skill_training_facilitator": False,
+            "reason_is_not_skill_training_facilitator": (
+                "Not enough time to commit to skill trainings. "
+                "Not enough time to commit to movement trainings."
+            ),
+            "reason_is_not_movement_training_facilitator": (
+                "Not enough time to commit to movement trainings. "
+                "Not enough time to commit to movement trainings."
+            ),
+            "reason_is_not_mentor": (
+                "Not enough time to commit to mentor others."
+                "Not enough time to commit to movement trainings."
+            ),
+            "is_mentor": True,
+        }
+
+        form = ProfileInvolvementForm(
+            data=form_data,
+            instance=self.profile,
+        )
+
+        self.assertTrue(
+            form.is_valid(),
+            "The form should be valid with mixed facilitator options and reasons",
         )
 
     def test_invalid_form_when_facilitator_options_false_without_reason(self):
@@ -310,25 +346,6 @@ class TestProfileInvolvementForm(TestCase):
         self.assertIn(
             "reason_is_not_mentor",
             form.errors,
-        )
-
-    def test_valid_form_with_mixed_facilitator_options(self):
-        """Test that the form is valid with mixed facilitator options and corresponding reasons."""
-        form_data = {
-            "is_movement_training_facilitator": True,
-            "is_skill_training_facilitator": False,
-            "reason_is_not_skill_training_facilitator": "Not enough time.",
-            "is_mentor": True,
-        }
-
-        form = ProfileInvolvementForm(
-            data=form_data,
-            instance=self.profile,
-        )
-
-        self.assertTrue(
-            form.is_valid(),
-            "The form should be valid with mixed facilitator options and reasons",
         )
 
 

@@ -1,0 +1,5 @@
+.text-area-disabled {
+  background-color: #e0e0e0;
+  cursor: not-allowed;
+  color: #9ca3af;
+}

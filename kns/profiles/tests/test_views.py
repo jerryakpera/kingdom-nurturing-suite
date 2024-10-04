@@ -695,11 +695,20 @@ class TestViews(TestCase):
         )
         data = {
             "is_mentor": True,
-            "reason_is_not_mentor": "Valid reason",
+            "reason_is_not_mentor": (
+                "Proin ut ligula vel nunc egestas porttitor. "
+                "Morbi lectus risus, iaculis vel, suscipit quis, luctus non, massa."
+            ),
             "is_movement_training_facilitator": True,
-            "reason_is_not_movement_training_facilitator": "Valid reason",
+            "reason_is_not_movement_training_facilitator": (
+                "Proin ut ligula vel nunc egestas porttitor. "
+                "Morbi lectus risus, iaculis vel, suscipit quis, luctus non, massa."
+            ),
             "is_skill_training_facilitator": True,
-            "reason_is_not_skill_training_facilitator": "Valid reason",
+            "reason_is_not_skill_training_facilitator": (
+                "Proin ut ligula vel nunc egestas porttitor. "
+                "Morbi lectus risus, iaculis vel, suscipit quis, luctus non, massa."
+            ),
         }
 
         # Post the data to the view
@@ -707,9 +716,6 @@ class TestViews(TestCase):
 
         # Refresh the profile from the database
         self.profile.refresh_from_db()
-
-        # Debug: Print the current value of is_mentor to verify the change
-        print("is_mentor after post:", self.profile.is_mentor)
 
         # Check if the profile involvement details were updated
         self.assertTrue(

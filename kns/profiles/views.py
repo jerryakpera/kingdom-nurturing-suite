@@ -1284,6 +1284,10 @@ def edit_involvement_details(request, profile_slug):
 
             return redirect(profile)
 
+        else:
+            # Debug: Print form errors
+            log_this(involvement_form.errors)
+
     return render(
         request=request,
         template_name="profiles/pages/edit_involvement_details.html",

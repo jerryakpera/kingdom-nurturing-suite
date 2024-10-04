@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from cloudinary.forms import CloudinaryFileField
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
@@ -204,16 +205,14 @@ class ProfileInvolvementForm(forms.ModelForm):
     """
     A form for specifying the user's involvement in various training and mentoring roles.
 
-    This form allows users to indicate their willingness to be a movement training facilitator,
-    skill training facilitator, or mentor, and to provide reasons if they are not willing or able
-    to fulfill these roles.
-
     Parameters
     ----------
-    *args : tuple
-        Positional arguments passed to the parent class.
-    **kwargs : dict
-        Keyword arguments passed to the parent class.
+    *args
+        Variable length argument list.
+    **kwargs
+        Arbitrary keyword arguments. Can include:
+        - profile (Profile): Arbitrary keyword arguments including instance (profile object)
+            and data (form data) to populate the form.
     """
 
     class Meta:
@@ -228,50 +227,119 @@ class ProfileInvolvementForm(forms.ModelForm):
         ]
 
         help_texts = {
-            "is_mentor": "Willing to facilitate mentor others?",
-            "is_skill_training_facilitator": "Willing to facilitate skill trainings?",
-            "is_movement_training_facilitator": "Willing to facilitate movement trainings?",
+            "is_movement_training_facilitator": (
+                "Select this option if the person is willing and able to "
+                "facilitate movement training sessions. Uncheck if you are "
+                "not able to participate in this role."
+            ),
+            "is_skill_training_facilitator": (
+                "Select this option if the person is willing and able to "
+                "facilitate skill trainings. Uncheck if you are unable to facilitate."
+            ),
+            "is_mentor": (
+                "Check if you are interested in mentoring others by "
+                "sharing your knowledge and experiences. Uncheck if you "
+                "are not able to mentor at this time."
+            ),
         }
 
     reason_is_not_movement_training_facilitator = forms.CharField(
         required=False,
-        label="If not willing/able, what is the reason",
+        label="If not able to facilitate movement trainings, kindly explain your reason here.",
+        help_text="Provide a reason if you're unable to facilitate movement training sessions.",
+        validators=[
+            MinLengthValidator(
+                profile_constants.REJECT_REASON_MIN_LENGTH,
+                message=(
+                    f"Reason must be at least {profile_constants.REJECT_REASON_MIN_LENGTH} "
+                    "characters long."
+                ),
+            ),
+            MaxLengthValidator(
+                profile_constants.REJECT_REASON_MAX_LENGTH,
+                message=(
+                    "Reason cannot exceed "
+                    f"{profile_constants.REJECT_REASON_MAX_LENGTH} characters."
+                ),
+            ),
+        ],
         widget=forms.Textarea(
             attrs={
                 "rows": 2,
                 "autocomplete": "off",
                 "class": (
-                    "bg-gray-50 border border-gray-300"
-                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
-                    "focus:border-blue-500 block w-full p-2.5 "
+                    "bg-gray-50 border border-gray-300 "
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500 "
+                    "focus:border-blue-500 block w-full p-2.5"
                 ),
                 "id": "reason_is_not_movement_training_facilitator",
                 "name": "reason_is_not_movement_training_facilitator",
+                "data-minlength": profile_constants.REJECT_REASON_MIN_LENGTH,
+                "data-maxlength": profile_constants.REJECT_REASON_MAX_LENGTH,
             }
         ),
     )
 
     reason_is_not_skill_training_facilitator = forms.CharField(
         required=False,
-        label="If not willing/able, what is the reason",
+        label="If not able to facilitate skill trainings, kindly explain your reason here.",
+        help_text=(
+            "Provide a reason if you're unable or unwilling to "
+            "facilitate skill-based training sessions."
+        ),
+        validators=[
+            MinLengthValidator(
+                profile_constants.REJECT_REASON_MIN_LENGTH,
+                message=(
+                    "Reason must be at least "
+                    f"{profile_constants.REJECT_REASON_MIN_LENGTH} characters long."
+                ),
+            ),
+            MaxLengthValidator(
+                profile_constants.REJECT_REASON_MAX_LENGTH,
+                message=(
+                    f"Reason cannot exceed "
+                    f"{profile_constants.REJECT_REASON_MAX_LENGTH} characters."
+                ),
+            ),
+        ],
         widget=forms.Textarea(
             attrs={
                 "rows": 2,
                 "autocomplete": "off",
                 "class": (
-                    "bg-gray-50 border border-gray-300"
-                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
-                    "focus:border-blue-500 block w-full p-2.5 "
+                    "bg-gray-50 border border-gray-300 "
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500 "
+                    "focus:border-blue-500 block w-full p-2.5"
                 ),
                 "id": "reason_is_not_skill_training_facilitator",
                 "name": "reason_is_not_skill_training_facilitator",
+                "data-minlength": profile_constants.REJECT_REASON_MIN_LENGTH,
+                "data-maxlength": profile_constants.REJECT_REASON_MAX_LENGTH,
             }
         ),
     )
 
     reason_is_not_mentor = forms.CharField(
         required=False,
-        label="If not willing/able, what is the reason",
+        label="Reason for not being a mentor",
+        help_text="If you're not able to mentor, kindly explain your reason here.",
+        validators=[
+            MinLengthValidator(
+                profile_constants.REJECT_REASON_MIN_LENGTH,
+                message=(
+                    f"Reason must be at least "
+                    f"{profile_constants.REJECT_REASON_MIN_LENGTH} characters long."
+                ),
+            ),
+            MaxLengthValidator(
+                profile_constants.REJECT_REASON_MAX_LENGTH,
+                message=(
+                    "Reason cannot exceed "
+                    f"{profile_constants.REJECT_REASON_MAX_LENGTH} characters."
+                ),
+            ),
+        ],
         widget=forms.Textarea(
             attrs={
                 "rows": 2,
@@ -279,10 +347,12 @@ class ProfileInvolvementForm(forms.ModelForm):
                 "id": "reason_is_not_mentor",
                 "name": "reason_is_not_mentor",
                 "class": (
-                    "bg-gray-50 border border-gray-300"
-                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500"
-                    "focus:border-blue-500 block w-full p-2.5 "
+                    "bg-gray-50 border border-gray-300 "
+                    "text-gray-900 text-sm rounded-lg focus:ring-blue-500 "
+                    "focus:border-blue-500 block w-full p-2.5"
                 ),
+                "data-minlength": profile_constants.REJECT_REASON_MIN_LENGTH,
+                "data-maxlength": profile_constants.REJECT_REASON_MAX_LENGTH,
             }
         ),
     )
@@ -291,16 +361,6 @@ class ProfileInvolvementForm(forms.ModelForm):
         """
         Validate the form to ensure that reasons are provided if the user is not willing
         or able to fulfill certain roles.
-
-        Returns
-        -------
-        dict
-            The cleaned data from the form.
-
-        Raises
-        ------
-        ValidationError
-            If required reasons are not provided.
         """
         cleaned_data = super().clean()
         is_movement_training_facilitator = cleaned_data.get(
@@ -342,6 +402,19 @@ class ProfileInvolvementForm(forms.ModelForm):
         return cleaned_data
 
     def __init__(self, *args, **kwargs):
+        """
+        Initialize the form with the given arguments.
+
+        Parameters
+        ----------
+        *args
+            Variable length argument list.
+        **kwargs
+            Arbitrary keyword arguments. Can include:
+            - profile (Profile): Arbitrary keyword arguments including instance (profile object)
+                and data (form data) to populate the form.
+        """
+
         super().__init__(*args, **kwargs)
         self.fields["is_movement_training_facilitator"].widget.attrs[
             "id"
