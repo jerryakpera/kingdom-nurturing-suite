@@ -525,11 +525,11 @@ class ContactDetailsForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = [
-            "phone",
+            "location_country",
+            "location_city",
             "email",
             "phone_prefix",
-            "location_city",
-            "location_country",
+            "phone",
         ]
 
     def __init__(self, *args, **kwargs):

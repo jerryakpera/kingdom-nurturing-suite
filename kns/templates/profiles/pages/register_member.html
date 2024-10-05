@@ -35,15 +35,21 @@
             {{ wizard.form.management_form }}
             {% for form in wizard.form.forms %}
               {% for field in form %}
-                <div class="mb-3">
+                {% if field.field.widget.input_type == "checkbox" %}
+                  {% include "core/components/forms/form_checkbox.html" %}
+                {% else %}
                   {% include "core/components/forms/form_field.html" %}
-                </div>
+                {% endif %}
               {% endfor %}
             {% endfor %}
           {% else %}
             {% for field in wizard.form %}
               <div class="mb-3">
-                {% include "core/components/forms/form_field.html" %}
+                {% if field.field.widget.input_type == "checkbox" %}
+                  {% include "core/components/forms/form_checkbox.html" %}
+                {% else %}
+                  {% include "core/components/forms/form_field.html" %}
+                {% endif %}
               </div>
             {% endfor %}
           {% endif %}
@@ -80,4 +86,7 @@
   </section>
 
   <script src="{% static "profiles/js/involvements.js" %}"></script>
+  <script src="{% static "profiles/js/phone_prefix.js" %}"></script>
+
+  <link rel="stylesheet" href="{% static "profiles/css/involvement_form.css" %}">
 {% endblock base_content %}

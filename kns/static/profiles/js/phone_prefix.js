@@ -4,6 +4,15 @@ document.addEventListener('DOMContentLoaded', function () {
   const locationCityField = document.getElementById('location_city');
   const locationCountryField = document.getElementById('location_country');
 
+  if (
+    !phoneField &&
+    !phonePrefixField &&
+    !locationCityField &&
+    !locationCountryField
+  ) {
+    return;
+  }
+
   // Load countries.json file
   fetch('/static/core/js/countries.json')
     .then((response) => response.json())

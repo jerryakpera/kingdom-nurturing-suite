@@ -199,5 +199,4 @@ def send_welcome_email(request, profile, leader):
     )
 
     # Save the token to the profile
-    profile.email_token = token
-    profile.save()
+    profile.save_email_token(token)

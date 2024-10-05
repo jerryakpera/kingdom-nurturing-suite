@@ -141,13 +141,15 @@ class NewMemberView(SessionWizardView):  # pragma: no cover
 
             # Create the profile associated with the user
             profile, profile_created = Profile.objects.get_or_create(
-                user=user, defaults=new_profile_data
+                user=user,
+                defaults=new_profile_data,
             )
 
             if not profile_created:
                 # Update profile data if the profile already exists
                 for attr, value in new_profile_data.items():
                     setattr(profile, attr, value)
+
                 profile.save()
 
             # Add the new member to the users group
