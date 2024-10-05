@@ -177,10 +177,7 @@ class TestIsProfilesGroupLeader(TestCase):
         )
 
         # Add other_profile to the group as a member
-        self.group_member = GroupMember.objects.create(
-            group=self.group,
-            profile=self.other_profile,
-        )
+        self.group.add_member(self.other_profile)
 
     def test_user_is_group_leader_of_own_group(self):
         """
@@ -191,7 +188,30 @@ class TestIsProfilesGroupLeader(TestCase):
             self.leader_user,
             self.leader_profile,
         )
+
         self.assertTrue(result)
+
+    def test_user_is_leader_but_profile_not_in_group(self):
+        """
+        Test if the function returns False when the user is the leader
+        of a group but the profile is not in the group.
+        """
+        user = User.objects.create_user(
+            email="newuser@example.com",
+            password="password",
+        )
+
+        if Profile.objects.filter(user=user).exists():
+            Profile.objects.filter(user=user).delete()
+
+        new_profile = Profile.objects.create(user=user)
+
+        result = is_profiles_group_leader(
+            self.leader_user,
+            new_profile,
+        )
+
+        self.assertFalse(result)
 
     def test_user_is_not_group_leader(self):
         """
@@ -219,24 +239,3 @@ class TestIsProfilesGroupLeader(TestCase):
             self.other_profile,
         )
         self.assertTrue(result)
-
-    def test_user_is_leader_but_profile_not_in_group(self):
-        """
-        Test if the function returns False when the user is the leader
-        of a group but the profile is not in the group.
-        """
-        user = User.objects.create_user(
-            email="newuser@example.com",
-            password="password",
-        )
-
-        if Profile.objects.filter(user=user).exists():
-            Profile.objects.filter(user=user).delete()
-
-        new_profile = Profile.objects.create(user=user)
-
-        result = is_profiles_group_leader(
-            self.leader_user,
-            new_profile,
-        )
-        self.assertFalse(result)

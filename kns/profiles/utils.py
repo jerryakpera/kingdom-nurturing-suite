@@ -128,11 +128,17 @@ def is_profiles_group_leader(user, profile):
     bool
         `True` if the user is the leader of the profile's group, `False` otherwise.
     """
-    users_group_exists = Group.objects.filter(
-        leader=user.profile,
-    ).exists()
+    users_group_exists = Group.objects.filter(leader=user.profile).exists()
 
     if not users_group_exists:
+        return False
+
+    # If profile is the leader of their own group
+    if not hasattr(profile, "group_in") and user.profile == profile:
+        return True
+
+    # If the profile is not in any group, return False
+    if not hasattr(profile, "group_in"):
         return False
 
     profile_group_member_exists = GroupMember.objects.filter(
@@ -140,7 +146,8 @@ def is_profiles_group_leader(user, profile):
         group=user.profile.group_led,
     ).exists()
 
-    if not profile_group_member_exists and user.profile == profile:
+    # Check if the user's profile is the leader of the group the profile belongs to
+    if user.profile == profile.group_in.group.leader:
         return True
 
     return profile_group_member_exists

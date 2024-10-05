@@ -3,12 +3,12 @@
 <label>
   <input class="peer/showLabel absolute scale-0" type="checkbox" />
   <span class="block max-h-10 overflow-hidden py-0 rounded-b-md text-black transition-all duration-300 peer-checked/showLabel:max-h-full peer-checked/showLabel:pb-4 peer-checked/showLabel:bg-knsSecondary-200 peer-checked/showLabel:rounded-b-md">
-    <div class="flex items-center justify-between rounded-b-md bg-knsSecondary-200 px-4">
+    <div class="flex items-center justify-between rounded-b-md bg-knsSecondary-200 px-2">
       <h3 class="flex h-10 cursor-pointer items-center font-bold w-full">Faith Milestones</h3>
 
       <div class="text-xs bg-gray-200 rounded-2xl p-1.5 font-semibold">{{ profile.faith_milestones.count }}/10</div>
     </div>
-    <div class="px-4 space-y-4">
+    <div class="px-2 space-y-4">
       <p class="text-sm text-black">
         Faith Milestones helps track an individual's spiritual steps on their profile. It highlights personal growth and involvement in faith, offering a way to celebrate, and measure progress.
       </p>
@@ -26,8 +26,16 @@
       {% endif %}
 
       {% if profile.faith_milestones.count == 0 %}
-        <div class="p-2 border border-red-400 bg-red-100 rounded-md font-medium text-sm w-full">
-          There are no faith milestones to display at the moment.
+        <div class="p-2 border border-red-400 bg-red-100 rounded-md font-medium text-sm w-full space-y-2">
+          <p>
+            There are no faith milestones to display at the moment.
+          </p>
+
+          {% if profile == request.user.profile and not request.user|is_profiles_group_leader:profile %}
+            <p>
+              Your group leader, {{ group.leader.group_in.group.leader }}, is responsible for updating this section.
+            </p>
+          {% endif %}
         </div>
       {% else %}
         <div class="space-y-2">

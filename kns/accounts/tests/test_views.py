@@ -600,6 +600,7 @@ class SetPasswordViewTests(TestCase):
         self.member_profile = self.member_user.profile
 
         self.member_profile.is_onboarded = True
+        self.member_profile.role = "leader"
         self.member_profile.save()
 
         self.token = generate_verification_token(self.member_user)
@@ -695,6 +696,29 @@ class SetPasswordViewTests(TestCase):
                 "You already have a password set. "
                 "Please log in using your existing password."
             ),
+        )
+
+    def test_set_profile_role_is_not_leader(self):
+        """
+        Test that the set_password view handles the case where the
+        user already has a password set.
+        """
+        self.member_user.set_password("Newpassword@123")
+        self.member_user.save()
+
+        self.member_profile.role = "member"
+        self.member_profile.save()
+
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("accounts:login"))
+
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(
+            str(messages[0]),
+            "You cannot complete this request",
         )
 
     def test_set_password_profile_not_found(self):

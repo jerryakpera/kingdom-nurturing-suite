@@ -1157,6 +1157,38 @@ class TestGroupIndexView(TestCase):
         self.group1.add_member(self.profile2)
         self.group1.add_member(self.profile3)
 
+    def test_view_for_leader_without_group(self):
+        """
+        Test that the index view renders the correct template.
+        """
+
+        test_user = User.objects.create_user(
+            email="example@example.com",
+            password="password",
+        )
+
+        test_user.verified = True
+        test_user.agreed_to_terms = True
+        test_user.save()
+
+        test_profile = test_user.profile
+
+        test_profile.is_onboarded = True
+        test_profile.role = "leader"
+        test_profile.save()
+
+        self.client.login(
+            email=test_user.email,
+            password="password",
+        )
+
+        response = self.client.get(reverse("groups:index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "groups/pages/index.html")
+
+        self.assertEqual(len(response.context["page_obj"]), 0)
+
     def test_view_renders_correct_template(self):
         """
         Test that the index view renders the correct template.

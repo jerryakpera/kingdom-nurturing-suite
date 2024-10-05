@@ -375,6 +375,15 @@ def set_password(request, uidb64, token):
 
     profile = user.profile
 
+    # Check if the profile is a leader role
+    if profile.role != "leader":
+        messages.info(
+            request=request,
+            message="You cannot complete this request",
+        )
+
+        return redirect("accounts:login")
+
     # Check if the user already has a password set
     if user.has_usable_password() and user.password:
         messages.info(
