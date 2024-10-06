@@ -39,32 +39,8 @@
         </a>
       </li>
     </ul>
+
     <div class="py-1">
-      {% if request.user|can_edit_profile:profile and not profile.encryption %}
-        <a
-          href="{% url "profiles:encrypt_profile" profile_slug=profile.slug %}"
-          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-        >
-          Hide name
-        </a>
-      {% endif %}
-
-      {% if request.user|can_edit_profile:profile and profile.encryption and profile.encryption.encrypted_by == request.user.profile %}
-        <a
-          href="{% url "profiles:decrypt_profile" profile_slug=profile.slug %}"
-          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-        >
-          Reveal name
-        </a>
-      {% endif %}
-
-      <a
-        href="{% url "profiles:profile_settings" profile_slug=profile.slug %}"
-        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-      >
-        Settings
-      </a>
-
       {% if profile.can_become_member_role %}
         <a
           href="{% url "profiles:make_member_page" profile_slug=profile.slug %}"
@@ -91,5 +67,36 @@
           Make leader
         </a>
       {% endif %}
+    </div>
+
+    <div class="py-1">
+      {% if request.user|can_edit_profile:profile and not profile.encryption %}
+        <a
+          href="{% url "profiles:encrypt_profile" profile_slug=profile.slug %}"
+          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Hide name
+        </a>
+      {% endif %}
+
+      {% if request.user|can_edit_profile:profile and profile.encryption and profile.encryption.encrypted_by == request.user.profile %}
+        <a
+          href="{% url "profiles:decrypt_profile" profile_slug=profile.slug %}"
+          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Reveal name
+        </a>
+      {% endif %}
+
+      {% if profile.group_in.group %}
+        {% include "profiles/components/profile_card/change_group_menu.html" %}
+      {% endif %}
+
+      <a
+        href="{% url "profiles:profile_settings" profile_slug=profile.slug %}"
+        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+      >
+        Settings
+      </a>
     </div>
   </div>

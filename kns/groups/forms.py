@@ -9,6 +9,7 @@ from django_countries.fields import CountryField
 
 from kns.faith_milestones.models import FaithMilestone
 from kns.mentorships.models import MentorshipArea
+from kns.profiles.models import Profile
 from kns.skills.models import Skill
 from kns.vocations.models import Vocation
 
@@ -930,3 +931,135 @@ class GroupFaithMilestoneFilterForm(forms.Form):
             "Hold Ctrl to select multiple milestones."
         ),
     )
+
+
+class MoveToSisterGroupForm(forms.Form):
+    """
+    A form for moving a member to a sister group.
+
+    This form allows a group leader to select a member from their current group
+    and assign them to a sister group.
+
+    Parameters
+    ----------
+    *args : tuple
+        Additional positional arguments passed to the parent form class.
+    **kwargs : dict
+        Additional keyword arguments passed to the parent form class.
+    """
+
+    member = forms.ModelChoiceField(
+        queryset=Profile.objects.none(),
+        label="Select Member",
+        required=True,
+    )
+
+    target_group = forms.ModelChoiceField(
+        queryset=Group.objects.none(),
+        label="Select Sister Group",
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the form with a list of members from the group leader's group
+        and a list of sister groups.
+
+        Parameters
+        ----------
+        leader_group : Group
+            The group led by the current user (group leader).
+        *args : tuple
+            Additional positional arguments passed to the parent form class.
+        **kwargs : dict
+            Additional keyword arguments passed to the parent form class.
+        """
+        leader_group = kwargs.pop("leader_group")
+        super().__init__(*args, **kwargs)
+        # Populate members from the leader's group
+        self.fields["member"].queryset = Profile.objects.filter(
+            group_in__group=leader_group
+        )
+        # Populate sister groups
+        self.fields["target_group"].queryset = Group.objects.filter(
+            parent=leader_group.parent
+        ).exclude(id=leader_group.id)
+
+    def clean_target_group(self):
+        """
+        Custom validation for the target group field.
+
+        This method ensures that the selected target group is valid.
+
+        Returns
+        -------
+        Group
+            The cleaned target group data after validation.
+        """
+        target_group = self.cleaned_data["target_group"]
+        return target_group
+
+
+class MoveToChildGroupForm(forms.Form):
+    """
+    A form for moving a member to a child group.
+
+    This form allows a group leader to select a member from their current group
+    and assign them to a child group.
+
+    Parameters
+    ----------
+    *args : tuple
+        Additional positional arguments passed to the parent form class.
+    **kwargs : dict
+        Additional keyword arguments passed to the parent form class.
+    """
+
+    member = forms.ModelChoiceField(
+        queryset=Profile.objects.none(),
+        label="Select Member",
+        required=True,
+    )
+
+    target_group = forms.ModelChoiceField(
+        queryset=Group.objects.none(),
+        label="Select Child Group",
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the form with a list of members from the group leader's group
+        and a list of child groups.
+
+        Parameters
+        ----------
+        leader_group : Group
+            The group led by the current user (group leader).
+        *args : tuple
+            Additional positional arguments passed to the parent form class.
+        **kwargs : dict
+            Additional keyword arguments passed to the parent form class.
+        """
+        leader_group = kwargs.pop("leader_group")
+        super().__init__(*args, **kwargs)
+        # Populate members from the leader's group
+        self.fields["member"].queryset = Profile.objects.filter(
+            group_in__group=leader_group
+        )
+        # Populate child groups
+        self.fields["target_group"].queryset = Group.objects.filter(parent=leader_group)
+
+    def clean_target_group(self):
+        """
+        Custom validation for the target group field.
+
+        This method ensures that the selected target group is valid.
+
+        Returns
+        -------
+        Group
+            The cleaned target group data after validation.
+        """
+        target_group = self.cleaned_data["target_group"]
+        return target_group

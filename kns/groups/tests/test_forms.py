@@ -4,6 +4,7 @@ Tests for the forms in the `groups` app.
 
 from django.test import TestCase
 
+from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.models import FaithMilestone, GroupFaithMilestone
 from kns.groups.models import Group
@@ -20,6 +21,8 @@ from ..forms import (
     GroupMentorshipAreasFilterForm,
     GroupSkillsInterestsFilterForm,
     GroupVocationsFilterForm,
+    MoveToChildGroupForm,
+    MoveToSisterGroupForm,
 )
 from . import test_constants
 
@@ -693,5 +696,285 @@ class TestGroupFaithMilestoneFilterForm(TestCase):
         Test that an empty form does not raise validation errors.
         """
         form = GroupFaithMilestoneFilterForm(data={})
+
+        self.assertTrue(form.is_valid())
+
+
+class TestMoveToSisterGroupForm(TestCase):
+    def setUp(self):
+        """
+        Set up test data for the Move to Sister Group form.
+        """
+        # Create users
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.user2 = User.objects.create_user(
+            email="testuser2@example.com",
+            password="testpassword",
+        )
+        self.user3 = User.objects.create_user(
+            email="testuser3@example.com",
+            password="testpassword",
+        )
+        self.target_user = User.objects.create_user(
+            email="testtarget_user@example.com",
+            password="testpassword",
+        )
+
+        # Create profiles for users
+        self.profile1 = self.user.profile
+        self.profile2 = self.user2.profile
+        self.profile3 = self.user3.profile
+        self.target_profile = self.target_user.profile
+
+        # Set profiles to onboarded
+        self.profile1.is_onboarded = True
+        self.profile1.save()
+
+        self.profile2.is_onboarded = True
+        self.profile2.save()
+
+        self.profile3.is_onboarded = True
+        self.profile3.save()
+
+        # Create groups
+        self.parent_group = Group.objects.create(
+            name="Parent Group",
+            leader=self.profile1,
+            location_country="GH",
+            location_city="Accra",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.child_group1 = Group.objects.create(
+            leader=self.profile2,
+            name="Child Group 1",
+            location_country="GH",
+            location_city="Accra",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+            parent=self.parent_group,
+        )
+
+        self.child_group2 = Group.objects.create(
+            leader=self.profile3,
+            name="Child Group 2",
+            location_country="GH",
+            location_city="Accra",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+            parent=self.parent_group,
+        )
+
+        # Add profile to the current group
+        self.parent_group.add_member(self.profile2)
+        self.parent_group.add_member(self.profile3)
+
+        self.child_group1.add_member(self.target_profile)
+
+        # Form data to be used in tests
+        self.form_data = {
+            "member": self.target_profile.id,
+            "target_group": self.child_group2.id,
+        }
+
+    def test_move_to_sister_group_form_valid(self):
+        form = MoveToSisterGroupForm(
+            data=self.form_data,
+            leader_group=self.child_group1,
+        )
+
+        self.assertTrue(form.is_valid())
+
+    def test_move_to_sister_group_form_member_not_in_group(self):
+        # Create a new profile not in the current group
+        another_user = User.objects.create_user(
+            email="anotheruser@example.com",
+            password="password",
+        )
+
+        another_profile = another_user.profile
+        another_profile.is_onboarded = True
+        another_profile.save()
+
+        self.form_data["member"] = another_profile.id
+
+        form = MoveToSisterGroupForm(
+            data=self.form_data,
+            leader_group=self.child_group1,
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("member", form.errors)
+
+    def test_move_to_sister_group_form_target_group_same_as_current(self):
+        self.form_data["target_group"] = self.child_group1.id
+
+        form = MoveToSisterGroupForm(
+            data=self.form_data,
+            leader_group=self.child_group1,
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("target_group", form.errors)
+
+    def test_move_to_sister_group_form_target_group_excluded(self):
+        # Create another valid target group (sister group)
+        another_sister_group = Group.objects.create(
+            leader=self.target_profile,
+            name="Another Sister Group",
+            location_country="GH",
+            location_city="Accra",
+            description="Another sister group for testing.",
+            parent=self.parent_group,
+        )
+
+        self.form_data["target_group"] = another_sister_group.id
+
+        form = MoveToSisterGroupForm(
+            data=self.form_data,
+            leader_group=self.child_group1,
+        )
+
+        self.assertTrue(form.is_valid())
+
+
+class TestMoveToChildGroupForm(TestCase):
+    def setUp(self):
+        """
+        Set up test data for the Move to Child Group form.
+        """
+        # Create users
+        self.origin_user = User.objects.create_user(
+            email="origin_user@example.com",
+            password="testpassword",
+        )
+        self.child_user = User.objects.create_user(
+            email="child_user@example.com",
+            password="testpassword",
+        )
+        self.child_user2 = User.objects.create_user(
+            email="child_user2@example.com",
+            password="testpassword",
+        )
+
+        # Create profiles for users
+        self.origin_profile = self.origin_user.profile
+        self.child_profile = self.child_user.profile
+        self.child_profile2 = self.child_user2.profile
+
+        # Set profiles to onboarded
+        self.origin_profile.is_onboarded = True
+        self.origin_profile.save()
+
+        self.child_profile.is_onboarded = True
+        self.child_profile.save()
+
+        self.child_profile2.is_onboarded = True
+        self.child_profile2.save()
+
+        # Create groups
+        self.origin_group = Group.objects.create(
+            leader=self.origin_profile,
+            name="Origin Group",
+            location_country="GH",
+            location_city="Accra",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.child_group = Group.objects.create(
+            leader=self.child_profile,
+            name="Child group 1",
+            location_country="GH",
+            location_city="Accra",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+            parent=self.origin_group,
+        )
+
+        self.child_group2 = Group.objects.create(
+            leader=self.child_profile2,
+            name="Child Group 2",
+            location_country="GH",
+            location_city="Accra",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+            parent=self.origin_group,
+        )
+
+        # Add profiles to the current group
+        self.origin_group.add_member(self.child_profile)
+        self.origin_group.add_member(self.child_profile2)
+
+        # Form data to be used in tests
+        self.form_data = {
+            "member": self.child_profile.id,
+            "target_group": self.child_group2.id,
+        }
+
+    def test_move_to_child_group_form_valid(self):
+        form = MoveToChildGroupForm(
+            data=self.form_data,
+            leader_group=self.origin_group,
+        )
+
+        self.assertTrue(form.is_valid())
+
+    def test_move_to_child_group_form_member_not_in_group(self):
+        # Create a new profile not in the current group
+        another_user = User.objects.create_user(
+            email="anotheruser@example.com",
+            password="password",
+        )
+
+        another_profile = another_user.profile
+        another_profile.is_onboarded = True
+        another_profile.save()
+
+        self.form_data["member"] = another_profile.id
+
+        form = MoveToChildGroupForm(
+            data=self.form_data,
+            leader_group=self.origin_group,
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("member", form.errors)
+
+    def test_move_to_child_group_form_target_group_same_as_current(self):
+        self.form_data["target_group"] = self.origin_group.id
+
+        form = MoveToChildGroupForm(
+            data=self.form_data,
+            leader_group=self.origin_group,
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("target_group", form.errors)
+
+    def test_move_to_child_group_form_target_group_excluded(self):
+        another_user = User.objects.create_user(
+            email="anotheruser@example.com",
+            password="password",
+        )
+
+        another_profile = another_user.profile
+        another_profile.is_onboarded = True
+        another_profile.save()
+
+        # Create another valid child group
+        another_child_group = Group.objects.create(
+            leader=another_profile,
+            name="Another Child Group",
+            location_country="GH",
+            location_city="Accra",
+            description="Another child group for testing.",
+            parent=self.origin_group,
+        )
+
+        self.form_data["target_group"] = another_child_group.id
+
+        form = MoveToChildGroupForm(
+            data=self.form_data,
+            leader_group=self.origin_group,
+        )
 
         self.assertTrue(form.is_valid())

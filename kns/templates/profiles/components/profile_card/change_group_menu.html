@@ -1,0 +1,25 @@
+<div>
+  <button id="doubleDropdownButton" data-dropdown-toggle="doubleDropdown" data-dropdown-placement="right-start" type="button" class="flex items-center justify-start w-full px-4 py-2 hover:bg-gray-100 text-sm text-left">
+    Move group
+  </button>
+  <div id="doubleDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+    <ul class="py-2 text-sm text-gray-700" aria-labelledby="doubleDropdownButton">
+      <li>
+        <a
+          href="{% url "groups:move_to_sister_group" group_slug=profile.group_in.group.slug profile_slug=profile.slug %}"
+          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Move to sister group
+        </a>
+      </li>
+      <li>
+        <a
+          href="{% url "groups:move_to_child_group" group_slug=profile.group_in.group.slug profile_slug=profile.slug %}"
+          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+        >
+          Move to child group
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>

@@ -1,4 +1,3 @@
-from django.db.models import Count
 from django.test import TestCase
 
 from kns.custom_user.models import User
