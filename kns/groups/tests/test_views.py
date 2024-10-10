@@ -1255,7 +1255,7 @@ class TestGroupIndexView(TestCase):
 
         response = self.client.get(reverse("groups:index"))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context["page_obj"]), 6)
+        self.assertEqual(len(response.context["page_obj"]), 5)
 
         # Test second page
         response = self.client.get(

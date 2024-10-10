@@ -5,7 +5,9 @@
         {{ group.name }}
       </h1>
 
-      {% include "groups/components/group_card/group_card_menu.html" %}
+      {% if request.user.profile == group.leader %}
+        {% include "groups/components/group_card/group_card_menu.html" %}
+      {% endif %}
     </div>
 
     <div class="flex items-center gap-2">

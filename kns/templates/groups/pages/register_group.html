@@ -15,7 +15,12 @@
       </p>
     </div>
 
-    <form action="{% url "groups:register_group" %}" method="POST" autocomplete="off">
+    <form
+      method="POST"
+      autocomplete="off"
+      enctype="multipart/form-data"
+      action="{% url "groups:register_group" %}"
+    >
       {% csrf_token %}
 
       {% include "groups/forms/group_form.html" %}

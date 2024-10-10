@@ -363,7 +363,7 @@ def index(request):
         groups = Group.objects.none()
 
     # Pagination
-    paginator = Paginator(groups, 6)
+    paginator = Paginator(groups, 5)
     page = request.GET.get("page")
 
     try:
@@ -476,6 +476,10 @@ def register_group(request):
 
         if group_form.is_valid():
             group = group_form.save(commit=False)
+
+            # Process uploaded images, if any
+            for image in request.FILES.getlist("image"):  # pragma: no cover
+                group.image = image
 
             # Assign the leader
             group.leader = profile
@@ -673,7 +677,13 @@ def edit_group(request, group_slug):
         )
 
         if group_form.is_valid():
-            group_form.save()
+            group_form.save(commit=False)
+
+            # Process uploaded images, if any
+            for image in request.FILES.getlist("image"):  # pragma: no cover
+                group.image = image
+
+            group.save()
 
             messages.success(
                 request=request,

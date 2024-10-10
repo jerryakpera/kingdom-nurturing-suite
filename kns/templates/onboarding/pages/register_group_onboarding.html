@@ -2,7 +2,13 @@
 
 {% block onboarding_content %}
   <div class="p-4 md:p-6 ">
-    <form class="space-y-6" id="form-container" method="POST" action="{% url "onboarding:group" %}">
+    <form
+      method="POST"
+      class="space-y-6"
+      id="form-container"
+      enctype="multipart/form-data"
+      action="{% url "onboarding:group" %}"
+    >
       {% csrf_token %}
 
       <div class="card-body flex flex-col gap-4">
