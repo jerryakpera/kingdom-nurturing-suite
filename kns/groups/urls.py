@@ -21,16 +21,6 @@ urlpatterns = [
         name="remove_group_milestone",
     ),
     path(
-        "<slug:group_slug>/move-member-to-sister-group/<slug:profile_slug>",
-        views.move_to_sister_group,
-        name="move_to_sister_group",
-    ),
-    path(
-        "<slug:group_slug>/move-member-to-child-group/<slug:profile_slug>",
-        views.move_to_child_group,
-        name="move_to_child_group",
-    ),
-    path(
         "<slug:group_slug>/edit-milestones",
         views.edit_group_milestones,
         name="edit_group_milestones",

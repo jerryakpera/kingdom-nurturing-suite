@@ -23,10 +23,10 @@ from kns.classifications.models import (
 )
 from kns.core.utils import log_this
 from kns.custom_user.models import User
-from kns.discipleships.forms import GroupMemberDiscipleForm
-from kns.discipleships.models import Discipleship
 from kns.faith_milestones.forms import ProfileFaithMilestonesForm
 from kns.faith_milestones.models import ProfileFaithMilestone
+from kns.groups.forms import MoveToChildGroupForm, MoveToSisterGroupForm
+from kns.groups.models import Group
 from kns.levels.forms import ProfileLevelForm
 from kns.levels.models import Level, ProfileLevel, Sublevel
 from kns.mentorships.forms import ProfileMentorshipAreasForm
@@ -494,7 +494,7 @@ def profile_overview(request, profile_slug):
 
 
 @login_required
-def profile_levels(request, profile_slug):  # pragma: no cover
+def profile_levels(request, profile_slug):
     """
     View to render a page displaying levels history for a specific profile.
 
@@ -534,7 +534,7 @@ def profile_levels(request, profile_slug):  # pragma: no cover
 
 
 @login_required
-def profile_classifications(request, profile_slug):  # pragma: no cover
+def profile_classifications(request, profile_slug):
     """
     View to render a page displaying classifications history for a specific profile.
 
@@ -1286,10 +1286,6 @@ def edit_involvement_details(request, profile_slug):
 
             return redirect(profile)
 
-        else:
-            # Debug: Print form errors
-            log_this(involvement_form.errors)
-
     return render(
         request=request,
         template_name="profiles/pages/edit_involvement_details.html",
@@ -1909,7 +1905,7 @@ def edit_profile_classifications(request, profile_slug, profile_classification_n
 
 
 @login_required
-def profile_mentorships(request, profile_slug):  # pragma: no cover
+def profile_mentorships(request, profile_slug):
     """
     Display the mentorships for a specific profile.
 
@@ -2012,5 +2008,159 @@ def edit_profile_mentorship_areas(request, profile_slug):
     return render(
         request=request,
         template_name="mentorships/pages/edit_profile_mentorships.html",
+        context=context,
+    )
+
+
+@login_required
+def move_to_sister_group(request, profile_slug, group_slug):
+    """
+    Move a member to a sister group.
+
+    This view allows users to move a member from their current group
+    to a sister group, which shares the same parent group. It retrieves
+    the current group and initializes a form for selecting the member
+    and the target group. On successful form submission, it updates the
+    member's group and displays a success message.
+
+    If the member is leading their current group, the group led by the
+    member is also relocated as a child of the target group.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The incoming request object.
+    profile_slug : str
+        The slug of the profile (member) to be moved.
+    group_slug : str
+        The slug of the current group the member belongs to.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the move-to-sister-group page or redirects to the target group's
+        members page if the form is successfully submitted.
+    """
+    profile = get_object_or_404(Profile, slug=profile_slug)
+    current_group = get_object_or_404(Group, slug=group_slug)
+
+    move_group_form = MoveToSisterGroupForm(
+        request.POST or None,
+        leader_group=current_group,
+    )
+
+    if request.method == "POST":
+        if move_group_form.is_valid():
+            # Perform the action of moving the member to the sister group
+            member = move_group_form.cleaned_data["member"]
+            target_group = move_group_form.cleaned_data["target_group"]
+
+            # Remove member from current group and add member to target group
+            member.change_group(
+                current_group=current_group,
+                target_group=target_group,
+            )
+
+            # If the member is leading their group
+            if member.is_leading_group():
+                # Relocate the member's group to be a child of the target group
+                member.group_led.move_to(
+                    target_group,
+                    position="last-child",
+                )
+
+            messages.success(
+                request=request,
+                message=f"{member} has been moved to {target_group}.",
+            )
+
+            return redirect(target_group.get_members_url())
+
+    context = {
+        "profile": profile,
+        "current_group": current_group,
+        "move_group_form": move_group_form,
+    }
+
+    return render(
+        request=request,
+        template_name="profiles/pages/move_to_sister_group.html",
+        context=context,
+    )
+
+
+@login_required
+def move_to_child_group(request, profile_slug, group_slug):
+    """
+    Move a member to a child group.
+
+    This view allows users to move a member from their current group
+    to one of its child groups. It retrieves the current group and
+    initializes a form for selecting the member and the target child group.
+    On successful form submission, it updates the member's group and displays
+    a success message.
+
+    If the member is leading their current group, the group led by the member
+    is also relocated as a child of the target group.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The incoming request object.
+    profile_slug : str
+        The slug of the profile (member) to be moved.
+    group_slug : str
+        The slug of the current group the member belongs to.
+
+    Returns
+    -------
+    HttpResponse
+        Renders the move-to-child-group page or redirects to the target group's
+        members page if the form is successfully submitted.
+    """
+    profile = get_object_or_404(Profile, slug=profile_slug)
+    current_group = get_object_or_404(Group, slug=group_slug)
+
+    move_group_form = MoveToChildGroupForm(
+        request.POST or None,
+        leader_group=current_group,
+    )
+
+    if request.method == "POST":
+        if move_group_form.is_valid():
+            # Perform the action of moving the member to the child group
+            member = move_group_form.cleaned_data["member"]
+            target_group = move_group_form.cleaned_data["target_group"]
+
+            # Remove member from current group and add member to target group
+            member.change_group(
+                current_group=current_group,
+                target_group=target_group,
+            )
+
+            # If the member is leading their group
+            if member.is_leading_group():
+                # Relocate the member's group to be a child of the target group
+                member.group_led.move_to(
+                    target_group,
+                    position="last-child",
+                )
+
+            messages.success(
+                request=request,
+                message=f"{member} has been moved to {target_group}.",
+            )
+
+            return redirect(target_group.get_members_url())
+
+    context = {
+        "profile": profile,
+        "current_group": current_group,
+        "move_group_form": move_group_form,
+    }
+
+    return render(
+        request=request,
+        template_name="profiles/pages/move_to_child_group.html",
         context=context,
     )

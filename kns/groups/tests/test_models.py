@@ -604,6 +604,88 @@ class TestGroupMethods(TestCase):
             ),
         )
 
+    def test_sister_groups(self):
+        """
+        Test that sister_groups returns only groups with the same parent.
+        """
+        # Create an additional sibling group (another sister group)
+        another_user = User.objects.create_user(
+            email="another_user4@example.com",
+            password="password",
+        )
+
+        another_sister_group = GroupFactory(
+            parent=self.group.parent,
+            name="Another Sister Group",
+            location_country="Nigeria",
+            location_city="Ibadan",
+            leader=another_user.profile,
+        )
+
+        # Get the sister groups
+        sister_groups = another_sister_group.sister_groups()
+
+        # Ensure that only the sibling groups are returned
+        self.assertEqual(sister_groups.count(), 1)
+
+    def test_child_groups(self):
+        """
+        Test that child_groups returns only the direct child groups of the group.
+        """
+        # Get the child groups of the main group
+        child_groups = self.group.child_groups()
+
+        # Ensure that only the direct child groups are returned
+        self.assertIn(self.child_group_same_city, child_groups)
+        self.assertIn(self.child_group_different_city, child_groups)
+        self.assertNotIn(
+            self.grandchild_group_same_city, child_groups
+        )  # Ensure grandchildren aren't included
+        self.assertNotIn(
+            self.group, child_groups
+        )  # Ensure the group itself is excluded
+
+    def test_child_groups_on_child(self):
+        """
+        Test child_groups method on a child group to ensure it returns its own child groups.
+        """
+        # Call child_groups on a child group
+        child_groups_of_child = self.child_group_same_city.child_groups()
+
+        # Ensure that the grandchild group is returned
+        self.assertIn(self.grandchild_group_same_city, child_groups_of_child)
+        self.assertNotIn(
+            self.group, child_groups_of_child
+        )  # Ensure parent group is not included
+
+    def test_remove_member(self):
+        """
+        Test the remove_member method to ensure a member is correctly removed from the group
+        and that it returns the correct value.
+        """
+        self.group.add_member(self.profile1)
+
+        # Ensure profile1 is a member of the group
+        self.assertTrue(self.group.is_member(self.profile1))
+
+        # Remove the member from the group
+        removed = self.group.remove_member(self.profile1)
+
+        # Check that the member has been removed and the method returns True
+        self.assertTrue(removed)
+        self.assertNotIn(self.profile1, self.group.group_members())
+
+        non_user = User.objects.create_user(
+            email="non_user@example.com",
+            password="password",
+        )
+
+        non_member_profile = non_user.profile
+        removed_non_member = self.group.remove_member(non_member_profile)
+
+        # Check that the method returns False since the profile was not a member
+        self.assertFalse(removed_non_member)
+
 
 class TestGroupSignals(TestCase):
     def setUp(self):

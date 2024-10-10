@@ -1,0 +1,75 @@
+{% extends "profiles/profile_base.html" %}
+
+{% load profiles_custom_tags %}
+
+{% block title %}
+  {{ profile.get_full_name }} | Change group
+{% endblock title %}
+
+{% block profile_base_content %}
+  <section class="space-y-6">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Moving a member to a Child Group</h2>
+      <p class="mb-4 text-gray-600">
+        You are about to move a member from your group to one of your child groups. It's important to understand how this process works and what the form allows you to do. The form is designed to ensure a smooth transition, allowing you to select a member and assign them to a new child group.
+      </p>
+    </div>
+
+    <div>
+      <h3 class="text-xl font-semibold text-gray-700">Steps to Move a Member:</h3>
+      <ul class="list-disc pl-6 mb-4 text-gray-600">
+        <li class="mb-2">
+          <strong class="text-gray-900">Select a Member:</strong>
+          The form will show you a list of members from your current group. These are individuals who belong to the group you're leading. Simply choose the member you wish to transfer.
+        </li>
+        <li class="mb-2">
+          <strong class="text-gray-900">Choose a Child Group:</strong>
+          Next, you'll see a dropdown of available child groups. These are sub-groups that fall under your current group. The form ensures that you can only select valid child groups.
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="text-xl font-semibold text-gray-700">Why This is Important:</h3>
+      <p class="text-gray-600">
+        Moving a member to a child group could be necessary for various reasons—perhaps the new group better fits their needs, or maybe there’s a reorganization within your group structure. This form ensures that you can make this change in an organized manner, limiting your selection to valid groups within the same hierarchy (i.e., child groups).
+      </p>
+    </div>
+
+    <div class="bg-blue-100 border-l-4 border-blue-600 p-3">
+      <h3 class="text-xl font-semibold text-blue-600">Important Note:</h3>
+      <p class="text-blue-600">
+        If the member you're moving is currently leading a child group, please be aware that they will lose leadership over that group. Ensure that this change is intentional and aligns with your group's management strategy.
+      </p>
+    </div>
+
+    <form
+      id="moveToChildGroupForm"
+      action="{% url "profiles:move_to_child_group" profile_slug=profile.slug group_slug=current_group.slug %}"
+      method="POST"
+    >
+      {% csrf_token %}
+
+      {% include "groups/forms/move_group_form.html" %}
+
+      <div class="flex justify-end space-x-2 items-center my-6">
+        <a href="{{ profile.get_absolute_url }}" class="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2">Cancel</a>
+
+        <button id="confirmMove" type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2">Save</button>
+      </div>
+    </form>
+  </section>
+
+  <script>
+    document.getElementById('confirmMove').addEventListener('click', function (event) {
+      event.preventDefault(); // Prevent form submission
+      const confirmMessage = "Are you sure you want to move this person to a child group?";
+
+      if (confirm(confirmMessage)) {
+        // If confirmed, submit the form
+        document.getElementById('moveToChildGroupForm').submit();
+      }
+    });
+  </script>
+
+{% endblock profile_base_content %}

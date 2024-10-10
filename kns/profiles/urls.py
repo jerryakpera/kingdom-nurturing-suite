@@ -136,6 +136,16 @@ urlpatterns = [
         name="profile_mentorships",
     ),
     path(
+        "<slug:profile_slug>/move-member-to-sister-group/<slug:group_slug>",
+        views.move_to_sister_group,
+        name="move_to_sister_group",
+    ),
+    path(
+        "<slug:profile_slug>/move-member-to-child-group/<slug:group_slug>",
+        views.move_to_child_group,
+        name="move_to_child_group",
+    ),
+    path(
         "<slug:profile_slug>/",
         views.profile_overview,
         name="profile_overview",

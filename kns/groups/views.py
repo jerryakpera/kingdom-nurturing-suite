@@ -25,7 +25,6 @@ from kns.groups.models import Group, GroupMember
 from kns.profiles.models import Profile
 from kns.profiles.utils import name_with_apostrophe
 
-from .decorators import group_leader_required
 from .utils import GroupStatistics
 
 
@@ -421,8 +420,8 @@ def group_overview(request, group_slug):
 
     context = {
         "group": group,
-        "sister_groups": group.get_siblings(include_self=False)[:9],
-        "child_groups": group.get_children()[:9],
+        "sister_groups": group.sister_groups()[:6],
+        "child_groups": group.child_groups()[:6],
     }
 
     return render(
@@ -814,39 +813,3 @@ def remove_group_milestone(request, milestone_id):
 
     # Redirect to the group's detail page
     return redirect(group.get_absolute_url())
-
-
-@login_required
-@group_leader_required
-def move_to_sister_group(request, group_slug, profile_slug):  # pragma: no cover
-    """
-    View to move a member to a sister group.
-
-    Parameters
-    ----------
-    request : HttpRequest
-        _description_.
-    group_slug : str
-        _description_.
-    profile_slug : str
-        _description_.
-    """
-    pass
-
-
-@login_required
-@group_leader_required
-def move_to_child_group(request, group_slug, profile_slug):  # pragma: no cover
-    """
-    View to move a member to a child group.
-
-    Parameters
-    ----------
-    request : HttpRequest
-        _description_.
-    group_slug : str
-        _description_.
-    profile_slug : str
-        _description_.
-    """
-    pass

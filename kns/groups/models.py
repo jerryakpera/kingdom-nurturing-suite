@@ -220,6 +220,31 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
             )
         return profile
 
+    def remove_member(self, profile):
+        """
+        Remove a profile from the group if they are a member.
+
+        Parameters
+        ----------
+        profile : Profile
+            The profile to remove from the group.
+
+        Returns
+        -------
+        bool
+            True if the profile was removed, False if they were not a member.
+        """
+        try:
+            membership = GroupMember.objects.get(
+                profile=profile,
+                group=self,
+            )
+            membership.delete()
+
+            return True
+        except GroupMember.DoesNotExist:
+            return False
+
     def leaders_count(self):
         """
         Return the count of leaders in the group.
@@ -445,6 +470,32 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
                 profile__interests__interest__title=None,
             )
         )
+
+    def sister_groups(self):
+        """
+        Return a queryset of the group's sister groups.
+
+        Sister groups are groups that share the same parent group but are not the group itself.
+
+        Returns
+        -------
+        QuerySet:
+            A queryset of the group's sister groups (groups with the same parent).
+        """
+        return self.get_siblings(include_self=False)
+
+    def child_groups(self):
+        """
+        Return a queryset of the group's child groups.
+
+        Child groups are groups that are directly below the current group in the hierarchy.
+
+        Returns
+        -------
+        QuerySet:
+            A queryset of the group's child groups (direct descendants).
+        """
+        return self.get_children()
 
 
 class GroupMember(TimestampedModel):

@@ -15,7 +15,7 @@ from kns.classifications.models import (
 from kns.core.models import Setting
 from kns.custom_user.models import User
 from kns.faith_milestones.models import FaithMilestone, ProfileFaithMilestone
-from kns.groups.models import Group
+from kns.groups.models import Group, GroupMember
 from kns.groups.tests import test_constants
 from kns.levels.models import Level, ProfileLevel, Sublevel
 from kns.mentorships.models import MentorshipArea, ProfileMentorshipArea
@@ -3496,3 +3496,581 @@ class TestMakeExternalPersonView(TestCase):
                 "to perform this action."
             ),
         )
+
+
+class TestProfileClassificationsView(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Create a user and log them in
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+        self.client.login(
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        # Create a profile for the user
+        self.profile = self.user.profile
+        self.profile.is_onboarded = True
+        self.profile.first_name = "Test"
+        self.profile.last_name = "User"
+        self.profile.slug = "test-user"
+        self.profile.save()
+
+        # Create classifications for the profile
+        self.classification1 = Classification.objects.create(
+            author=self.profile,
+            order=1,
+            title="Classification Title 1",
+            content="Classification Content 1",
+        )
+        self.classification2 = Classification.objects.create(
+            order=2,
+            author=self.profile,
+            title="Classification Title 2",
+            content="Classification Content 2",
+        )
+        self.classification3 = Classification.objects.create(
+            order=3,
+            author=self.profile,
+            title="Classification Title 3",
+            content="Classification Content 3",
+        )
+
+        # Create profile classifications with varying `no` values
+        self.profile_classification1 = ProfileClassification.objects.create(
+            no=1,
+            profile=self.profile,
+            classification=self.classification1,
+        )
+        self.profile_classification2 = ProfileClassification.objects.create(
+            no=1,
+            profile=self.profile,
+            classification=self.classification2,
+        )
+        self.profile_classification3 = ProfileClassification.objects.create(
+            no=2,
+            profile=self.profile,
+            classification=self.classification3,
+        )
+
+    def test_profile_classifications_view_loads_correctly(self):
+        """
+        Test that the profile classifications view loads and displays the correct classifications.
+        """
+        url = reverse(
+            "profiles:profile_classifications",
+            kwargs={
+                "profile_slug": self.profile.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response is successful
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "classifications/pages/profile_classifications.html",
+        )
+
+        # Check if classifications are in the context
+        self.assertIn(
+            "profile_classifications_group",
+            response.context,
+        )
+
+        classifications_group = response.context["profile_classifications_group"]
+
+        self.assertEqual(len(classifications_group), 2)
+
+        # Ensure that the classifications are grouped correctly by 'no'
+        self.assertEqual(len(classifications_group[0]), 1)
+        self.assertEqual(len(classifications_group[1]), 2)
+
+    def test_profile_classifications_view_missing_profile(self):
+        """
+        Test that requesting a non-existent profile returns a 404.
+        """
+        url = reverse(
+            "profiles:profile_classifications",
+            kwargs={"profile_slug": "non-existent-slug"},
+        )
+        response = self.client.get(url)
+
+        # Check if the response is 404 (Not Found)
+        self.assertEqual(response.status_code, 404)
+
+    def test_profile_classifications_view_no_classifications(self):
+        """
+        Test that the view loads correctly when a profile has no classifications.
+        """
+        # Create a new profile with no classifications
+        new_user = User.objects.create_user(
+            email="newuser@example.com",
+            password="testpassword",
+        )
+
+        new_profile = new_user.profile
+        new_profile.slug = "new-user"
+        new_profile.save()
+
+        url = reverse(
+            "profiles:profile_classifications",
+            kwargs={
+                "profile_slug": new_profile.slug,
+            },
+        )
+
+        response = self.client.get(url)
+
+        # Check if the response is successful
+        self.assertEqual(response.status_code, 200)
+
+        # Check that the context contains an empty list for profile_classifications_group
+        self.assertIn(
+            "profile_classifications_group",
+            response.context,
+        )
+        self.assertEqual(
+            len(response.context["profile_classifications_group"]),
+            0,
+        )
+
+    def test_profile_classifications_view_duplicate_classification_nos(self):
+        """
+        Test that the view correctly groups classifications with the same 'no'.
+        """
+        # Manually add an additional classification with the same 'no' as an existing one
+        ProfileClassification.objects.create(
+            profile=self.profile,
+            no=1,  # Same 'no' as classification1 and classification2
+            classification=self.classification3,  # Different classification
+        )
+
+        url = reverse(
+            "profiles:profile_classifications",
+            kwargs={"profile_slug": self.profile.slug},
+        )
+        response = self.client.get(url)
+
+        # Check if the response is successful
+        self.assertEqual(response.status_code, 200)
+
+        # Check if classifications are in the context
+        self.assertIn("profile_classifications_group", response.context)
+        classifications_group = response.context["profile_classifications_group"]
+
+        self.assertEqual(len(classifications_group[0]), 1)
+
+
+class MoveToSisterGroupViewTests(TestCase):
+    def setUp(self):
+        # Create test users
+        self.user1 = User.objects.create_user(
+            email="user1@example.com",
+            password="password1",
+        )
+        self.user2 = User.objects.create_user(
+            email="user2@example.com",
+            password="password2",
+        )
+        self.user3 = User.objects.create_user(
+            email="user3@example.com",
+            password="password3",
+        )
+        self.user4 = User.objects.create_user(
+            email="user4@example.com",
+            password="password4",
+        )
+        self.user5 = User.objects.create_user(
+            email="user5@example.com",
+            password="password5",
+        )
+
+        # Create test profiles
+        self.profile1 = self.user1.profile
+        self.profile1.first_name = "John"
+        self.profile1.last_name = "Doe"
+        self.profile1.is_onboarded = True
+        self.profile1.save()
+
+        self.profile2 = self.user2.profile
+        self.profile2.first_name = "Tobi"
+        self.profile2.last_name = "Damilola"
+        self.profile2.is_onboarded = True
+        self.profile2.save()
+
+        self.profile3 = self.user3.profile
+        self.profile3.first_name = "Chichi"
+        self.profile3.last_name = "Aberechi"
+        self.profile3.is_onboarded = True
+        self.profile3.save()
+
+        self.profile4 = self.user4.profile
+        self.profile4.first_name = "Haruna"
+        self.profile4.last_name = "Lawal"
+        self.profile4.is_onboarded = True
+        self.profile4.save()
+
+        self.profile5 = self.user5.profile
+        self.profile5.first_name = "Kato"
+        self.profile5.last_name = "Dominiq"
+        self.profile5.is_onboarded = True
+        self.profile5.save()
+
+        # Create test groups
+        self.group1 = Group.objects.create(
+            leader=self.profile1,
+            name="Origin group",
+            slug="origin-group",
+            location_country="NG",
+            location_city="Bauchi",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.group2 = Group.objects.create(
+            leader=self.profile2,
+            name="Second Group 2",
+            slug="second-group-2",
+            location_country="NG",
+            parent=self.group1,
+            location_city="Bauchi",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.group3 = Group.objects.create(
+            parent=self.group1,
+            leader=self.profile3,
+            name="Third Group 3",
+            slug="third-group-3",
+            location_country="NG",
+            location_city="Jos",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        # Add members to the group
+        self.group1.add_member(self.profile2)
+        self.group1.add_member(self.profile3)
+
+        self.group2.add_member(self.profile4)
+        self.group2.add_member(self.profile5)
+
+    def test_move_member_successfully(self):
+        # Test the successful move of a member from group1 to group2
+
+        self.client.login(
+            email="user2@example.com",
+            password="password2",
+        )
+
+        form_data = {
+            "member": self.profile4.id,
+            "target_group": self.group3.id,
+        }
+
+        url = reverse(
+            "profiles:move_to_sister_group",
+            kwargs={
+                "profile_slug": self.profile4.slug,
+                "group_slug": self.group2.slug,
+            },
+        )
+
+        response = self.client.post(
+            url,
+            form_data,
+        )
+
+        self.profile4.refresh_from_db()
+
+        self.assertEqual(
+            self.profile4.group_in.group,
+            self.group3,
+        )
+
+        self.assertRedirects(
+            response,
+            self.group3.get_members_url(),
+        )
+
+    def test_invalid_form_submission(self):
+        # Test submission with invalid data (e.g., missing target group)
+        self.client.login(
+            email="user2@example.com",
+            password="password2",
+        )
+
+        form_data = {
+            "member": self.profile2.id,
+        }
+
+        url = reverse(
+            "profiles:move_to_sister_group",
+            kwargs={
+                "profile_slug": self.profile2.slug,
+                "group_slug": self.group1.slug,
+            },
+        )
+        response = self.client.post(url, form_data)
+
+        # Ensure the form is invalid and returned to the template
+        self.assertFalse(response.context["move_group_form"].is_valid())
+
+    def test_move_leader_and_relocate_group(self):
+        # Test moving the leader and relocating their group
+        self.client.login(
+            email="user2@example.com",
+            password="password2",
+        )
+
+        self.group4 = Group.objects.create(
+            parent=self.group1,
+            leader=self.profile4,
+            name="Third Group 4",
+            slug="third-group-4",
+            location_country="NG",
+            location_city="Jos",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        form_data = {
+            "member": self.profile4.id,
+            "target_group": self.group3.id,
+        }
+
+        url = reverse(
+            "profiles:move_to_sister_group",
+            kwargs={
+                "profile_slug": self.profile4.slug,
+                "group_slug": self.group2.slug,
+            },
+        )
+
+        self.client.post(url, form_data)
+
+        # Ensure the member is moved and the leader's group is relocated
+        # as a child of the new group
+        self.profile4.refresh_from_db()
+        self.assertEqual(
+            self.profile4.group_in.group,
+            self.group3,
+        )
+
+        # Check if the group led by profile1 is now a child of group2
+        self.group3.refresh_from_db()
+        self.assertEqual(
+            self.group4.parent,
+            self.group1,
+        )
+
+
+class MoveToChildGroupViewTests(TestCase):
+    def setUp(self):
+        # Create test users and profiles (as in your previous setup)
+        self.user1 = User.objects.create_user(
+            email="user1@example.com", password="password1"
+        )
+        self.user2 = User.objects.create_user(
+            email="user2@example.com", password="password2"
+        )
+        self.user3 = User.objects.create_user(
+            email="user3@example.com", password="password3"
+        )
+        self.user4 = User.objects.create_user(
+            email="user4@example.com", password="password4"
+        )
+        self.user5 = User.objects.create_user(
+            email="user5@example.com", password="password5"
+        )
+
+        self.profile1 = self.user1.profile
+        self.profile1.first_name = "John"
+        self.profile1.last_name = "Doe"
+        self.profile1.is_onboarded = True
+        self.profile1.save()
+
+        self.profile2 = self.user2.profile
+        self.profile2.first_name = "Tobi"
+        self.profile2.last_name = "Damilola"
+        self.profile2.is_onboarded = True
+        self.profile2.save()
+
+        self.profile3 = self.user3.profile
+        self.profile3.first_name = "Chichi"
+        self.profile3.last_name = "Aberechi"
+        self.profile3.is_onboarded = True
+        self.profile3.save()
+
+        self.profile4 = self.user4.profile
+        self.profile4.first_name = "Haruna"
+        self.profile4.last_name = "Lawal"
+        self.profile4.is_onboarded = True
+        self.profile4.save()
+
+        self.profile5 = self.user5.profile
+        self.profile5.first_name = "Kato"
+        self.profile5.last_name = "Dominiq"
+        self.profile5.is_onboarded = True
+        self.profile5.save()
+
+        # Create test groups
+        self.group1 = Group.objects.create(
+            leader=self.profile1,
+            name="Origin group",
+            slug="origin-group",
+            location_country="NG",
+            location_city="Bauchi",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.group2 = Group.objects.create(
+            leader=self.profile2,
+            name="Child Group 1",
+            slug="child-group-1",
+            location_country="NG",
+            parent=self.group1,
+            location_city="Bauchi",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        self.group3 = Group.objects.create(
+            leader=self.profile3,
+            name="Child Group 2",
+            slug="child-group-2",
+            location_country="NG",
+            parent=self.group1,
+            location_city="Jos",
+            description=test_constants.VALID_GROUP_DESCRIPTION,
+        )
+
+        # Add members to the group
+        self.group1.add_member(self.profile2)
+        self.group1.add_member(self.profile3)
+
+        self.group2.add_member(self.profile4)
+        self.group3.add_member(self.profile5)
+
+    def test_move_member_successfully(self):
+        from kns.core.utils import log_this
+
+        """Test successful move of a member from parent group to a child group."""
+        self.client.login(
+            email="user1@example.com",
+            password="password1",
+        )
+
+        form_data = {
+            "member": self.profile2.id,
+            "target_group": self.group3.id,
+        }
+
+        url = reverse(
+            "profiles:move_to_child_group",
+            kwargs={
+                "profile_slug": self.profile2.slug,
+                "group_slug": self.group1.slug,
+            },
+        )
+
+        response = self.client.post(url, form_data)
+
+        log_this(response)
+
+        self.profile2.refresh_from_db()
+
+        # Check that the member was successfully moved
+        self.assertEqual(self.profile2.group_in.group, self.group3)
+
+        # Assert redirection to the new group members page
+        self.assertRedirects(response, self.group3.get_members_url())
+
+    def test_move_member_not_in_group(self):
+        """Test trying to move a member who is not part of the current group."""
+        self.client.login(
+            email="user1@example.com",
+            password="password1",
+        )
+
+        form_data = {
+            "member": self.profile4.id,
+            "target_group": self.group2.id,
+        }
+
+        url = reverse(
+            "profiles:move_to_child_group",
+            kwargs={
+                "profile_slug": self.profile4.slug,
+                "group_slug": self.group1.slug,
+            },
+        )
+        response = self.client.post(url, form_data)
+
+        # Ensure warning message is set that the member is not part of the group
+        messages = list(get_messages(response.wsgi_request))
+
+        self.assertEqual(len(messages), 0)
+
+    def test_invalid_form_submission(self):
+        """Test submission with invalid data (e.g., missing target group)."""
+        self.client.login(
+            email="user1@example.com",
+            password="password1",
+        )
+
+        form_data = {
+            "member": self.profile2.id,
+        }
+
+        url = reverse(
+            "profiles:move_to_child_group",
+            kwargs={
+                "profile_slug": self.profile2.slug,
+                "group_slug": self.group1.slug,
+            },
+        )
+        response = self.client.post(
+            url,
+            form_data,
+        )
+
+        # Ensure the form is invalid and returned to the template
+        self.assertFalse(response.context["move_group_form"].is_valid())
+
+    def test_move_leader_and_relocate_group(self):
+        """Test moving the leader and relocating their group."""
+        self.client.login(
+            email="user1@example.com",
+            password="password1",
+        )
+
+        form_data = {
+            "member": self.profile2.id,
+            "target_group": self.group3.id,
+        }
+
+        url = reverse(
+            "profiles:move_to_child_group",
+            kwargs={
+                "profile_slug": self.profile2.slug,
+                "group_slug": self.group1.slug,
+            },
+        )
+
+        self.client.post(url, form_data)
+
+        # Ensure the member is moved and the leader's group is relocated
+        # as a child of the new group
+        self.profile2.refresh_from_db()
+        self.assertEqual(
+            self.profile2.group_in.group,
+            self.group3,
+        )
+
+        # Check if the group led by profile2 is now a child of group3
+        self.group2.refresh_from_db()
+        self.assertEqual(self.group2.parent, self.group3)

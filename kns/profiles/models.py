@@ -885,6 +885,21 @@ class Profile(
         # If token has expired or is not present
         return False
 
+    def change_group(self, current_group, target_group):
+        """
+        Move the profile from the current group to the target group.
+
+        Parameters
+        ----------
+        current_group : Group
+            The group from which the member is being moved.
+        target_group : Group
+            The group to which the member is being moved.
+        """
+
+        current_group.remove_member(self)
+        target_group.add_member(self)
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

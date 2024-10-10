@@ -937,64 +937,89 @@ class MoveToSisterGroupForm(forms.Form):
     """
     A form for moving a member to a sister group.
 
-    This form allows a group leader to select a member from their current group
-    and assign them to a sister group.
+    This form allows users to move a member from their current group
+    to a sister group, with both groups sharing the same parent group.
+    The member must belong to the current group, and the target group
+    must be a sibling group.
 
     Parameters
     ----------
     *args : tuple
-        Additional positional arguments passed to the parent form class.
+        Positional arguments passed to the parent form.
     **kwargs : dict
-        Additional keyword arguments passed to the parent form class.
+        Keyword arguments passed to the parent form. 'leader_group' must be
+        included in kwargs to filter the 'member' and 'target_group' fields.
     """
 
     member = forms.ModelChoiceField(
         queryset=Profile.objects.none(),
-        label="Select Member",
+        label="Select the member of your group to move",
         required=True,
+        widget=forms.Select(
+            attrs={
+                "id": "member",
+                "name": "member",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
     )
 
     target_group = forms.ModelChoiceField(
         queryset=Group.objects.none(),
-        label="Select Sister Group",
+        label="Select the group to transfer the member to",
         required=True,
+        widget=forms.Select(
+            attrs={
+                "id": "target_group",
+                "name": "target_group",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
     )
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize the form with a list of members from the group leader's group
-        and a list of sister groups.
+        Initialize the form with a queryset for the 'member' and 'target_group' fields.
+
+        The 'member' field is populated with profiles from the current leader's group.
+        The 'target_group' field is populated with sibling groups, excluding the
+        current leader's group.
 
         Parameters
         ----------
-        leader_group : Group
-            The group led by the current user (group leader).
         *args : tuple
-            Additional positional arguments passed to the parent form class.
+            Positional arguments passed to the parent form.
         **kwargs : dict
-            Additional keyword arguments passed to the parent form class.
+            Keyword arguments passed to the parent form. 'leader_group' must be
+            included in kwargs to filter the 'member' and 'target_group' fields.
         """
         leader_group = kwargs.pop("leader_group")
         super().__init__(*args, **kwargs)
-        # Populate members from the leader's group
         self.fields["member"].queryset = Profile.objects.filter(
-            group_in__group=leader_group
+            group_in__group=leader_group,
         )
-        # Populate sister groups
         self.fields["target_group"].queryset = Group.objects.filter(
             parent=leader_group.parent
         ).exclude(id=leader_group.id)
 
     def clean_target_group(self):
         """
-        Custom validation for the target group field.
+        Validate and clean the 'target_group' field.
 
-        This method ensures that the selected target group is valid.
+        Ensures that the selected target group is valid for moving the member.
 
         Returns
         -------
         Group
-            The cleaned target group data after validation.
+            The cleaned target group instance.
         """
         target_group = self.cleaned_data["target_group"]
         return target_group
@@ -1004,62 +1029,87 @@ class MoveToChildGroupForm(forms.Form):
     """
     A form for moving a member to a child group.
 
-    This form allows a group leader to select a member from their current group
-    and assign them to a child group.
+    This form allows users to move a member from their current group to
+    one of its child groups. The member must belong to the current group,
+    and the target group must be a child group.
 
     Parameters
     ----------
     *args : tuple
-        Additional positional arguments passed to the parent form class.
+        Positional arguments passed to the parent form.
     **kwargs : dict
-        Additional keyword arguments passed to the parent form class.
+        Keyword arguments passed to the parent form. 'leader_group' must be
+        included in kwargs to filter the 'member' and 'target_group' fields.
     """
 
     member = forms.ModelChoiceField(
         queryset=Profile.objects.none(),
         label="Select Member",
         required=True,
+        widget=forms.Select(
+            attrs={
+                "id": "member",
+                "name": "member",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
     )
 
     target_group = forms.ModelChoiceField(
         queryset=Group.objects.none(),
         label="Select Child Group",
         required=True,
+        widget=forms.Select(
+            attrs={
+                "id": "target_group",
+                "name": "target_group",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
     )
 
     def __init__(self, *args, **kwargs):
         """
-        Initialize the form with a list of members from the group leader's group
-        and a list of child groups.
+        Initialize the form with a queryset for the 'member' and 'target_group' fields.
+
+        The 'member' field is populated with profiles from the current leader's group.
+        The 'target_group' field is populated with child groups under the current leader's group.
 
         Parameters
         ----------
-        leader_group : Group
-            The group led by the current user (group leader).
         *args : tuple
-            Additional positional arguments passed to the parent form class.
+            Positional arguments passed to the parent form.
         **kwargs : dict
-            Additional keyword arguments passed to the parent form class.
+            Keyword arguments passed to the parent form. 'leader_group' must be
+            included in kwargs to filter the 'member' and 'target_group' fields.
         """
         leader_group = kwargs.pop("leader_group")
         super().__init__(*args, **kwargs)
-        # Populate members from the leader's group
         self.fields["member"].queryset = Profile.objects.filter(
-            group_in__group=leader_group
+            group_in__group=leader_group,
         )
-        # Populate child groups
-        self.fields["target_group"].queryset = Group.objects.filter(parent=leader_group)
+        self.fields["target_group"].queryset = Group.objects.filter(
+            parent=leader_group,
+        )
 
     def clean_target_group(self):
         """
-        Custom validation for the target group field.
+        Validate and clean the 'target_group' field.
 
-        This method ensures that the selected target group is valid.
+        Ensures that the selected target group is valid for moving the member.
 
         Returns
         -------
         Group
-            The cleaned target group data after validation.
+            The cleaned target group instance.
         """
         target_group = self.cleaned_data["target_group"]
         return target_group

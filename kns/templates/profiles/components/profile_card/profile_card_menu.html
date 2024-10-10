@@ -88,8 +88,10 @@
         </a>
       {% endif %}
 
-      {% if profile.group_in.group %}
-        {% include "profiles/components/profile_card/change_group_menu.html" %}
+      {% if request.user.profile.group_led.sister_groups.count > 0 or request.user.profile.group_led.child_groups.count > 0 %}
+        {% if profile.group_in.group %}
+          {% include "profiles/components/profile_card/change_group_menu.html" %}
+        {% endif %}
       {% endif %}
 
       <a

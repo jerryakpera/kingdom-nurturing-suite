@@ -4,22 +4,26 @@
   </button>
   <div id="doubleDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
     <ul class="py-2 text-sm text-gray-700" aria-labelledby="doubleDropdownButton">
-      <li>
-        <a
-          href="{% url "groups:move_to_sister_group" group_slug=profile.group_in.group.slug profile_slug=profile.slug %}"
-          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-        >
-          Move to sister group
-        </a>
-      </li>
-      <li>
-        <a
-          href="{% url "groups:move_to_child_group" group_slug=profile.group_in.group.slug profile_slug=profile.slug %}"
-          class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-        >
-          Move to child group
-        </a>
-      </li>
+      {% if request.user.profile.group_led.sister_groups.count > 0 %}
+        <li>
+          <a
+            href="{% url "profiles:move_to_sister_group" profile_slug=profile.slug group_slug=profile.group_in.group.slug %}"
+            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            Move to sister group
+          </a>
+        </li>
+      {% endif %}
+      {% if request.user.profile.group_led.child_groups.count > 0 %}
+        <li>
+          <a
+            href="{% url "profiles:move_to_child_group" profile_slug=profile.slug group_slug=profile.group_in.group.slug %}"
+            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+          >
+            Move to child group
+          </a>
+        </li>
+      {% endif %}
     </ul>
   </div>
 </div>

@@ -8,13 +8,19 @@
     {% recursetree descendants %}
       <li class="font-serif my-4 p-1">
         {% if node.is_leaf_node %}
-          <a href="{{ node.get_absolute_url }}">
+          <a href="{{ node.get_absolute_url }}" class="text-blue-500 hover:text-blue-600">
             {{ node.name }}
+          </a> -
+          <a href="{{ node.leader.get_absolute_url }}" class="text-blue-500 hover:text-blue-600">
+            <span class="font-medium">{{ node.leader.get_full_name }}</span>
           </a>
           {% else %}
           <span class="caret fw-semibold">
-            <a href="{{ node.get_absolute_url }}">
+            <a href="{{ node.get_absolute_url }}" class="text-blue-500 hover:text-blue-600">
               {{ node.name }}
+            </a> -
+            <a href="{{ node.leader.get_absolute_url }}" class="text-blue-500 hover:text-blue-600">
+              <span class="font-medium">{{ node.leader.get_full_name }}</span>
             </a>
           </span>
         {% endif %}
