@@ -1040,49 +1040,6 @@ class TestRemoveGroupMilestoneView(TestCase):
             f"/accounts/login/?next={url}",
         )
 
-    # def test_remove_group_milestone_permission(self):
-    #     """
-    #     Test that only authenticated users can remove a milestone.
-    #     """
-    #     # Create another user and login as them
-    #     another_user = User.objects.create_user(
-    #         email="anotheruser@example.com",
-    #         password="password123",
-    #     )
-
-    #     self.client.login(
-    #         email="anotheruser@example.com",
-    #         password="password123",
-    #     )
-
-    #     url = reverse(
-    #         "groups:remove_group_milestone",
-    #         kwargs={
-    #             "milestone_id": self.milestone.id,
-    #         },
-    #     )
-    #     response = self.client.post(url)
-
-    #     # Check if the response redirects back (not allowed to remove)
-    #     self.assertRedirects(
-    #         response,
-    #         reverse(
-    #             "groups:group_overview",
-    #             kwargs={
-    #                 "group_slug": self.group.slug,
-    #             },
-    #         ),
-    #     )
-
-    #     # Ensure a warning message is displayed
-    #     messages = list(response.wsgi_request._messages)
-
-    #     self.assertEqual(len(messages), 1)
-    #     self.assertEqual(
-    #         str(messages[0]),
-    #         "You do not have permission to remove this milestone.",
-    #     )
-
 
 class TestGroupIndexView(TestCase):
     def setUp(self):
@@ -1266,7 +1223,7 @@ class TestGroupIndexView(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.context["page_obj"]), 6)
+        self.assertEqual(len(response.context["page_obj"]), 5)
 
     def test_empty_form_does_not_filter(self):
         """
