@@ -45,7 +45,7 @@
     </div>
 
     <p class="leading-relaxed mb-3 text-sm flex-grow">
-      {{ group.description }}
+      {{ group.description|truncatechars:95 }}
     </p>
 
     <!-- Align footer to the bottom -->

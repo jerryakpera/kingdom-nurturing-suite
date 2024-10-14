@@ -4,8 +4,9 @@ Models for the core app.
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
+from django.utils import timezone
 
-from . import constants
+from . import constants, modelmixins
 
 
 class FAQ(models.Model):
@@ -258,3 +259,158 @@ class Setting(models.Model):
 
         Provides human-readable names for the model and its plural form.
         """
+
+
+class Notification(modelmixins.TimestampedModel, models.Model):
+    """
+    Model representing a notification in the application.
+
+    Notifications are messages triggered by various actions in the
+    system, which can be sent to users.
+    """
+
+    NOTIFICATION_TYPES = constants.NOTIFICATION_TYPES
+
+    # User who triggered the notification (optional, might not always be a user)
+    sender = models.ForeignKey(
+        "profiles.Profile",
+        related_name="sent_notifications",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    # Type of notification, e.g., Group Move, Task Assignment
+    notification_type = models.CharField(
+        max_length=20,
+        choices=NOTIFICATION_TYPES,
+    )
+
+    # Title of the notification (short description for display in lists)
+    title = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+
+    # The main message of the notification
+    message = models.TextField()
+
+    link = models.URLField(
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        """
+        Meta options for the Notification model.
+
+        Defines ordering and indexing options for notifications.
+        """
+
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["notification_type"]),
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["sender"]),
+        ]
+
+    def __str__(self):
+        """
+        Return a string representation of the Notification instance.
+
+        Returns
+        -------
+        str
+            A string indicating the notification type and creation date.
+        """
+        return f"Notification [{self.notification_type}] - {self.created_at.strftime('%Y-%m-%d')}"
+
+    def mark_as_read_for_user(self, user):
+        """
+        Mark the notification as read for a specific user.
+
+        Parameters
+        ----------
+        user : Profile
+            The user for whom to mark the notification as read.
+        """
+        recipient_record = self.recipients.filter(recipient=user).first()
+
+        if recipient_record and not recipient_record.is_read:
+            recipient_record.mark_as_read()
+
+    def add_recipient(self, recipient):
+        """
+        Add a recipient to the notification.
+
+        Parameters
+        ----------
+        recipient : Profile
+            The user profile to be added as a recipient of the notification.
+        """
+        NotificationRecipient.objects.create(
+            notification=self,
+            recipient=recipient,
+        )
+
+
+class NotificationRecipient(models.Model):
+    """
+    Model representing a recipient of a notification.
+
+    Each recipient can have a notification marked as read or unread.
+    """
+
+    notification = models.ForeignKey(
+        Notification,
+        related_name="recipients",
+        on_delete=models.CASCADE,
+    )
+    recipient = models.ForeignKey(
+        "profiles.Profile",
+        related_name="notification_recipient",
+        on_delete=models.CASCADE,
+    )
+    is_read = models.BooleanField(default=False)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        """
+        Meta options for the NotificationRecipient model.
+
+        Defines unique constraints and indexing options for recipients.
+        """
+
+        unique_together = ("notification", "recipient")
+        indexes = [
+            models.Index(fields=["recipient"]),
+            models.Index(fields=["is_read"]),
+        ]
+
+    def __str__(self):
+        """
+        Return a string representation of the NotificationRecipient instance.
+
+        Returns
+        -------
+        str
+            A string indicating the notification type and read status for the recipient.
+        """
+        status = "Read" if self.is_read else "Unread"
+
+        return (
+            f"Notification '{self.notification.notification_type}' for "
+            f"{self.recipient} - {status}"
+        )
+
+    def mark_as_read(self):
+        """
+        Mark the notification as read.
+
+        Updates the is_read status and the read_at timestamp.
+        """
+        if not self.is_read:
+            self.is_read = True
+            self.read_at = timezone.now()
+            self.save()

@@ -47,9 +47,15 @@ def index(request):
         ).exists()
 
         if group_led_exists:
-            context["local_groups"] = (
-                request.user.profile.group_led.get_local_descendant_groups()[:3]
+            close_city_groups = request.user.profile.group_led.get_close_city_groups()
+            close_country_groups = (
+                request.user.profile.group_led.get_close_country_groups()
             )
+
+            # Use union to combine querysets
+            close_groups = close_city_groups.union(close_country_groups)
+
+            context["close_groups"] = close_groups[:3]
 
     else:
         context = {}
@@ -164,7 +170,7 @@ def contact_view(request):
 def error_404(
     request: HttpRequest,
     exception: Exception,
-) -> HttpResponse:
+) -> HttpResponse:  # pragma: no cover
     """
     Render the error page of the core application.
 

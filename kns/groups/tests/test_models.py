@@ -466,44 +466,44 @@ class TestGroupMethods(TestCase):
         self.assertEqual(self.group.members.count(), 4)
         self.assertTrue(self.group.is_member(new_profile))
 
-    def test_get_local_descendant_groups_same_city(self):
+    def test_get_close_city_groups_same_city(self):
         """
-        Test that get_local_descendant_groups returns only descendants
+        Test that get_close_city_groups returns only descendants
         that are in the same city as the group.
         """
-        local_groups = self.group.get_local_descendant_groups()
+        local_groups = self.group.get_close_city_groups()
 
         # Ensure only the groups in the same city are returned
         self.assertIn(self.child_group_same_city, local_groups)
         self.assertIn(self.grandchild_group_same_city, local_groups)
         self.assertNotIn(self.child_group_different_city, local_groups)
 
-    def test_get_local_descendant_groups_exclude_self(self):
+    def test_get_close_city_groups_exclude_self(self):
         """
         Test that the method excludes the group itself from the result.
         """
-        local_groups = self.group.get_local_descendant_groups()
+        local_groups = self.group.get_close_city_groups()
 
         # Ensure the parent group itself is excluded
         self.assertNotIn(self.group, local_groups)
 
-    def test_get_local_descendant_groups_different_city(self):
+    def test_get_close_city_groups_different_city(self):
         """
-        Test that get_local_descendant_groups doesn't return groups
+        Test that get_close_city_groups doesn't return groups
         in a different city.
         """
-        local_groups = self.group.get_local_descendant_groups()
+        local_groups = self.group.get_close_city_groups()
 
         # Ensure the group in a different city is not returned
         self.assertNotIn(self.child_group_different_city, local_groups)
 
-    def test_get_local_descendant_groups_called_on_child(self):
+    def test_get_close_city_groups_called_on_child(self):
         """
-        Test that get_local_descendant_groups works correctly when called
+        Test that get_close_city_groups works correctly when called
         on a child group, ensuring that the parent's descendants are returned.
         """
         # Call the method on a child group that has a parent
-        local_groups = self.child_group_same_city.get_local_descendant_groups()
+        local_groups = self.child_group_same_city.get_close_city_groups()
 
         # Ensure that descendants of the parent group are returned
         self.assertIn(self.grandchild_group_same_city, local_groups)
@@ -513,6 +513,74 @@ class TestGroupMethods(TestCase):
         self.assertNotIn(self.child_group_same_city, local_groups)
 
         # Test for the average_age method
+
+    def test_get_close_country_groups_same_country(self):
+        """
+        Test that get_close_country_groups returns only descendants
+        that are in the same country as the group.
+        """
+        national_groups = self.group.get_close_country_groups()
+
+        # Ensure the groups in the same country are returned
+        self.assertIn(self.child_group_same_city, national_groups)
+        self.assertIn(self.grandchild_group_same_city, national_groups)
+        self.assertIn(self.child_group_different_city, national_groups)
+
+    def test_get_close_country_groups_exclude_self(self):
+        """
+        Test that the method excludes the group itself from the result.
+        """
+        national_groups = self.group.get_close_country_groups()
+
+        # Ensure the parent group itself is excluded
+        self.assertNotIn(self.group, national_groups)
+
+    def test_get_close_country_groups_called_on_child(self):
+        """
+        Test that get_close_country_groups works correctly when called
+        on a child group, ensuring that the parent's descendants are returned.
+        """
+        # Call the method on a child group that has a parent
+        national_groups = self.child_group_same_city.get_close_country_groups()
+
+        # Ensure that descendants of the parent group are returned
+        self.assertIn(self.grandchild_group_same_city, national_groups)
+        self.assertIn(self.child_group_different_city, national_groups)
+
+        # Ensure that the group itself (child_group_same_city) is excluded
+        self.assertNotIn(self.child_group_same_city, national_groups)
+
+    def test_get_close_country_groups_different_country(self):
+        """
+        Test that get_close_country_groups doesn't return groups
+        in a different country (assuming we add a group in a different country).
+        """
+        # Create a new group in a different country
+        user9 = User.objects.create_user(
+            email="member9@example.com",
+            password="password",
+        )
+        profile9 = user9.profile
+        profile9.date_of_birth = date.today() - timedelta(
+            days=365 * 25,
+        )
+        profile9.save()
+
+        self.child_group_different_country = GroupFactory(
+            parent=self.group,
+            leader=profile9,
+            name="Child Group USA",
+            location_country="US",
+            location_city="New York",
+        )
+
+        national_groups = self.group.get_close_country_groups()
+
+        # Ensure the group in a different country is not returned
+        self.assertNotIn(
+            self.child_group_different_country,
+            national_groups,
+        )
 
     def test_average_age(self):
         # Get the actual ages of the members

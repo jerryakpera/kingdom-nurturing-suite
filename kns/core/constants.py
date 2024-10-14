@@ -111,3 +111,7 @@ STATUS_CHOICES = [
     ("published", "Published"),
     ("archived", "Archived"),
 ]
+
+NOTIFICATION_TYPES = [
+    ("group_move", "Group Move"),
+]

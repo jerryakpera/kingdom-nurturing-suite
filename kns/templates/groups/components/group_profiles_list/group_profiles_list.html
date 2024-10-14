@@ -1,8 +1,10 @@
 <section class="{% if profiles.count > 0 %} pb-10 {% endif %}">
   {% if profiles.count > 0 %}
-    <div class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <div class="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {% for profile in profiles %}
-        {% include "profiles/components/profiles_list/profiles_list_item.html" %}
+        <div class="flex flex-col h-full"> <!-- Ensure the container stretches to fill height -->
+          {% include "profiles/components/profiles_list/profiles_list_item.html" %}
+        </div>
       {% endfor %}
     </div>
 

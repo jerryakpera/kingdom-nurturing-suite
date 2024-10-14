@@ -77,3 +77,48 @@ class GroupAdmin(admin.ModelAdmin):
         GroupMemberInline,
         GroupFaithMilestoneInline,
     ]
+
+    # Customize the columns displayed in the Group list
+    list_display = ["name", "leaders_full_name", "parent_group_name"]
+
+    # Define a method to display the leader's full name
+    def leaders_full_name(self, obj):
+        """
+        Retrieve the full name of the leader of the group.
+
+        Parameters
+        ----------
+        obj : Group
+            The Group instance for which the leader's name is retrieved.
+
+        Returns
+        -------
+        str
+            The full name of the group's leader.
+        """
+        return obj.leader.get_full_name()
+
+    leaders_full_name.short_description = "Leader"
+
+    # Define a method to display the parent group's name
+    def parent_group_name(self, obj):
+        """
+        Retrieve the name of the parent group.
+
+        If the group does not have a parent, it returns a placeholder.
+
+        Parameters
+        ----------
+        obj : Group
+            The Group instance for which the parent group's name is retrieved.
+
+        Returns
+        -------
+        str
+            The name of the parent group if it exists; otherwise, a placeholder.
+        """
+        if obj.parent:
+            return obj.parent.name
+        return "---"
+
+    parent_group_name.short_description = "Parent Group"

@@ -383,15 +383,15 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
         """
         return self.members.filter(profile=profile).exists()
 
-    def get_local_descendant_groups(self):
+    def get_close_city_groups(self):
         """
-        Return all groups within the same city or country as the groups location,
-        that are descendants of the group.
+        Return all groups within the same city as the groups location,
+        that are descendants/siblings of the group.
 
         Returns
         -------
         QuerySet
-            A queryset of groups that are descendants of this group and
+            A queryset of groups that are descendants/siblings of this group and
             are in the same city or country as the group.
         """
 
@@ -404,13 +404,42 @@ class Group(TimestampedModel, ModelWithLocation, MPTTModel):
             descendant_groups = self.get_descendants()
 
         # Filter based on city first, then country if city is not available
-        local_groups = descendant_groups.filter(
+        close_groups = descendant_groups.filter(
             location_city=self.location_city,
         ).exclude(
             id=self.id,
         )
 
-        return local_groups
+        return close_groups
+
+    def get_close_country_groups(self):
+        """
+        Return all groups within the same country as the groups location,
+        that are descendants/siblings of the group.
+
+        Returns
+        -------
+        QuerySet
+            A queryset of groups that are descendants/siblings of this group and
+            are in the same country or country as the group.
+        """
+
+        descendant_groups = None
+
+        if self.parent:
+            descendant_groups = self.parent.get_descendants()
+        else:
+            # Get all descendant groups of this group
+            descendant_groups = self.get_descendants()
+
+        # Filter based on country first, then country if country is not available
+        close_groups = descendant_groups.filter(
+            location_country=self.location_country,
+        ).exclude(
+            id=self.id,
+        )
+
+        return close_groups
 
     def average_age(self):
         """

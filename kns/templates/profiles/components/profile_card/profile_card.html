@@ -47,6 +47,15 @@
     {% include "profiles/components/profile_icons/profile_icons.html" %}
   </div>
 
+  {% if profile.group_in %}
+    <div class="p-4 pb-0">
+      <div class="text-xs text-gray-500 uppercase font-semibold">Belongs to</div>
+      <a href="{{ profile.group_in.group.get_absolute_url }}" class="font-bold text-blue-500 hover:text-blue-700">
+        {{ profile.group_in.group.name }}
+      </a>
+    </div>
+  {% endif %}
+
   <div class="px-4 my-4 space-y-4">
     {% if profile.contact_details_is_visible %}
       <div>

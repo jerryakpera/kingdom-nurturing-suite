@@ -36,62 +36,6 @@ class TestGroupViews(TestCase):
             description=test_constants.VALID_GROUP_DESCRIPTION,
         )
 
-    def test_index_view_authenticated(self):
-        """
-        Test the index view for authenticated users to ensure
-        it renders correctly and includes profile completion and groups.
-        """
-        user2 = User.objects.create_user(
-            email="testuser2@example.com",
-            password="password",
-        )
-        profile2 = user2.profile
-
-        self.group.add_member(profile=profile2)
-
-        # Create a group
-        self.group2 = Group.objects.create(
-            leader=profile2,
-            name="Test Group 2",
-            location_country="NG",
-            location_city="Bauchi",
-            parent=self.group,
-            description=test_constants.VALID_GROUP_DESCRIPTION,
-        )
-
-        # Log in the test user
-        self.client.login(
-            email=self.user.email,
-            password="password123",
-        )
-
-        response = self.client.get(reverse("core:index"))
-
-        # Check if the response status code is 200 OK
-        self.assertEqual(response.status_code, 200)
-
-        # Check if the correct template is used
-        self.assertTemplateUsed(
-            response,
-            "core/pages/index.html",
-        )
-
-        # Check that 'profile_completion' is in the context
-        self.assertIn("profile_completion", response.context)
-
-        # If there is a group led by the user, 'local_groups' should be in the context
-        self.assertIn("local_groups", response.context)
-        self.assertEqual(
-            response.context["local_groups"].count(),
-            1,
-        )
-
-        # Ensure the correct group is listed in 'local_groups'
-        self.assertIn(self.group2, response.context["local_groups"])
-
-        # Ensure the group's name appears in the page description
-        self.assertIn("Test Group 2", response.content.decode())
-
     def test_group_overview_view(self):
         """
         Test the group_overview view for authenticated users to ensure

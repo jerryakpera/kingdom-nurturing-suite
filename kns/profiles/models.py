@@ -14,8 +14,8 @@ from django.urls import reverse
 from django.utils import timezone
 from django_countries.fields import CountryField
 
-from kns.accounts.utils import verify_token
 from kns.core import modelmixins
+from kns.core.models import Notification
 from kns.custom_user.models import User
 
 from . import constants, emails

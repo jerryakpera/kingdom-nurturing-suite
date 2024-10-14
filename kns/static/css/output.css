@@ -3412,6 +3412,10 @@ video {
     justify-content: flex-start;
   }
 
+  .lg\:gap-2{
+    gap: 0.5rem;
+  }
+
   .lg\:gap-4{
     gap: 1rem;
   }

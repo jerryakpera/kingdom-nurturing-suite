@@ -1,29 +1,26 @@
-<div class="p-2">
-  <div class="shadow-sm border rounded-md border-gray-200">
-    <div class="h-full p-2">
-      <div class="w-full flex flex-col items-center space-y-2">
-        <div class="text-center w-full flex justify-center flex-col items-center">
-          <a href="{{ profile.get_absolute_url }}" class="text-knsPrimary font-medium hover:text-knsPrimary-700">
-            {{ profile.get_full_name }}
-          </a>
+<div class="shadow-xs border rounded-md border-gray-200 flex flex-col h-full">
+  <div class="h-full p-2 flex flex-col justify-between"> <!-- Flex to space items evenly -->
+    <div class="w-full flex flex-col items-center space-y-2 mb-1">
+      <div class="text-center w-full flex justify-center flex-col items-center">
+        <a href="{{ profile.get_absolute_url }}" class="text-knsPrimary font-medium hover:text-knsPrimary-700">
+          {{ profile.get_full_name }}
+        </a>
 
-          {% if profile.location_country %}
-            <div class="text-gray-700 text-xs font-light flex items-center gap-x-1">
-              <span class="mb-0 fw-semibold">
-                <img
-                  alt="Event location flag"
-                  src="{{ profile.location_country.flag }}"
-                />
-
-              </span>
-              {{ profile.location_display }}
-            </div>
-          {% else %}
-            <div class="text-xs">
-              ---
-            </div>
-          {% endif %}
-        </div>
+        {% if profile.location_country %}
+          <div class="text-gray-700 text-xs font-light flex items-center gap-x-1">
+            <span class="mb-0 fw-semibold">
+              <img
+                alt="Event location flag"
+                src="{{ profile.location_country.flag }}"
+              />
+            </span>
+            {{ profile.location_display }}
+          </div>
+        {% else %}
+          <div class="text-xs">
+            ---
+          </div>
+        {% endif %}
       </div>
     </div>
 
@@ -43,50 +40,39 @@
       {% endif %}
     </a>
 
-    <div class="h-full p-2">
-      <div class="w-full flex flex-col items-center space-y-2">
-
-        <div class="w-full text-center">
-          <div class="text-xs font-semibold">
-            {{ profile.get_role_display_str }}
-          </div>
-
-          {% if profile.role == "leader" %}
-            {% if profile.group_led %}
-              <div>
-                <a href="{{ profile.group_led.get_absolute_url }}">
-                  {{ profile.group_led.name }}
-                </a>
-              </div>
-            {% elif profile.group_in %}
-              <div>
-                <a href="{{ profile.group_in.get_absolute_url }}">
-                  {{ profile.group_in.name }}
-                </a>
-              </div>
-            {% else %}
-              <div class="text-xs">
-                ---
-              </div>
-            {% endif %}
-          {% endif %}
-
-          {% if profile.role != "leader" %}
-            {% if profile.group_in %}
-              <div>
-                <a href="{{ profile.group_in.get_absolute_url }}">
-                  {{ profile.group_in.group.name }}
-                </a>
-              </div>
-            {% else %}
-              <div class="text-xs">
-                ---
-              </div>
-            {% endif %}
-          {% endif %}
-
-
+    <div class="h-full p-2 flex flex-col justify-center">
+      <div class="w-full text-center">
+        <div class="text-xs font-semibold">
+          {{ profile.get_role_display_str }}
         </div>
+
+        {% if profile.role == "leader" %}
+          {% if profile.group_led %}
+            <div>
+              {{ profile.group_led.name }}
+            </div>
+          {% elif profile.group_in %}
+            <div>
+              {{ profile.group_in.name }}
+            </div>
+          {% else %}
+            <div class="text-xs">
+              ---
+            </div>
+          {% endif %}
+        {% endif %}
+
+        {% if profile.role != "leader" %}
+          {% if profile.group_in %}
+            <div>
+              {{ profile.group_in.group.name }}
+            </div>
+          {% else %}
+            <div class="text-xs">
+              ---
+            </div>
+          {% endif %}
+        {% endif %}
       </div>
     </div>
 

@@ -21,7 +21,8 @@ from kns.classifications.models import (
     ProfileClassification,
     Subclassification,
 )
-from kns.core.utils import log_this
+from kns.core import emails as core_emails
+from kns.core import utils as core_utils
 from kns.custom_user.models import User
 from kns.faith_milestones.forms import ProfileFaithMilestonesForm
 from kns.faith_milestones.models import ProfileFaithMilestone
@@ -179,7 +180,7 @@ class NewMemberView(SessionWizardView):  # pragma: no cover
             return redirect(profile)
 
         except Exception as e:
-            log_this(e)
+            core_utils.log_this(e)
             messages.error(
                 request=self.request,
                 message=(
@@ -2061,6 +2062,30 @@ def move_to_sister_group(request, profile_slug, group_slug):
                 target_group=target_group,
             )
 
+            notification_recipients = [
+                current_group.leader,
+                target_group.leader,
+                member,
+            ]
+
+            group_change_notification = core_utils.create_group_change_notification(
+                profile=member,
+                current_group=current_group,
+                target_group=target_group,
+            )
+
+            for recipient in notification_recipients:
+                group_change_notification.add_recipient(recipient=recipient)
+
+                # Send email notification
+                core_emails.send_group_change_notification_email(
+                    request=request,
+                    profile=member,
+                    current_group=current_group,
+                    target_group=target_group,
+                    recipient=recipient,
+                )
+
             # If the member is leading their group
             if member.is_leading_group():
                 # Relocate the member's group to be a child of the target group
@@ -2138,6 +2163,33 @@ def move_to_child_group(request, profile_slug, group_slug):
                 target_group=target_group,
             )
 
+            # Notify the current group's leader, target group's leader, and member
+            notification_recipients = [
+                current_group.leader,
+                target_group.leader,
+                member,
+            ]
+
+            # Create group change notification
+            group_change_notification = core_utils.create_group_change_notification(
+                profile=member,
+                current_group=current_group,
+                target_group=target_group,
+            )
+
+            # Add recipients to the notification and send email notifications
+            for recipient in notification_recipients:
+                group_change_notification.add_recipient(recipient=recipient)
+
+                # Send email notification
+                core_emails.send_group_change_notification_email(
+                    request=request,
+                    profile=member,
+                    current_group=current_group,
+                    target_group=target_group,
+                    recipient=recipient,
+                )
+
             # If the member is leading their group
             if member.is_leading_group():
                 # Relocate the member's group to be a child of the target group
@@ -2146,13 +2198,16 @@ def move_to_child_group(request, profile_slug, group_slug):
                     position="last-child",
                 )
 
+            # Display success message
             messages.success(
                 request=request,
                 message=f"{member} has been moved to {target_group}.",
             )
 
+            # Redirect to target group's members page
             return redirect(target_group.get_members_url())
 
+    # Render the move-to-child-group page
     context = {
         "profile": profile,
         "current_group": current_group,
