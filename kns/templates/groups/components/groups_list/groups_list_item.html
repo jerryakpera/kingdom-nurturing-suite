@@ -49,19 +49,18 @@
     </p>
 
     <!-- Align footer to the bottom -->
-    <div class="flex items-center flex-wrap justify-between mt-auto" id="{{ group.id }}-card-footer">
-      <a class="w-28 h-8 text-xs font-medium text-center text-white bg-knsSecondary-700 rounded-lg hover:bg-knsSecondary-800 focus:ring-4 focus:outline-none focus:ring-knsSebg-knsSecondary-300 dark:bg-knsSecondary-600 dark:hover:bg-knsSecondary-700 dark:focus:ring-knsSebg-knsSecondary-800 gap-x-2 flex items-center justify-center cursor-pointer" href="{{ group.get_absolute_url }}">
+    <div class="flex space-y-2 items-center flex-wrap justify-between mt-auto" id="{{ group.id }}-card-footer">
+      <a class="text-sm font-semibold text-blue-500 hover:text-blue-600" href="{{ group.get_absolute_url }}">
         View group
-        <iconify-icon icon="ph:arrow-right-fill" class="text-lg"></iconify-icon>
       </a>
 
-      <div class="flex space-x-4 justify-between">
-        <span class="text-gray-800 font-bold inline-flex items-center leading-none text-sm border-gray-300 gap-x-1">
-          <iconify-icon icon="iconamoon:profile-fill" class="text-lg"></iconify-icon>
+      <div class="flex space-x-1 justify-between">
+        <span class="text-gray-800 font-bold inline-flex items-center leading-none text-sm border-gray-300 gap-x-1 border rounded-full p-1 px-1.5">
+          <iconify-icon icon="iconamoon:profile-fill" class="text-sm"></iconify-icon>
           {{ group.total_members_count }}
         </span>
-        <span class="text-gray-800 inline-flex items-center leading-none text-sm gap-x-1 font-bold">
-          <iconify-icon icon="mdi:family-tree" class="text-lg"></iconify-icon>
+        <span class="text-gray-800 inline-flex items-center leading-none text-sm gap-x-1 font-bold border rounded-full p-1 px-1.5">
+          <iconify-icon icon="mdi:family-tree" class="text-sm"></iconify-icon>
           {{ group.get_descendant_count }}
         </span>
 

@@ -3,6 +3,7 @@ Views for the core application.
 """
 
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -222,3 +223,40 @@ def mark_notification_and_redirect(request, notification_id):
 
     # Redirect to the notification's link
     return redirect(notification.link)
+
+
+@login_required
+def dismiss_getting_started(request):
+    """
+    Mark the getting started section as dismissed for the current user's profile.
+
+    This view updates the `is_dismissed` flag for the user's ProfileCompletion
+    instance, allowing them to hide the "Getting Started" section.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object containing the logged-in user's profile.
+
+    Returns
+    -------
+    HttpResponseRedirect
+        A redirect response to the index page.
+    """
+    profile = request.user.profile
+
+    try:
+        # Get or create ProfileCompletion for the user's profile
+        profile_completion = profile.profile_completion
+    except ObjectDoesNotExist:
+        profile_completion = ProfileCompletion.objects.create(
+            profile=profile,
+            is_dismissed=True,
+        )
+
+    # Mark as dismissed and save
+    profile_completion.is_dismissed = True
+    profile_completion.save()
+
+    # Redirect to the index page
+    return redirect("core:index")

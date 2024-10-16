@@ -294,3 +294,85 @@ class TestNotificationViews(TestCase):
         )
 
         self.assertEqual(response.status_code, 404)
+
+
+class TestDismissGettingStartedView(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Set up user and profile data
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        self.profile = self.user.profile
+        self.profile.is_onboarded = True
+        self.profile.save()
+
+        # Create a ProfileCompletion instance
+        self.profile_completion = ProfileCompletion.objects.create(
+            profile=self.profile,
+        )
+
+        # Log the user in
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+    def test_dismiss_getting_started(self):
+        """
+        A logged-in user dismisses the getting started section.
+        """
+        response = self.client.post(reverse("core:dismiss_getting_started"))
+
+        # Ensure the response is a redirect to the index page
+        self.assertRedirects(response, reverse("core:index"))
+
+        # Verify that the profile_completion instance is marked as dismissed
+        self.profile_completion.refresh_from_db()  # Refresh the instance from the database
+        self.assertTrue(self.profile_completion.is_dismissed)
+
+    def test_dismiss_getting_started_nonexistent_profile_completion(self):
+        """
+        A logged-in user with no ProfileCompletion instance creates one when dismissing.
+        """
+        # Log out the current user and create a new one without ProfileCompletion
+        self.client.logout()
+        self.user2 = User.objects.create_user(
+            email="anotheruser@example.com", password="password123"
+        )
+        self.profile2 = self.user2.profile
+        self.profile2.is_onboarded = True
+        self.profile2.save()
+
+        # Log in the new user
+        self.client.login(
+            email="anotheruser@example.com",
+            password="password123",
+        )
+
+        response = self.client.post(reverse("core:dismiss_getting_started"))
+
+        # Ensure the response is a redirect to the index page
+        self.assertRedirects(response, reverse("core:index"))
+
+        # Verify that a new ProfileCompletion instance has been created
+        # and marked as dismissed
+        profile_completion = ProfileCompletion.objects.get(profile=self.profile2)
+        self.assertTrue(profile_completion.is_dismissed)
+
+    def test_dismiss_getting_started_unauthenticated(self):
+        """
+        An unauthenticated user is redirected to the login page when
+        trying to dismiss getting started.
+        """
+        self.client.logout()  # Ensure the user is logged out
+        response = self.client.post(reverse("core:dismiss_getting_started"))
+
+        # Check if the user is redirected to the login page
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={reverse('core:dismiss_getting_started')}",
+        )

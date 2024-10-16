@@ -267,6 +267,8 @@ class ProfileCompletion(models.Model):
         related_name="profile_completion",
     )
 
+    is_dismissed = models.BooleanField(default=False)
+
     @property
     def is_profile_complete(self):
         """
@@ -277,9 +279,12 @@ class ProfileCompletion(models.Model):
         bool
             True if all tasks are complete, False otherwise.
         """
-        return not self.profile.completion_tasks.filter(
-            is_complete=False,
-        ).exists()
+        return (
+            not self.profile.completion_tasks.filter(
+                is_complete=False,
+            ).exists()
+            or self.is_dismissed
+        )
 
     @property
     def tasks(self):

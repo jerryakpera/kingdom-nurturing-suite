@@ -26,6 +26,11 @@ urlpatterns = [
         name="submit_ticket",
     ),
     path(
+        "dismiss-getting-started",
+        views.dismiss_getting_started,
+        name="dismiss_getting_started",
+    ),
+    path(
         "notifications/read-redirect/<int:notification_id>/",
         views.mark_notification_and_redirect,
         name="mark_notification_and_redirect",
