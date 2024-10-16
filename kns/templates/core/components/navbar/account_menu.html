@@ -1,12 +1,12 @@
 {% load static %}
 
-<button type="button" class="text-sm bg-knsSecondary w-8 h-8 flex items-center justify-center rounded-full md:me-0 focus:ring-4 focus:ring-knsSecondary-300 dark:focus:ring-knsSecondary-600" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
+<button type="button" class="text-sm bg-knsSecondary w-8 h-8 flex items-center justify-center rounded-full md:me-0 focus:ring-4 focus:ring-knsSecondary-300" id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown" data-dropdown-placement="bottom">
   <span class="sr-only">Open user menu</span>
   <iconify-icon icon="iconamoon:profile-fill" class="text-2xl text-white"></iconify-icon>
 </button>
 
 <!-- Dropdown menu -->
-<div class="z-50 hidden my-4 text-base list-none divide-y divide-gray-400 rounded-lg shadow bg-knsSecondary-700" id="user-dropdown">
+<div class="z-50 hidden my-4 text-base list-none divide-y divide-gray-400 rounded-lg shadow bg-knsSecondary-600" id="user-dropdown">
   <div class="px-4 py-3">
     {% if request.user.profile %}
       <span class="block text-sm text-white">
@@ -17,22 +17,22 @@
       {{ request.user.email }}
     </span>
   </div>
-  <ul class="py-2" aria-labelledby="user-menu-button">
+  <ul class="py-2 text-white" aria-labelledby="user-menu-button">
     <li>
-      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Account</a>
+      <a href="#" class="block px-4 py-2 text-sm hover:bg-knsSecondary-500 text-white">Account</a>
     </li>
     {% if request.user.profile %}
       <li>
-        <a href="{% url "profiles:profile_overview" profile_slug=request.user.profile.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Profile</a>
+        <a href="{% url "profiles:profile_overview" profile_slug=request.user.profile.slug %}" class="block px-4 py-2 text-sm hover:bg-knsSecondary-500 text-white">Profile</a>
       </li>
     {% endif %}
     {% if request.user.profile.role == 'leader' %}
       <li>
-        <a href="{% if request.user.profile.group_led %} {{ request.user.profile.group_led.get_absolute_url }} {% else %} {% url "groups:register_group" %} {% endif %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Group</a>
+        <a href="{% if request.user.profile.group_led %} {{ request.user.profile.group_led.get_absolute_url }} {% else %} {% url "groups:register_group" %} {% endif %}" class="block px-4 py-2 text-sm hover:bg-knsSecondary-500">Group</a>
       </li>
     {% endif %}
     <li>
-      <a href="{% url "accounts:logout" %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</a>
+      <a href="{% url "accounts:logout" %}" class="block px-4 py-2 text-sm hover:bg-knsSecondary-500">Sign out</a>
     </li>
   </ul>
 </div>
