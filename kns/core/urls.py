@@ -26,6 +26,11 @@ urlpatterns = [
         name="submit_ticket",
     ),
     path(
+        "notifications/read-redirect/<int:notification_id>/",
+        views.mark_notification_and_redirect,
+        name="mark_notification_and_redirect",
+    ),
+    path(
         "contact",
         views.contact_view,
         name="contact",

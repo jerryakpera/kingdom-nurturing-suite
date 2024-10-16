@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.test import Client, TestCase
 from django.utils import timezone
@@ -159,6 +161,56 @@ class TestNotification(TestCase):
 
         recipient_record.refresh_from_db()
         self.assertTrue(recipient_record.is_read)
+
+    def test_icon_method(self):
+        """
+        Test the `icon` method returns the correct icon for the notification type.
+        """
+        notification = NotificationFactory(notification_type="group_move")
+        expected_icon = "tabler:transfer"
+
+        self.assertEqual(notification.icon(), expected_icon)
+
+    def test_time_since_created(self):
+        """
+        Test the `time_since_created` method returns the correct time difference.
+        """
+        # Set the created_at to a specific time
+        self.notification.created_at = timezone.now() - timedelta(
+            days=2,
+        )
+        self.notification.save()
+
+        # Calculate the expected time since created
+        expected_time_since = "2 days ago"
+
+        self.assertEqual(
+            self.notification.time_since_created(),
+            expected_time_since,
+        )
+
+    def test_time_period(self):
+        """
+        Test the `time_period` method returns the correct time period.
+        """
+        # Test for 'Today'
+        self.notification.created_at = timezone.now()
+        self.assertEqual(self.notification.time_period(), "Today")
+
+        # Test for 'Yesterday'
+        self.notification.created_at = timezone.now() - timedelta(days=1)
+        self.notification.save()
+        self.assertEqual(self.notification.time_period(), "Yesterday")
+
+        # Test for 'This Week'
+        self.notification.created_at = timezone.now() - timedelta(days=3)
+        self.notification.save()
+        self.assertEqual(self.notification.time_period(), "This Week")
+
+        # Test for 'Older'
+        self.notification.created_at = timezone.now() - timedelta(days=10)
+        self.notification.save()
+        self.assertEqual(self.notification.time_period(), "Older")
 
 
 class TestNotificationRecipient(TestCase):

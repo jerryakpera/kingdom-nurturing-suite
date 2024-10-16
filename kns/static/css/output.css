@@ -683,6 +683,10 @@ video {
   top: 0.75rem;
 }
 
+.right-2\.5{
+  right: 0.625rem;
+}
+
 .z-10{
   z-index: 10;
 }
@@ -1660,6 +1664,11 @@ video {
 .border-yellow-500{
   --tw-border-opacity: 1;
   border-color: rgb(234 179 8 / var(--tw-border-opacity));
+}
+
+.border-gray-50{
+  --tw-border-opacity: 1;
+  border-color: rgb(249 250 251 / var(--tw-border-opacity));
 }
 
 .border-b-knsDark-300{
@@ -3390,6 +3399,10 @@ video {
 
   .lg\:w-7\/12{
     width: 58.333333%;
+  }
+
+  .lg\:w-\[30\%\]{
+    width: 30%;
   }
 
   .lg\:grid-cols-2{

@@ -6,36 +6,47 @@
   id="requests-drawer-btn"
   class="text-sm bg-blue-500 w-8 h-8 flex items-center justify-center rounded-full md:me-0 focus:ring-4 focus:ring-blue-300 text-white me-4"
 >
-<iconify-icon icon="material-symbols:pending-actions-rounded" class="text-xl"></iconify-icon>
+  <iconify-icon icon="iconamoon:notification" class="text-xl"></iconify-icon>
   <span class="sr-only">Icon description</span>
 </button>
 
 <!-- drawer component -->
-<div id="requests-drawer" class="fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-white w-[98%] xs:w-[80%] md:w-[50%] lg:[w-30%]" tabindex="-1" aria-labelledby="drawer-right-label">
+<div id="requests-drawer" class="fixed top-0 right-0 z-40 h-screen p-4 overflow-y-auto transition-transform translate-x-full bg-gray-100 w-[98%] xs:w-[80%] md:w-[50%] lg:w-[30%]" tabindex="-1" aria-labelledby="drawer-right-label">
   <div class="flex justify-between items-center w-full border-b border-gray-300 pb-2">
     <h5 id="drawer-right-label" class="text-black text-left font-semibold">
-      Approval Requests
+      Notifications
     </h5>
 
     <button
       type="button"
       id="close-requests-drawer-button"
-      data-drawer-hide="requests-drawer"
-      aria-controls="requests-drawer" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 end-2.5 inline-flex items-center justify-center"
+      aria-controls="requests-drawer"
+      class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 absolute top-2.5 right-2.5 inline-flex items-center justify-center"
     >
       <iconify-icon icon="ic:round-close" class="text-lg"></iconify-icon>
       <span class="sr-only">Close menu</span>
     </button>
   </div>
 
-  {% if request.user.profile.pending_approval_requests.count == 0 %}
-    <div class="p-2 text-sm font-medium bg-gray-200 text-gray-800">No pending requests</div>
+  {% if not grouped_notifications %}
+    <div class="p-2 text-sm font-medium bg-gray-200 text-gray-800">No pending notifications</div>
   {% else %}
-    <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">
-      View a list of approval requests that you are yet to respond to
-    </p>
+    <!-- Grouped notifications loop -->
+    <div class="space-y-2 mt-4">
+      {% for period, notifications in grouped_notifications.items %}
+        <!-- Display time period (e.g., Today, Yesterday) -->
+        <p class="font-medium text-gray-500 text-sm">{{ period }}</p>
+
+        <!-- Loop through the notifications in this period -->
+        <div class="space-y-2">
+          {% for notification in notifications %}
+            {% include "core/components/notification_drawer/notification_item.html" with notification=notification %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
   {% endif %}
-   </div>
+
 </div>
 
 <script src="{% static "core/js/requests_drawer.js" %}"></script>

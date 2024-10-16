@@ -2,9 +2,12 @@
 Models for the core app.
 """
 
+from datetime import timedelta
+
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.utils import timezone
+from django.utils.timesince import timesince
 
 from . import constants, modelmixins
 
@@ -353,6 +356,58 @@ class Notification(modelmixins.TimestampedModel, models.Model):
             notification=self,
             recipient=recipient,
         )
+
+    def icon(self):
+        """
+        Return the specific icon for the notification depending on its type.
+
+        Returns
+        -------
+        str
+            The string for the iconify-icon.
+        """
+
+        icons = {
+            "group_move": "tabler:transfer",
+        }
+
+        return icons[self.notification_type]
+
+    def time_since_created(self):
+        """
+        Return a human-readable time difference between the current time
+        and when the notification was created, e.g., '2 days ago'.
+
+        Returns
+        -------
+        str
+            The time difference since the notification was created.
+        """
+        now = timezone.now()
+        # Calculate the time difference
+        diff = timesince(self.created_at, now)
+        # Replace any non-breaking spaces with regular spaces
+        return diff.replace("\xa0", " ") + " ago"
+
+    def time_period(self):
+        """
+        Return a human-readable time period for the notification
+        such as 'Today', 'Yesterday', 'This Week', or 'Older'.
+
+        Returns
+        -------
+        str
+            A string representing the time period since the notification was created.
+        """
+        now = timezone.now()
+        if self.created_at.date() == now.date():
+            return "Today"
+        elif self.created_at.date() == (now - timedelta(days=1)).date():
+            return "Yesterday"
+        elif self.created_at > (now - timedelta(days=7)):
+            return "This Week"
+        else:
+            return "Older"
 
 
 class NotificationRecipient(models.Model):

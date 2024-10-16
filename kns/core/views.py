@@ -2,14 +2,15 @@
 Views for the core application.
 """
 
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from kns.groups.models import Group
 from kns.onboarding.models import ProfileCompletion
 from kns.profiles.models import Profile
 
-from .models import FAQ
+from .models import FAQ, Notification
 
 
 def index(request):
@@ -194,3 +195,30 @@ def error_404(
         context,
         status=404,
     )
+
+
+@login_required
+def mark_notification_and_redirect(request, notification_id):
+    """
+    Mark the notification as read for the logged-in user and redirect to the notification's link.
+
+    Parameters
+    ----------
+    request : HttpRequest
+        The HTTP request object.
+    notification_id : int
+        The ID of the notification to be marked as read.
+
+    Returns
+    -------
+    HttpResponse
+        A redirect response to the notification's link.
+    """
+    # Get the notification by its ID
+    notification = get_object_or_404(Notification, id=notification_id)
+
+    # Mark the notification as read for the current user
+    notification.mark_as_read_for_user(request.user.profile)
+
+    # Redirect to the notification's link
+    return redirect(notification.link)

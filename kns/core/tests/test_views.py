@@ -5,7 +5,7 @@ from kns.custom_user.models import User
 from kns.groups.models import Group
 from kns.onboarding.models import ProfileCompletion
 
-from ..models import FAQ
+from ..models import FAQ, Notification, NotificationRecipient
 
 
 class TestViews(TestCase):
@@ -192,3 +192,105 @@ class TestCoreIndexView(TestCase):
 
         # Check for close_groups in the context
         self.assertIn("close_groups", response.context)
+
+
+class TestNotificationViews(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Set up user and profile data
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        self.profile = self.user.profile
+        self.profile.is_onboarded = True
+        self.profile.save()
+
+        # Create a ProfileCompletion instance
+        self.profile_completion = ProfileCompletion.objects.create(
+            profile=self.profile,
+        )
+
+        # Create a notification for the user
+        self.notification = Notification.objects.create(
+            notification_type="group_move",
+            title="Group Moved",
+            message="Your group has been moved to a new location.",
+            link="https://example.com/group/1",
+            sender=self.profile,
+        )
+
+        # Create a notification recipient
+        NotificationRecipient.objects.create(
+            notification=self.notification,
+            recipient=self.profile,
+            is_read=False,
+        )
+
+        # Log the user in
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+    def test_mark_notification_and_redirect(self):
+        """
+        A logged-in user marks a notification as read and is redirected to its link.
+        """
+        response = self.client.get(
+            reverse(
+                "core:mark_notification_and_redirect",
+                args=[self.notification.id],
+            )
+        )
+
+        # Ensure the response is a redirect, without fetching the final response
+        self.assertRedirects(
+            response,
+            self.notification.link,
+            fetch_redirect_response=False,
+        )
+
+        # Verify that the notification was marked as read
+        recipient_record = NotificationRecipient.objects.get(
+            recipient=self.profile,
+            notification=self.notification,
+        )
+
+        self.assertTrue(recipient_record.is_read)
+
+    def test_mark_notification_unauthenticated(self):
+        """
+        An unauthenticated user is redirected to the login page when trying to mark a notification.
+        """
+        self.client.logout()
+        response = self.client.get(
+            reverse(
+                "core:mark_notification_and_redirect",
+                args=[self.notification.id],
+            )
+        )
+
+        # Check if the user is redirected to the login page
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={reverse(
+                'core:mark_notification_and_redirect',
+                args=[self.notification.id],
+            )}",
+        )
+
+    def test_mark_nonexistent_notification(self):
+        """
+        Attempting to mark a nonexistent notification should return a 404 error.
+        """
+        response = self.client.get(
+            reverse(
+                "core:mark_notification_and_redirect",
+                args=[999],
+            )
+        )
+
+        self.assertEqual(response.status_code, 404)
