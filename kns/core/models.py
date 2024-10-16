@@ -1,5 +1,5 @@
 """
-Models for the core app.
+Models for the `core` app.
 """
 
 from datetime import timedelta

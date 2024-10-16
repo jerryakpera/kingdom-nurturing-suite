@@ -1,5 +1,5 @@
 """
-Django admin site configuration for the core app.
+Django admin site configuration for the `core` app.
 """
 
 from django.contrib import admin
