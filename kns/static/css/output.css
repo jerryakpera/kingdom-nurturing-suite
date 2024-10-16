@@ -3617,11 +3617,6 @@ video {
     --tw-ring-color: rgb(30 64 175 / var(--tw-ring-opacity));
   }
 
-  .dark\:focus\:ring-knsSecondary-600:focus{
-    --tw-ring-opacity: 1;
-    --tw-ring-color: rgb(2 118 110 / var(--tw-ring-opacity));
-  }
-
   .dark\:focus\:ring-knsSecondary-800:focus{
     --tw-ring-opacity: 1;
     --tw-ring-color: rgb(1 77 69 / var(--tw-ring-opacity));
