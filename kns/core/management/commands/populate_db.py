@@ -12,6 +12,8 @@ from kns.levels.db_data import sublevels as sublevels_data
 from kns.levels.utils import populate_levels, populate_sublevels
 from kns.mentorships.db_data import mentorship_areas, mentorship_goals
 from kns.mentorships.utils import populate_mentorship_areas, populate_mentorship_goals
+from kns.movements.db_data import movement_topics, movements
+from kns.movements.utils import populate_movement_topics, populate_movements
 from kns.profiles.db_data import encryption_reasons
 from kns.profiles.utils import populate_encryption_reasons
 from kns.skills.skills_data import skills as skills_data
@@ -52,6 +54,9 @@ class Command(BaseCommand):
 
         populate_levels(levels_data=levels_data)
         populate_sublevels(sublevels_data=sublevels_data)
+
+        populate_movements(movements_data=movements)
+        populate_movement_topics(movement_topics_data=movement_topics)
 
         populate_mentorship_areas(mentorship_areas_data=mentorship_areas)
         populate_mentorship_goals(mentorship_goals_data=mentorship_goals)

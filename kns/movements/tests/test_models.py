@@ -73,6 +73,40 @@ class TestMovementModel(TestCase):
 
         self.assertEqual(str(movement), "Disciple Making Movement")
 
+    def test_only_one_prayer_movement_allowed(self):
+        """
+        Test that only one movement can be marked as a prayer movement at a time.
+        """
+        # Create the first prayer movement
+        Movement.objects.create(
+            title="First Prayer Movement",
+            content="<p>Description of the first prayer movement</p>",
+            author=self.profile,
+            prayer_movement=True,
+        )
+
+        # Attempt to create a second prayer movement, expecting a ValidationError
+        with self.assertRaises(ValidationError) as excinfo:
+            Movement.objects.create(
+                title="Second Prayer Movement",
+                content="<p>Description of the second prayer movement</p>",
+                author=self.profile,
+                prayer_movement=True,
+            )
+            # We need to call save() on the object to trigger the validation
+            movement = Movement(
+                title="Second Prayer Movement",
+                content="<p>Description of the second prayer movement</p>",
+                author=self.profile,
+                prayer_movement=True,
+            )
+            movement.save()
+
+        self.assertEqual(
+            str(excinfo.exception),
+            "['Only one movement can be a prayer movement at a time.']",
+        )
+
 
 class TestMovementTopicModel(TestCase):
     def setUp(self):

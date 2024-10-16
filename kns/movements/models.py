@@ -4,6 +4,7 @@ Models for the `movements` app.
 
 from uuid import uuid4
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from tinymce import models as tinymce_models
 
@@ -68,6 +69,40 @@ class Movement(
 
     class Meta:
         unique_together = ("title", "slug")
+
+    def save(self, *args, **kwargs):
+        """
+        Override the save method to ensure only one movement can be a prayer movement at a time.
+
+        Parameters
+        ----------
+        *args : tuple
+            Positional arguments passed to the superclass save method.
+        **kwargs : dict
+            Keyword arguments passed to the superclass save method.
+
+        Raises
+        ------
+        ValidationError
+            If there is already a movement marked as a prayer movement.
+        """
+        if self.prayer_movement:
+            # Check if there's already a prayer movement
+            existing_prayer_movement = (
+                Movement.objects.filter(
+                    prayer_movement=True,
+                )
+                .exclude(
+                    id=self.id,
+                )
+                .first()
+            )
+            if existing_prayer_movement:
+                raise ValidationError(
+                    "Only one movement can be a prayer movement at a time."
+                )
+
+        super().save(*args, **kwargs)
 
 
 class MovementTopic(
