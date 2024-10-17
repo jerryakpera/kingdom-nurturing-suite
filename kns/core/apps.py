@@ -1,5 +1,5 @@
 """
-Django AppConfig for the core app.
+Django AppConfig for the `core` app.
 """
 
 from django.apps import AppConfig
