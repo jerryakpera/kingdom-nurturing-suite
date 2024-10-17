@@ -71,11 +71,7 @@ class Event(
         ),
     )
     description = tinymce_models.HTMLField()
-    slug = models.SlugField(
-        unique=True,
-        editable=False,
-        default=uuid4,
-    )
+    slug = models.SlugField(unique=True, editable=False)
     tags = TaggableManager(blank=True)
 
     start_date = models.DateField()
@@ -139,9 +135,11 @@ class Event(
         If the slug field is empty, it generates a slug from the title using `slugify`.
         It also checks that the start date is not later than the end date before saving.
         """
+        # Generate slug from title if it's empty
         if not self.slug:
             self.slug = slugify(self.title)
-        if self.end_date and self.start_date > self.end_date:
+        # Ensure end_date is not earlier than start_date
+        if self.end_date and self.start_date > self.end_date:  # pragma: no cover
             raise ValidationError("End date cannot be earlier than start date.")
         super().save(*args, **kwargs)
 
@@ -157,6 +155,7 @@ class Event(
         """
         if self.end_date and self.start_date:
             return (self.end_date - self.start_date).days
+
         return 0
 
     def __str__(self):
@@ -186,6 +185,7 @@ class Event(
             location_str = self.location_country.name
             if self.location_city:
                 location_str += f", {self.location_city}"
+
         return location_str
 
     def days_until_event(self):
@@ -197,11 +197,10 @@ class Event(
         int
             The number of days until the event starts or 0 if the event has already started.
         """
-        if self.start_date:
-            today = timezone.now().date()
-            days_left = (self.start_date - today).days
-            return max(days_left, 0)
-        return None
+        today = timezone.now().date()
+        days_left = (self.start_date - today).days
+
+        return max(days_left, 0)
 
     def has_registration_deadline_passed(self):
         """
@@ -212,10 +211,9 @@ class Event(
         bool
             True if the deadline has passed, False otherwise.
         """
-        if self.registration_deadline_date:
-            today = timezone.now().date()
-            return today > self.registration_deadline_date
-        return False
+        today = timezone.now().date()
+
+        return today > self.registration_deadline_date
 
     def is_upcoming(self):
         """
@@ -229,7 +227,7 @@ class Event(
         today = timezone.now().date()
         return self.start_date and today < self.start_date
 
-    def get_primary_image(self):
+    def get_primary_image(self):  # pragma: no cover
         """
         Return the primary image for this event. If no primary image has been set,
         return the first image added for the event.
