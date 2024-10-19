@@ -2,12 +2,15 @@
 Tests for the forms in the `events` app.
 """
 
+from datetime import timedelta
+
 from django.test import TestCase
+from django.utils import timezone
 
 from kns.core.utils import log_this
 
 from .. import constants as event_constants
-from ..forms import EventContentForm
+from ..forms import EventContentForm, EventDatesForm
 
 
 class TestEventContentForm(TestCase):
@@ -34,8 +37,6 @@ class TestEventContentForm(TestCase):
         Test if the form is valid when correct data is provided.
         """
         form = EventContentForm(data=self.form_data)
-
-        log_this(form.errors)
 
         self.assertTrue(form.is_valid())
 
@@ -143,5 +144,94 @@ class TestEventContentForm(TestCase):
         self.form_data.pop("tags")
 
         form = EventContentForm(data=self.form_data)
+
+        self.assertTrue(form.is_valid())
+
+
+class TestEventDatesForm(TestCase):
+    def setUp(self):
+        """
+        Set up valid form data for all tests.
+        """
+
+        self.valid_start_date = timezone.now().date() + timedelta(
+            days=event_constants.EVENT_MIN_DAYS_IN_FUTURE + 1
+        )
+        self.valid_end_date = self.valid_start_date + timedelta(days=1)
+        self.valid_registration_deadline = self.valid_start_date - timedelta(days=1)
+
+        self.form_data = {
+            "start_date": self.valid_start_date,
+            "end_date": self.valid_end_date,
+            "registration_deadline_date": self.valid_registration_deadline,
+        }
+
+    def test_event_dates_form_valid(self):
+        """
+        Test if the form is valid when correct data is provided.
+        """
+
+        form = EventDatesForm(data=self.form_data)
+
+        log_this(form.errors)
+
+        self.assertTrue(form.is_valid())
+
+    def test_start_date_too_soon(self):
+        """
+        Test that a start date less than the minimum required days in the future is invalid.
+        """
+        self.form_data["start_date"] = timezone.now().date() + timedelta(
+            days=event_constants.EVENT_MIN_DAYS_IN_FUTURE - 1
+        )
+
+        form = EventDatesForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("start_date", form.errors)
+        self.assertEqual(
+            form.errors["start_date"],
+            [event_constants.ERROR_START_DATE_FUTURE],
+        )
+
+    def test_end_date_before_start_date(self):
+        """
+        Test that an end date before the start date is invalid.
+        """
+        self.form_data["end_date"] = self.valid_start_date - timedelta(days=1)
+
+        form = EventDatesForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("end_date", form.errors)
+        self.assertEqual(
+            form.errors["end_date"],
+            [event_constants.ERROR_END_DATE],
+        )
+
+    def test_registration_deadline_after_start_date(self):
+        """
+        Test that a registration deadline that is not before the event start date is invalid.
+        """
+        self.form_data["registration_deadline_date"] = self.valid_start_date
+
+        form = EventDatesForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("registration_deadline_date", form.errors)
+        self.assertEqual(
+            form.errors["registration_deadline_date"],
+            [event_constants.ERROR_REGISTRATION_DEADLINE],
+        )
+
+    def test_registration_deadline_before_start_date(self):
+        """
+        Test that a valid registration deadline before the start date is valid.
+        """
+        self.form_data["registration_deadline_date"] = (
+            self.valid_start_date - timedelta(days=1)
+        )
+
+        form = EventDatesForm(data=self.form_data)
 
         self.assertTrue(form.is_valid())
