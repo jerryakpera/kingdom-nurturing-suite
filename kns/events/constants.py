@@ -23,4 +23,11 @@ EVENT_SUMMARY_MAX_LENGTH = 300
 EVENT_TITLE_MIN_LENGTH = 15
 EVENT_TITLE_MAX_LENGTH = 135
 
+# Constants for Event Location Form
+HELP_TEXT_COUNTRY = "Select the country where the event will be held."
+HELP_TEXT_CITY = "Enter the city where the event will be held."
+ERROR_NO_COUNTRY_AND_CITY = "Both country and city fields are required."
+ERROR_NO_LOCATION_CITY = "Select the city where the event will be held."
+ERROR_NO_LOCATION_COUNTRY = "Select the country where the event will be held."
+
 MAX_TAGS = 5

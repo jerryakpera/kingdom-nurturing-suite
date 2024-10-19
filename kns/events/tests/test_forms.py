@@ -10,7 +10,7 @@ from django.utils import timezone
 from kns.core.utils import log_this
 
 from .. import constants as event_constants
-from ..forms import EventContentForm, EventDatesForm
+from ..forms import EventContentForm, EventDatesForm, EventLocationForm
 
 
 class TestEventContentForm(TestCase):
@@ -235,3 +235,87 @@ class TestEventDatesForm(TestCase):
         form = EventDatesForm(data=self.form_data)
 
         self.assertTrue(form.is_valid())
+
+
+class TestEventLocationForm(TestCase):
+    def setUp(self):
+        """
+        Set up valid form data for all tests.
+        """
+        self.form_data = {
+            "location_country": "US",
+            "location_city": "New York",
+        }
+
+    def test_event_location_form_valid(self):
+        """
+        Test if the form is valid when correct data is provided.
+        """
+        form = EventLocationForm(data=self.form_data)
+
+        self.assertTrue(form.is_valid())
+
+    def test_country_field_required(self):
+        """
+        Test that the country field is required.
+        """
+        self.form_data["location_country"] = ""
+        self.form_data["location_city"] = ""
+
+        form = EventLocationForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("location_country", form.errors)
+        self.assertEqual(
+            form.errors["location_country"],
+            [event_constants.ERROR_NO_COUNTRY_AND_CITY],
+        )
+
+    def test_city_field_required(self):
+        """
+        Test that the city field is required.
+        """
+        self.form_data["location_city"] = ""
+
+        form = EventLocationForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("location_city", form.errors)
+        self.assertEqual(
+            form.errors["location_city"],
+            [
+                event_constants.ERROR_NO_LOCATION_CITY,
+            ],
+        )
+
+    def test_city_without_country(self):
+        """
+        Test that the city field cannot be filled without a country.
+        """
+        self.form_data["location_city"] = "Los Angeles"
+        self.form_data["location_country"] = ""
+
+        form = EventLocationForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("location_country", form.errors)
+        self.assertEqual(
+            form.errors["location_country"],
+            [event_constants.ERROR_NO_LOCATION_COUNTRY],
+        )
+
+    def test_country_without_city(self):
+        """
+        Test that the country field cannot be filled without a city.
+        """
+        self.form_data["location_country"] = "US"
+        self.form_data["location_city"] = ""
+
+        form = EventLocationForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("location_city", form.errors)
+        self.assertEqual(
+            form.errors["location_city"],
+            [event_constants.ERROR_NO_LOCATION_CITY],
+        )

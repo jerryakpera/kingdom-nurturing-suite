@@ -5,6 +5,8 @@ Forms for the `events` app.
 from django import forms
 from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.utils import timezone
+from django_countries.fields import CountryField
+from django_countries.widgets import CountrySelectWidget
 from taggit.forms import TagField, TagWidget
 from tinymce.widgets import TinyMCE
 
@@ -288,3 +290,81 @@ class EventDatesForm(forms.ModelForm):
             raise forms.ValidationError(event_constants.ERROR_REGISTRATION_DEADLINE)
 
         return registration_deadline_date
+
+
+class EventLocationForm(forms.ModelForm):
+    """
+    Form for selecting the location of an event.
+    """
+
+    class Meta:
+        model = Event
+        fields = [
+            "location_country",
+            "location_city",
+        ]
+        widgets = {
+            "location_country": CountrySelectWidget(
+                attrs={
+                    "id": "location_country",
+                    "name": "location_country",
+                    "class": "form-select input-field",
+                    "placeholder": "Select country",
+                    "autocomplete": "off",
+                }
+            ),
+            "location_city": forms.TextInput(
+                attrs={
+                    "id": "location_city",
+                    "name": "location_city",
+                    "autocomplete": "off",
+                    "class": "form-control input-field",
+                    "placeholder": "Enter city",
+                }
+            ),
+        }
+        labels = {
+            "location_country": "Country",
+            "location_city": "City",
+        }
+        help_texts = {
+            "location_country": event_constants.HELP_TEXT_COUNTRY,
+            "location_city": event_constants.HELP_TEXT_CITY,
+        }
+        required = {
+            "location_country": True,
+            "location_city": True,
+        }
+
+    def clean(self):
+        """
+        Validate that both city and country fields are filled if one is provided.
+        """
+        cleaned_data = super().clean()
+        location_country = cleaned_data.get("location_country")
+        location_city = cleaned_data.get("location_city")
+
+        # Check if both fields are empty and raise field-specific error
+        if not location_country and not location_city:
+            self.add_error(
+                "location_country",
+                event_constants.ERROR_NO_COUNTRY_AND_CITY,
+            )
+            self.add_error(
+                "location_city",
+                event_constants.ERROR_NO_COUNTRY_AND_CITY,
+            )
+
+        if location_city and not location_country:
+            self.add_error(
+                "location_country",
+                event_constants.ERROR_NO_LOCATION_COUNTRY,
+            )
+
+        if location_country and not location_city:
+            self.add_error(
+                "location_city",
+                event_constants.ERROR_NO_LOCATION_CITY,
+            )
+
+        return cleaned_data
