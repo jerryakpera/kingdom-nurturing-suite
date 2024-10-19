@@ -10,7 +10,7 @@ from django.utils import timezone
 from kns.core.utils import log_this
 
 from .. import constants as event_constants
-from ..forms import EventContentForm, EventDatesForm, EventLocationForm
+from ..forms import EventContentForm, EventDatesForm, EventLocationForm, EventMiscForm
 
 
 class TestEventContentForm(TestCase):
@@ -318,4 +318,61 @@ class TestEventLocationForm(TestCase):
         self.assertEqual(
             form.errors["location_city"],
             [event_constants.ERROR_NO_LOCATION_CITY],
+        )
+
+
+class TestEventMiscForm(TestCase):
+    def setUp(self):
+        """
+        Set up valid form data for all tests.
+        """
+        # Define event dates
+        self.start_date = timezone.now().date() + timedelta(days=1)
+        self.end_date = self.start_date + timedelta(days=1)
+
+        # Define form data
+        self.form_data = {
+            "refreshments": True,
+            "accommodation": True,
+            "registration_limit": event_constants.EVENT_DEFAULT_REGISTRATION_LIMIT,
+        }
+
+    def test_event_misc_form_valid(self):
+        """
+        Test if the form is valid when correct data is provided.
+        """
+        form = EventMiscForm(data=self.form_data)
+
+        self.assertTrue(form.is_valid())
+
+    def test_registration_limit_required(self):
+        """
+        Test that the registration limit is required.
+        """
+        self.form_data["registration_limit"] = None
+
+        form = EventMiscForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("registration_limit", form.errors)
+        self.assertEqual(
+            form.errors["registration_limit"],
+            [
+                "This field is required.",
+            ],
+        )
+
+    def test_registration_limit_too_low(self):
+        """
+        Test that a registration limit less than 1 is invalid.
+        """
+        self.form_data["registration_limit"] = 0
+
+        form = EventMiscForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("registration_limit", form.errors)
+        self.assertEqual(
+            form.errors["registration_limit"],
+            [event_constants.REGISTRATION_LIMIT_ERROR_MESSAGE],
         )

@@ -3,9 +3,12 @@ Forms for the `events` app.
 """
 
 from django import forms
-from django.core.validators import MaxLengthValidator, MinLengthValidator
+from django.core.validators import (
+    MaxLengthValidator,
+    MinLengthValidator,
+    MinValueValidator,
+)
 from django.utils import timezone
-from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 from taggit.forms import TagField, TagWidget
 from tinymce.widgets import TinyMCE
@@ -368,3 +371,55 @@ class EventLocationForm(forms.ModelForm):
             )
 
         return cleaned_data
+
+
+class EventMiscForm(forms.ModelForm):
+    """
+    Form for managing miscellaneous event settings such as refreshments, accommodation,
+    and registration limits.
+    """
+
+    class Meta:
+        model = Event
+        fields = ["refreshments", "accommodation", "registration_limit"]
+
+    refreshments = forms.BooleanField(
+        label="Provide Refreshments",
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "form-check-input",
+            }
+        ),
+    )
+
+    accommodation = forms.BooleanField(
+        label="Provide Accommodation",
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "form-check-input",
+            }
+        ),
+    )
+
+    registration_limit = forms.IntegerField(
+        label="Registration Limit",
+        initial=event_constants.EVENT_DEFAULT_REGISTRATION_LIMIT,
+        required=True,
+        validators=[
+            MinValueValidator(
+                1,
+                message=event_constants.REGISTRATION_LIMIT_ERROR_MESSAGE,
+            )
+        ],
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control input-field",
+                "min": "1",
+                "placeholder": "Enter registration limit",
+            }
+        ),
+    )
