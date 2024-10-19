@@ -36,7 +36,6 @@ class EventFactory(factory.django.DjangoModelFactory):
     accommodation = factory.Faker("boolean")
     event_contact_name = factory.Faker("name")
     event_contact_email = factory.Faker("email")
-    registration_limit = factory.Faker("random_int", min=1, max=100)
     archived_at = None
     author = factory.Iterator(Profile.objects.all())
 

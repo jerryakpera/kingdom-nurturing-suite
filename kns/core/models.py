@@ -165,11 +165,6 @@ class Setting(models.Model):
         verbose_name="Mentorship Prohibition Period (Weeks)",
         help_text="The prohibition period in weeks before starting a new mentorship.",
     )
-    default_event_registration_limit = models.PositiveIntegerField(
-        default=constants.EVENT_REGISTRATION_LIMIT,
-        verbose_name="Default Event Registration Limit",
-        help_text="The default limit for event registrations.",
-    )
     organizer_must_facilitate_training = models.BooleanField(
         default=constants.ORGANIZER_MUST_FACILITATE,
         choices=constants.BOOLEAN_CHOICES,

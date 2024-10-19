@@ -2,10 +2,8 @@
 Models for the `events` app.
 """
 
-from uuid import uuid4
-
 from cloudinary.models import CloudinaryField
-from django.core.validators import MinValueValidator, ValidationError
+from django.core.validators import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
@@ -76,22 +74,16 @@ class Event(
 
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
-    registration_deadline_date = models.DateField(null=True, blank=True)
+    registration_deadline_date = models.DateField(
+        null=True,
+        blank=True,
+    )
 
     refreshments = models.BooleanField(default=False)
     accommodation = models.BooleanField(default=False)
 
     event_contact_name = models.CharField(max_length=50)
     event_contact_email = models.EmailField(blank=True)
-
-    registration_limit = models.PositiveIntegerField(
-        default=event_constants.EVENT_DEFAULT_REGISTRATION_LIMIT,
-        validators=[
-            MinValueValidator(
-                1, message="Registration limit must be a positive integer."
-            )
-        ],
-    )
 
     archived_at = models.DateField(null=True, blank=True)
 
@@ -253,22 +245,11 @@ class Event(
 class EventImage(models.Model):  # pragma: no cover
     """
     Model representing images associated with an event.
-
-    Attributes
-    ----------
-    event : Event
-        The event to which the image is associated.
-    image : CloudinaryField
-        The image file for the event.
-    caption : str
-        A caption for the image.
-    primary : bool
-        Indicates whether this image is the primary image for the event.
     """
 
     event = models.ForeignKey(
         Event,
-        related_name="galleries",
+        related_name="images",
         on_delete=models.CASCADE,
     )
     image = CloudinaryField(

@@ -6,6 +6,7 @@ omit=
   */__init__.py
   */admin.py
   */emails.py
+  */constants.py
   */urls.py
   */apps.py
   */tests/*
