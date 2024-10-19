@@ -10,7 +10,13 @@ from django.utils import timezone
 from kns.core.utils import log_this
 
 from .. import constants as event_constants
-from ..forms import EventContentForm, EventDatesForm, EventLocationForm, EventMiscForm
+from ..forms import (
+    EventContactForm,
+    EventContentForm,
+    EventDatesForm,
+    EventLocationForm,
+    EventMiscForm,
+)
 
 
 class TestEventContentForm(TestCase):
@@ -375,4 +381,67 @@ class TestEventMiscForm(TestCase):
         self.assertEqual(
             form.errors["registration_limit"],
             [event_constants.REGISTRATION_LIMIT_ERROR_MESSAGE],
+        )
+
+
+class TestEventContactForm(TestCase):
+    def setUp(self):
+        """
+        Set up valid form data for all tests.
+        """
+        self.form_data = {
+            "event_contact_name": "John Doe",
+            "event_contact_email": "john.doe@example.com",
+        }
+
+    def test_event_contact_form_valid(self):
+        """
+        Test if the form is valid when correct data is provided.
+        """
+        form = EventContactForm(data=self.form_data)
+        self.assertTrue(form.is_valid())
+
+    def test_event_contact_name_required(self):
+        """
+        Test that the contact name is required.
+        """
+        self.form_data["event_contact_name"] = ""
+
+        form = EventContactForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("event_contact_name", form.errors)
+        self.assertEqual(
+            form.errors["event_contact_name"],
+            [event_constants.ERROR_CONTACT_NAME_REQUIRED],
+        )
+
+    def test_event_contact_email_required(self):
+        """
+        Test that the email field is required.
+        """
+        self.form_data["event_contact_email"] = ""
+
+        form = EventContactForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("event_contact_email", form.errors)
+        self.assertEqual(
+            form.errors["event_contact_email"],
+            [event_constants.ERROR_CONTACT_EMAIL_REQUIRED],
+        )
+
+    def test_event_contact_email_invalid_format(self):
+        """
+        Test that an invalid email format is considered invalid.
+        """
+        self.form_data["event_contact_email"] = "not-an-email"
+
+        form = EventContactForm(data=self.form_data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("event_contact_email", form.errors)
+        self.assertEqual(
+            form.errors["event_contact_email"],
+            ["Enter a valid email address."],
         )

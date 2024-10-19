@@ -3,6 +3,7 @@ Forms for the `events` app.
 """
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
@@ -298,6 +299,14 @@ class EventDatesForm(forms.ModelForm):
 class EventLocationForm(forms.ModelForm):
     """
     Form for selecting the location of an event.
+
+    This form captures the country and city where the event will be held.
+    It validates that both fields are filled out if one is provided.
+
+    Returns
+    -------
+    dict
+        The cleaned data.
     """
 
     class Meta:
@@ -334,14 +343,18 @@ class EventLocationForm(forms.ModelForm):
             "location_country": event_constants.HELP_TEXT_COUNTRY,
             "location_city": event_constants.HELP_TEXT_CITY,
         }
-        required = {
-            "location_country": True,
-            "location_city": True,
-        }
 
     def clean(self):
         """
         Validate that both city and country fields are filled if one is provided.
+
+        Raises a ValidationError if both fields are empty or if one is filled
+        without the other.
+
+        Returns
+        -------
+        dict
+            The cleaned data.
         """
         cleaned_data = super().clean()
         location_country = cleaned_data.get("location_country")
@@ -377,16 +390,29 @@ class EventMiscForm(forms.ModelForm):
     """
     Form for managing miscellaneous event settings such as refreshments, accommodation,
     and registration limits.
+
+    This form captures the various settings for an event and validates the
+    registration limit to ensure it is a positive integer.
+
+    Returns
+    -------
+    dict
+        The cleaned data.
     """
 
     class Meta:
         model = Event
-        fields = ["refreshments", "accommodation", "registration_limit"]
+        fields = [
+            "registration_limit",
+            "refreshments",
+            "accommodation",
+        ]
 
     refreshments = forms.BooleanField(
         label="Provide Refreshments",
         required=False,
         initial=False,
+        help_text="Check this box if refreshments will be provided at the event.",
         widget=forms.CheckboxInput(
             attrs={
                 "class": "form-check-input",
@@ -398,6 +424,7 @@ class EventMiscForm(forms.ModelForm):
         label="Provide Accommodation",
         required=False,
         initial=False,
+        help_text="Check this box if accommodations will be provided at the event.",
         widget=forms.CheckboxInput(
             attrs={
                 "class": "form-check-input",
@@ -419,7 +446,129 @@ class EventMiscForm(forms.ModelForm):
             attrs={
                 "class": "form-control input-field",
                 "min": "1",
-                "placeholder": "Enter registration limit",
+                "placeholder": "Enter registration limit (e.g., 100)",
             }
         ),
     )
+
+    def clean_registration_limit(self):
+        """
+        Validate the registration limit to ensure it is a positive integer.
+
+        Raises a ValidationError if the registration limit is less than 1.
+
+        Returns
+        -------
+        int
+            The validated registration limit.
+        """
+        registration_limit = self.cleaned_data.get("registration_limit")
+
+        if registration_limit < 1:
+            raise forms.ValidationError(
+                event_constants.REGISTRATION_LIMIT_ERROR_MESSAGE
+            )
+
+        return registration_limit
+
+
+class EventContactForm(forms.ModelForm):
+    """
+    Form for managing event contact information.
+
+    This form captures the contact name and email for an event,
+    providing validation to ensure that required fields are filled out
+    correctly.
+
+    Returns
+    -------
+    dict
+        The cleaned data.
+    """
+
+    class Meta:
+        model = Event
+        fields = ["event_contact_name", "event_contact_email"]
+        widgets = {
+            "event_contact_name": forms.TextInput(
+                attrs={
+                    "id": "event_contact_name",
+                    "name": "event_contact_name",
+                    "autocomplete": "off",
+                    "class": (
+                        "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                        "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                        "block w-full p-2.5"
+                    ),
+                    "placeholder": "Enter contact name",
+                }
+            ),
+            "event_contact_email": forms.EmailInput(
+                attrs={
+                    "id": "event_contact_email",
+                    "name": "event_contact_email",
+                    "autocomplete": "off",
+                    "class": (
+                        "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                        "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                        "block w-full p-2.5"
+                    ),
+                    "placeholder": "Enter contact email",
+                }
+            ),
+        }
+
+    event_contact_name = forms.CharField(
+        max_length=50,
+        label="Contact Name",
+        help_text=event_constants.HELP_TEXT_CONTACT_NAME,
+        error_messages={
+            "required": event_constants.ERROR_CONTACT_NAME_REQUIRED,
+        },
+    )
+
+    event_contact_email = forms.EmailField(
+        label="Contact Email",
+        help_text=event_constants.HELP_TEXT_CONTACT_EMAIL,
+        error_messages={
+            "required": event_constants.ERROR_CONTACT_EMAIL_REQUIRED,  # Add this line
+        },
+    )
+
+    def clean_event_contact_name(self):
+        """
+        Validate the event contact name to ensure it is provided.
+
+        Raises a ValidationError if the contact name is not provided,
+        using the specified error message.
+
+        Returns
+        -------
+        str
+            The validated contact name.
+        """
+        name = self.cleaned_data.get("event_contact_name")
+
+        if not name:
+            raise forms.ValidationError(event_constants.ERROR_CONTACT_NAME_REQUIRED)
+
+        return name
+
+    def clean_event_contact_email(self):
+        """
+        Validate the event contact email format.
+
+        If an email is provided, it checks the format and raises a
+        ValidationError if the email is not valid.
+
+        Returns
+        -------
+        str
+            The validated email address.
+        """
+        email = self.cleaned_data.get("event_contact_email")
+
+        if not email:
+            raise forms.ValidationError(event_constants.ERROR_CONTACT_EMAIL_REQUIRED)
+
+        return email

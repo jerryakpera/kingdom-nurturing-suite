@@ -13,7 +13,7 @@ ERROR_START_DATE_FUTURE = "The start date must be at least 3 days in the future.
 
 EVENT_CANCEL_REASON_MAX_LENGTH = 300
 EVENT_CANCEL_REASON_MIN_LENGTH = 135
-EVENT_DEFAULT_REGISTRATION_LIMIT = 50
+EVENT_DEFAULT_REGISTRATION_LIMIT = 1000
 
 # Minimum days in the future for event start date
 EVENT_MIN_DAYS_IN_FUTURE = 3
@@ -23,10 +23,20 @@ EVENT_SUMMARY_MIN_LENGTH = 135
 EVENT_TITLE_MAX_LENGTH = 135
 EVENT_TITLE_MIN_LENGTH = 15
 
+HELP_TEXT_CONTACT_NAME = "Enter the name of the event contact."
+HELP_TEXT_CONTACT_EMAIL = "Enter the email address of the event contact (optional)."
+
 # Constants for Event Location Form
 HELP_TEXT_CITY = "Enter the city where the event will be held."
 HELP_TEXT_COUNTRY = "Select the country where the event will be held."
+
+
 MAX_TAGS = 5
 
 
 REGISTRATION_LIMIT_ERROR_MESSAGE = "Registration limit must be a positive integer."
+ZERO_REGISTRATION_LIMIT_ERROR_MESSAGE = "Registration limit must be at least 1."
+
+
+ERROR_CONTACT_NAME_REQUIRED = "Enter the name of the contact person."
+ERROR_CONTACT_EMAIL_REQUIRED = "Enter the email address of the contact person."
