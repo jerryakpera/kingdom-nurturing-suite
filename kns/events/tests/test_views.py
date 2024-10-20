@@ -120,3 +120,68 @@ class TestEventDetailView(TestCase):
             self.event.summary,
             response.content.decode(),
         )
+
+
+class TestEventActivitiesView(TestCase):
+    def setUp(self):
+        self.client = Client()
+
+        # Create a user and log in
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        self.profile = self.user.profile
+        self.profile.is_onboarded = True
+        self.profile.save()
+
+        self.client.login(
+            email="testuser@example.com",
+            password="password123",
+        )
+
+        # Create a sample event
+        self.event = Event.objects.create(
+            title="Test Event",
+            summary="This is a test event.",
+            description="Detailed description of the test event.",
+            start_date="2024-01-01",
+            end_date="2024-01-02",
+            location_country="NG",
+            location_city="Lagos",
+            author=self.user.profile,
+        )
+
+    def test_event_activities_view(self):
+        """
+        Test the event activities view to ensure it renders the activities
+        page for a specific event.
+        """
+        url = reverse(
+            "events:event_activities",
+            kwargs={
+                "event_slug": self.event.slug,
+            },
+        )
+        response = self.client.get(url)
+
+        # Check if the response status code is 200 OK
+        self.assertEqual(response.status_code, 200)
+
+        # Check if the correct template is used
+        self.assertTemplateUsed(
+            response,
+            "events/pages/event_activities.html",
+        )
+
+        # Ensure the event details are present in the response
+        self.assertIn(
+            self.event.title,
+            response.content.decode(),
+        )
+
+        self.assertIn(
+            self.event.summary,
+            response.content.decode(),
+        )

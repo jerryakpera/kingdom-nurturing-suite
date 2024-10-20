@@ -247,3 +247,33 @@ def event_detail(request, event_slug):
         template_name="events/pages/event_detail.html",
         context=context,
     )
+
+
+def event_activities(request, event_slug):
+    """
+    Render the activities page for a specific event.
+
+    Parameters
+    ----------
+    request : django.http.HttpRequest
+        The HTTP request object.
+    event_slug : str
+        The slug of the event to retrieve.
+
+    Returns
+    -------
+    django.http.HttpResponse
+        The rendered HTML response for the event activities page.
+    """
+    event = get_object_or_404(Event, slug=event_slug)
+    event.request = request
+
+    context = {
+        "event": event,
+    }
+
+    return render(
+        request=request,
+        template_name="events/pages/event_activities.html",
+        context=context,
+    )

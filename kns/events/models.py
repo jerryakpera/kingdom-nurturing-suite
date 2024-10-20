@@ -124,6 +124,23 @@ class Event(
             },
         )
 
+    def get_activities_url(self):
+        """
+        Return the URL for the event's activities page.
+
+        Returns
+        -------
+        str
+            The URL to the event activities view.
+        """
+
+        return reverse(
+            "events:event_activities",
+            kwargs={
+                "event_slug": self.slug,
+            },
+        )
+
     def save(self, *args, **kwargs):
         """
         Override the save method to generate a slug if not present and validate date fields.

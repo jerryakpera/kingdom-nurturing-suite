@@ -1,0 +1,59 @@
+{% load static %}
+
+<div class="rounded-lg border space-y-2">
+  <div class="px-3 py-2">
+    <h2 class="text-lg font-semibold leading-6">{{ event.title }}</h2>
+  </div>
+
+  <div class="p-0">
+    {% if event.get_primary_image %}
+      <div class="w-full h-64 overflow-hidden">
+        <img src="{{ event.get_primary_image.image.url }}" alt="{{ event.title }}" class="w-full h-full object-cover" />
+      </div>
+    {% else %}
+      <div class="w-full h-64 overflow-hidden">
+        <img src="{% static 'events/images/default-2.png' %}" alt="Default Event Image" class="w-full h-full object-cover" />
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="p-3 space-y-3">
+    <div>
+      <div class="text-xs text-gray-500 uppercase font-semibold">Location</div>
+      <div class="flex items-center gap-x-1">
+        {% if event.location_country %}
+          <span class="mb-0 fw-semibold">
+            <img
+              alt="Event location flag"
+              src="{{ event.location_country.flag }}"
+            />
+          </span>
+        {% endif %}
+        {{ event.location_display }}
+      </div>
+    </div>
+
+    <div>
+      <div class="text-xs text-gray-500 uppercase font-semibold">Date</div>
+      <div class="flex gap-x-1 items-center text-sm sm:text-md">
+        <iconify-icon icon="mdi:calendar"></iconify-icon>
+
+        <div>
+          <span class="font-semibold">{{ event.start_date }}</span>
+          {% if event.end_date %}
+            to <span class="font-semibold">{{ event.end_date }}</span>
+          {% else %}
+            Ongoing
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="text-xs text-gray-500 uppercase font-semibold">Summary</div>
+      <p class="text-sm">
+        {{ event.summary }}
+      </p>
+    </div>
+  </div>
+</div>

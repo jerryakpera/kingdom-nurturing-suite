@@ -24,4 +24,9 @@ urlpatterns = [
         view=views.event_detail,
         name="event_detail",
     ),
+    path(
+        route="<slug:event_slug>/activities",
+        view=views.event_activities,
+        name="event_activities",
+    ),
 ]

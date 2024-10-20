@@ -1,0 +1,15 @@
+<div class="flex flex-wrap text-lg sm:text-sm border-b border-gray-300 gap-x-10 sm:gap-x-5 md:gap-x-8 pb-1 items-end" role="tablist">
+  <a href="{{ event.get_absolute_url }}" class="{% if request.path == event.get_absolute_url %}text-knsPrimary font-semibold{% endif %}">
+    <iconify-icon icon="majesticons:home"></iconify-icon>
+    <span class="hidden sm:block">
+      Overview
+    </span>
+  </a>
+
+  <a href="{{ event.get_activities_url }}" class="{% if request.path == event.get_activities_url %}text-knsPrimary font-semibold{% endif %}">
+    <iconify-icon icon="guidance:meeting-room"></iconify-icon>
+    <span class="hidden sm:block">
+      Activities
+    </span>
+  </a>
+</div>
