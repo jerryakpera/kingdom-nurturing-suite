@@ -4,7 +4,6 @@ Tests for the forms in the `groups` app.
 
 from django.test import TestCase
 
-from kns.core.utils import log_this
 from kns.custom_user.models import User
 from kns.faith_milestones.models import FaithMilestone, GroupFaithMilestone
 from kns.groups.models import Group

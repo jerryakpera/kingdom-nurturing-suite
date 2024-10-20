@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const textareas = document.querySelectorAll(
-    'textarea[data-minlength][data-maxlength]'
+  const inputsAndTextareas = document.querySelectorAll(
+    'textarea[data-minlength][data-maxlength], input[type="text"][data-minlength][data-maxlength]'
   );
 
-  textareas.forEach((textarea) => {
-    const minLength = parseInt(textarea.getAttribute('data-minlength'), 10);
-    const maxLength = parseInt(textarea.getAttribute('data-maxlength'), 10);
+  inputsAndTextareas.forEach((input) => {
+    const minLength = parseInt(input.getAttribute('data-minlength'), 10);
+    const maxLength = parseInt(input.getAttribute('data-maxlength'), 10);
 
     const counter = document.createElement('div');
     counter.className = 'char-counter';
@@ -14,10 +14,10 @@ document.addEventListener('DOMContentLoaded', function () {
     counter.style.fontSize = '0.75rem';
     counter.style.fontWeight = 600;
 
-    textarea.parentNode.insertBefore(counter, textarea.nextSibling);
+    input.parentNode.insertBefore(counter, input.nextSibling);
 
     function updateCounter() {
-      const length = textarea.value.length;
+      const length = input.value.length;
       counter.textContent = `${length}/${maxLength} characters`;
 
       if (length < minLength || length > maxLength) {
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function toggleCounterVisibility() {
-      if (textarea.disabled) {
+      if (input.disabled) {
         counter.style.display = 'none'; // Hide if disabled
       } else {
         counter.style.display = 'block'; // Show if enabled
@@ -40,15 +40,15 @@ document.addEventListener('DOMContentLoaded', function () {
     updateCounter();
     toggleCounterVisibility();
 
-    // Update on input
-    textarea.addEventListener('input', updateCounter);
+    // Update on input (works for both textareas and text inputs)
+    input.addEventListener('input', updateCounter);
 
     // Listen for changes to the disabled state (you can toggle disabled state externally)
     const observer = new MutationObserver(function () {
       toggleCounterVisibility();
     });
 
-    observer.observe(textarea, {
+    observer.observe(input, {
       attributes: true,
       attributeFilter: ['disabled'],
     });

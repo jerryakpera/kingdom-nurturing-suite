@@ -3,13 +3,13 @@ Forms for the `events` app.
 """
 
 from django import forms
-from django.core.exceptions import ValidationError
 from django.core.validators import (
     MaxLengthValidator,
     MinLengthValidator,
     MinValueValidator,
 )
 from django.utils import timezone
+from django_countries.fields import CountryField
 from django_countries.widgets import CountrySelectWidget
 from taggit.forms import TagField, TagWidget
 from tinymce.widgets import TinyMCE
@@ -58,6 +58,8 @@ class EventContentForm(forms.ModelForm):
                     "block w-full p-2.5"
                 ),
                 "placeholder": "Give your event a suitable title",
+                "data-minlength": event_constants.EVENT_TITLE_MIN_LENGTH,
+                "data-maxlength": event_constants.EVENT_TITLE_MAX_LENGTH,
             }
         ),
     )
@@ -67,6 +69,7 @@ class EventContentForm(forms.ModelForm):
         help_text="Summarize the event briefly.",
         widget=forms.Textarea(
             attrs={
+                "rows": 2,
                 "id": "summary",
                 "name": "summary",
                 "autocomplete": "off",
@@ -76,6 +79,8 @@ class EventContentForm(forms.ModelForm):
                     "block w-full p-2.5"
                 ),
                 "placeholder": "Write a summary of the event",
+                "data-minlength": event_constants.EVENT_SUMMARY_MIN_LENGTH,
+                "data-maxlength": event_constants.EVENT_SUMMARY_MAX_LENGTH,
             }
         ),
         validators=[
@@ -315,34 +320,39 @@ class EventLocationForm(forms.ModelForm):
             "location_country",
             "location_city",
         ]
-        widgets = {
-            "location_country": CountrySelectWidget(
-                attrs={
-                    "id": "location_country",
-                    "name": "location_country",
-                    "class": "form-select input-field",
-                    "placeholder": "Select country",
-                    "autocomplete": "off",
-                }
-            ),
-            "location_city": forms.TextInput(
-                attrs={
-                    "id": "location_city",
-                    "name": "location_city",
-                    "autocomplete": "off",
-                    "class": "form-control input-field",
-                    "placeholder": "Enter city",
-                }
-            ),
-        }
-        labels = {
-            "location_country": "Country",
-            "location_city": "City",
-        }
-        help_texts = {
-            "location_country": event_constants.HELP_TEXT_COUNTRY,
-            "location_city": event_constants.HELP_TEXT_CITY,
-        }
+
+    location_country = CountryField().formfield(
+        label="Country",
+        widget=forms.Select(
+            attrs={
+                "autocomplete": "off",
+                "id": "location_country",
+                "name": "location_country",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
+    )
+
+    location_city = forms.CharField(
+        label="City",
+        help_text="Enter the city where the event will be held.",
+        widget=forms.TextInput(
+            attrs={
+                "autocomplete": "off",
+                "id": "location_city",
+                "name": "location_city",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+            }
+        ),
+    )
 
     def clean(self):
         """
@@ -356,6 +366,7 @@ class EventLocationForm(forms.ModelForm):
         dict
             The cleaned data.
         """
+
         cleaned_data = super().clean()
         location_country = cleaned_data.get("location_country")
         location_city = cleaned_data.get("location_city")
@@ -393,6 +404,13 @@ class EventMiscForm(forms.ModelForm):
 
     This form captures the various settings for an event and validates the
     registration limit to ensure it is a positive integer.
+
+    Parameters
+    ----------
+    *args : tuple
+        Variable length argument list passed to the parent class.
+    **kwargs : dict
+        Arbitrary keyword arguments passed to the parent class.
 
     Returns
     -------
@@ -435,7 +453,6 @@ class EventMiscForm(forms.ModelForm):
     registration_limit = forms.IntegerField(
         label="Registration Limit",
         initial=event_constants.EVENT_DEFAULT_REGISTRATION_LIMIT,
-        required=True,
         validators=[
             MinValueValidator(
                 1,
@@ -444,14 +461,31 @@ class EventMiscForm(forms.ModelForm):
         ],
         widget=forms.NumberInput(
             attrs={
-                "class": "form-control input-field",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
                 "min": "1",
                 "placeholder": "Enter registration limit (e.g., 100)",
             }
         ),
     )
 
-    def clean_registration_limit(self):
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the form
+
+        Parameters
+        ----------
+        *args : tuple
+            Variable length argument list passed to the parent class.
+        **kwargs : dict
+            Arbitrary keyword arguments passed to the parent class.
+        """
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
         """
         Validate the registration limit to ensure it is a positive integer.
 
@@ -459,17 +493,19 @@ class EventMiscForm(forms.ModelForm):
 
         Returns
         -------
-        int
-            The validated registration limit.
+        dict
+            The cleaned data.
         """
-        registration_limit = self.cleaned_data.get("registration_limit")
+        cleaned_data = super().clean()
+        registration_limit = cleaned_data.get("registration_limit")
 
-        if registration_limit < 1:
-            raise forms.ValidationError(
-                event_constants.REGISTRATION_LIMIT_ERROR_MESSAGE
+        if registration_limit and registration_limit < 1:  # pragma: no cover
+            self.add_error(
+                "registration_limit",
+                event_constants.REGISTRATION_LIMIT_ERROR_MESSAGE,
             )
 
-        return registration_limit
+        return cleaned_data
 
 
 class EventContactForm(forms.ModelForm):
@@ -489,34 +525,6 @@ class EventContactForm(forms.ModelForm):
     class Meta:
         model = Event
         fields = ["event_contact_name", "event_contact_email"]
-        widgets = {
-            "event_contact_name": forms.TextInput(
-                attrs={
-                    "id": "event_contact_name",
-                    "name": "event_contact_name",
-                    "autocomplete": "off",
-                    "class": (
-                        "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
-                        "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
-                        "block w-full p-2.5"
-                    ),
-                    "placeholder": "Enter contact name",
-                }
-            ),
-            "event_contact_email": forms.EmailInput(
-                attrs={
-                    "id": "event_contact_email",
-                    "name": "event_contact_email",
-                    "autocomplete": "off",
-                    "class": (
-                        "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
-                        "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
-                        "block w-full p-2.5"
-                    ),
-                    "placeholder": "Enter contact email",
-                }
-            ),
-        }
 
     event_contact_name = forms.CharField(
         max_length=50,
@@ -525,14 +533,40 @@ class EventContactForm(forms.ModelForm):
         error_messages={
             "required": event_constants.ERROR_CONTACT_NAME_REQUIRED,
         },
+        widget=forms.TextInput(
+            attrs={
+                "id": "event_contact_name",
+                "name": "event_contact_name",
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+                "placeholder": "Enter contact name",
+            }
+        ),
     )
 
     event_contact_email = forms.EmailField(
         label="Contact Email",
         help_text=event_constants.HELP_TEXT_CONTACT_EMAIL,
         error_messages={
-            "required": event_constants.ERROR_CONTACT_EMAIL_REQUIRED,  # Add this line
+            "required": event_constants.ERROR_CONTACT_EMAIL_REQUIRED,
         },
+        widget=forms.EmailInput(
+            attrs={
+                "id": "event_contact_email",
+                "name": "event_contact_email",
+                "autocomplete": "off",
+                "class": (
+                    "bg-gray-50 border border-gray-300 text-gray-900 text-sm "
+                    "rounded-lg focus:ring-primary-600 focus:border-primary-600 "
+                    "block w-full p-2.5"
+                ),
+                "placeholder": "Enter contact email",
+            }
+        ),
     )
 
     def clean_event_contact_name(self):
@@ -549,7 +583,7 @@ class EventContactForm(forms.ModelForm):
         """
         name = self.cleaned_data.get("event_contact_name")
 
-        if not name:
+        if not name:  # pragma: no cover
             raise forms.ValidationError(event_constants.ERROR_CONTACT_NAME_REQUIRED)
 
         return name
@@ -568,7 +602,7 @@ class EventContactForm(forms.ModelForm):
         """
         email = self.cleaned_data.get("event_contact_email")
 
-        if not email:
+        if not email:  # pragma: no cover
             raise forms.ValidationError(event_constants.ERROR_CONTACT_EMAIL_REQUIRED)
 
         return email

@@ -201,3 +201,11 @@ cloudinary.config(
 )
 
 API_URL = ""
+
+
+TINYMCE_DEFAULT_CONFIG = {
+    "height": 300,
+    "width": 600,
+    "toolbar": "undo redo | styleselect | bold italic | link image",
+    "plugins": "link image code",
+}

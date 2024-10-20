@@ -67,7 +67,12 @@ class TestProfileSkillsForm(TestCase):
         Test that the form is invalid when selecting more skills than allowed.
         """
         form_data = {
-            "skills": [self.skill1.id, self.skill2.id, self.skill3.id, self.skill4.id],
+            "skills": [
+                self.skill1.id,
+                self.skill2.id,
+                self.skill3.id,
+                self.skill4.id,
+            ],
             "interests": [self.skill1.id],
         }
 

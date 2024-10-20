@@ -9,7 +9,6 @@ from django.db.models import Count, F, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
-from kns.core.utils import log_this
 from kns.faith_milestones.forms import GroupFaithMilestonesForm
 from kns.faith_milestones.models import GroupFaithMilestone
 from kns.groups.forms import (

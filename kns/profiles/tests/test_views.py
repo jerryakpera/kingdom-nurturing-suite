@@ -3956,9 +3956,10 @@ class MoveToChildGroupViewTests(TestCase):
         self.group3.add_member(self.profile5)
 
     def test_move_member_successfully(self):
-        from kns.core.utils import log_this
+        """
+        Test successful move of a member from parent group to a child group.
+        """
 
-        """Test successful move of a member from parent group to a child group."""
         self.client.login(
             email="user1@example.com",
             password="password1",
@@ -3978,8 +3979,6 @@ class MoveToChildGroupViewTests(TestCase):
         )
 
         response = self.client.post(url, form_data)
-
-        log_this(response)
 
         self.profile2.refresh_from_db()
 

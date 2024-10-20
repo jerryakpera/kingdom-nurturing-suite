@@ -7,8 +7,6 @@ from datetime import timedelta
 from django.test import TestCase
 from django.utils import timezone
 
-from kns.core.utils import log_this
-
 from .. import constants as event_constants
 from ..forms import (
     EventContactForm,
@@ -17,6 +15,7 @@ from ..forms import (
     EventLocationForm,
     EventMiscForm,
 )
+from .test_constants import VALID_REGISTRATION_LIMIT
 
 
 class TestEventContentForm(TestCase):
@@ -179,8 +178,6 @@ class TestEventDatesForm(TestCase):
 
         form = EventDatesForm(data=self.form_data)
 
-        log_this(form.errors)
-
         self.assertTrue(form.is_valid())
 
     def test_start_date_too_soon(self):
@@ -274,7 +271,10 @@ class TestEventLocationForm(TestCase):
         self.assertIn("location_country", form.errors)
         self.assertEqual(
             form.errors["location_country"],
-            [event_constants.ERROR_NO_COUNTRY_AND_CITY],
+            [
+                "This field is required.",
+                event_constants.ERROR_NO_COUNTRY_AND_CITY,
+            ],
         )
 
     def test_city_field_required(self):
@@ -290,6 +290,7 @@ class TestEventLocationForm(TestCase):
         self.assertEqual(
             form.errors["location_city"],
             [
+                "This field is required.",
                 event_constants.ERROR_NO_LOCATION_CITY,
             ],
         )
@@ -307,7 +308,10 @@ class TestEventLocationForm(TestCase):
         self.assertIn("location_country", form.errors)
         self.assertEqual(
             form.errors["location_country"],
-            [event_constants.ERROR_NO_LOCATION_COUNTRY],
+            [
+                "This field is required.",
+                event_constants.ERROR_NO_LOCATION_COUNTRY,
+            ],
         )
 
     def test_country_without_city(self):
@@ -323,7 +327,10 @@ class TestEventLocationForm(TestCase):
         self.assertIn("location_city", form.errors)
         self.assertEqual(
             form.errors["location_city"],
-            [event_constants.ERROR_NO_LOCATION_CITY],
+            [
+                "This field is required.",
+                event_constants.ERROR_NO_LOCATION_CITY,
+            ],
         )
 
 
@@ -340,7 +347,7 @@ class TestEventMiscForm(TestCase):
         self.form_data = {
             "refreshments": True,
             "accommodation": True,
-            "registration_limit": event_constants.EVENT_DEFAULT_REGISTRATION_LIMIT,
+            "registration_limit": VALID_REGISTRATION_LIMIT,
         }
 
     def test_event_misc_form_valid(self):
@@ -360,18 +367,21 @@ class TestEventMiscForm(TestCase):
         form = EventMiscForm(data=self.form_data)
 
         self.assertFalse(form.is_valid())
-        self.assertIn("registration_limit", form.errors)
+        self.assertIn(
+            "registration_limit",
+            form.errors,
+        )
+
         self.assertEqual(
             form.errors["registration_limit"],
-            [
-                "This field is required.",
-            ],
+            ["This field is required."],
         )
 
     def test_registration_limit_too_low(self):
         """
         Test that a registration limit less than 1 is invalid.
         """
+        # Test for zero
         self.form_data["registration_limit"] = 0
 
         form = EventMiscForm(data=self.form_data)
@@ -379,8 +389,8 @@ class TestEventMiscForm(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("registration_limit", form.errors)
         self.assertEqual(
-            form.errors["registration_limit"],
-            [event_constants.REGISTRATION_LIMIT_ERROR_MESSAGE],
+            form.errors["registration_limit"][0],
+            event_constants.REGISTRATION_LIMIT_ERROR_MESSAGE,
         )
 
 
@@ -428,7 +438,9 @@ class TestEventContactForm(TestCase):
         self.assertIn("event_contact_email", form.errors)
         self.assertEqual(
             form.errors["event_contact_email"],
-            [event_constants.ERROR_CONTACT_EMAIL_REQUIRED],
+            [
+                event_constants.ERROR_CONTACT_EMAIL_REQUIRED,
+            ],
         )
 
     def test_event_contact_email_invalid_format(self):

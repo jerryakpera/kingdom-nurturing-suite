@@ -427,7 +427,6 @@ class TestProfileModel(TestCase):
         profile is not verified.
         """
         # Set up the profile with unverified status
-        self.profile.is_verified = False
         self.profile.is_under_age = False
         self.profile.is_banned = False
 
@@ -441,7 +440,6 @@ class TestProfileModel(TestCase):
         profile is under age.
         """
         # Set up the profile as under age
-        self.profile.is_verified = True
         self.profile.is_under_age = True
         self.profile.is_banned = False
 

@@ -28,7 +28,7 @@ class Event(
     """
 
     title = models.CharField(
-        max_length=70,
+        max_length=event_constants.EVENT_TITLE_MAX_LENGTH,
         validators=get_min_max_validator(
             event_constants.EVENT_TITLE_MIN_LENGTH,
             event_constants.EVENT_TITLE_MAX_LENGTH,

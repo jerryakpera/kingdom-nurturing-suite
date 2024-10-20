@@ -1,0 +1,57 @@
+{% extends "events/layouts/create_event_base.html" %}
+
+{% load static %}
+
+{% block title %}
+  KNS Events | {{ current_step_info.title }}
+{% endblock title %}
+
+{% block create_event_base_content %}
+  <div class="container mx-auto">
+    <form action="" method="post" class="space-y-4">
+      {% csrf_token %}
+
+      {{ wizard.management_form }}
+
+      {% if form.errors %}
+        <div class="bg-red-100 text-red-700 text-sm font-semibold p-3 rounded">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              {{ error }}
+            {% endfor %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if wizard.form.forms %}
+        {{ wizard.form.management_form }}
+        {% for form in wizard.form.forms %}
+          {% for field in form %}
+            <div class="mb-4">
+              {% include "core/components/forms/form_field.html" %}
+            </div>
+          {% endfor %}
+        {% endfor %}
+      {% else %}
+        {% comment %} {{ wizard.form }} {% endcomment %}
+        {% for field in wizard.form %}
+          <div class="mb-4">
+            {% include "core/components/forms/form_field.html" %}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="flex justify-between items-center">
+        {% include "core/components/globals/cancel_button.html" %}
+
+        <div>
+          <button name="wizard_goto_step" class="bg-gray-500 text-white py-2 px-4 rounded mr-2" type="submit" value="{{ wizard.steps.prev }}">Back</button>
+          <input type="submit" class="bg-blue-500 text-white py-2 px-4 rounded" value="{% if wizard.steps.next %}Next {% else %}Submit{% endif %}"/>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script src="{% static 'events/js/min_date.js' %}"></script>
+  {% comment %} <script src="{% static 'events/js/event_form_handling.js' %}"></script> {% endcomment %}
+{% endblock create_event_base_content %}

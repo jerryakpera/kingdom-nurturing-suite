@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block base_content %}
+  <div class="container-default">
+    <div class="h-full w-full grid grid-cols-1 md:grid-cols-4 lg:grid-cols-3 gap-2 my-4">
+      <div class="md:col-span-1 h-full">
+        <div class="border border-gray-300 shadow-sm rounded-md h-full p-4 space-y-4">
+          <div class="container mx-auto space-y-2">
+            <h2 class="text-lg font-bold border-b">Easily Schedule Your Events!</h2>
+            <p class="text-sm text-gray-700">Create memorable gatherings, trainings, prayer meetups and community services. <span class="font-bold">Here's how it works:</span>
+            </p>
+          </div>
+
+          <div class="bg-gray-200 rounded-md p-2 space-y-1.5">
+            <!-- Display progress -->
+            <p class="font-semibold text-sm">Step {{ current_step_info.no }} of {{ wizard.steps.count }}</p>
+
+            <h1 class="text-lg font-bold border-b">{{ current_step_info.title }}</h1>
+            <p class="text-sm">{{ current_step_info.description }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="md:col-span-3 lg:col-span-2 h-full">
+        <div class="border border-gray-300 shadow-sm rounded-md p-4">
+          <h1 class="text-lg font-bold border-b">{{ current_step_info.title }}</h1>
+          {% block create_event_base_content %}{% endblock create_event_base_content %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock base_content %}
