@@ -5,6 +5,7 @@ Models for the `events` app.
 from cloudinary.models import CloudinaryField
 from django.core.validators import ValidationError
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 from taggit.managers import TaggableManager
@@ -105,6 +106,23 @@ class Event(
                 name="end_date_after_start_date",
             ),
         ]
+
+    def get_absolute_url(self):
+        """
+        Return the URL for the event's detail page.
+
+        Returns
+        -------
+        str
+            The URL to the event detail view.
+        """
+
+        return reverse(
+            "events:event_detail",
+            kwargs={
+                "event_slug": self.slug,
+            },
+        )
 
     def save(self, *args, **kwargs):
         """
@@ -231,7 +249,7 @@ class Event(
             added or None if no images exist.
         """
         # Try to get the primary image
-        primary_image = self.galleries.filter(
+        primary_image = self.images.filter(
             primary=True,
         ).first()
 
@@ -239,7 +257,7 @@ class Event(
             return primary_image
 
         # If no primary image, return the first image added to the event
-        return self.galleries.first()
+        return self.images.first()
 
 
 class EventImage(models.Model):  # pragma: no cover

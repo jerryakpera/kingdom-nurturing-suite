@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from django.core.exceptions import ValidationError
 from django.test import Client, TestCase
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -241,3 +242,17 @@ class TestEvent(TestCase):
 
         self.event.start_date = timezone.now().date() - timedelta(days=2)
         self.assertFalse(self.event.is_upcoming())
+
+    def test_get_absolute_url(self):
+        """
+        Test the get_absolute_url method to ensure it returns
+        the correct URL for the event detail page.
+        """
+        expected_url = reverse(
+            "events:event_detail",
+            kwargs={
+                "event_slug": self.event.slug,
+            },
+        )
+
+        self.assertEqual(self.event.get_absolute_url(), expected_url)

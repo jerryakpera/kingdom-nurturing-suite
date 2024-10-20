@@ -1,0 +1,56 @@
+{% load static %}
+
+<div class="flex flex-col w-full bg-white rounded-md border shadow-sm">
+  {% if event.get_primary_image %}
+    <div class="w-full h-64 bg-top bg-cover rounded-t" style="background-image: url(https://www.si.com/.image/t_share/MTY4MTkyMjczODM4OTc0ODQ5/cfp-trophy-deitschjpg.jpg)"></div>
+  {% endif %}
+
+  {% if not event.get_primary_image %}
+    <div class="w-full h-64 bg-top bg-cover rounded-t" style="background-image: url('{% static "events/images/default-2.png" %}')"></div>
+  {% endif %}
+  <div class="flex flex-col w-full xs:flex-row">
+    <div class="flex flex-row justify-around p-4 font-bold leading-none text-gray-900 uppercase bg-gray-300 xs:flex-col xs:items-center xs:justify-center sm:w-3/12">
+      <div class="xs:text-3xl">{{ event.start_date|date:"M" }}</div>
+      <div class="xs:text-6xl">{{ event.start_date|date:"d" }}</div>
+      <div class="xs:text-xl">{{ event.start_date|date:"Y" }}</div>
+    </div>
+
+    <div class="p-4 font-normal text-gray-800 sm:w-9/12 space-y-3">
+      <h1 class="text-2xl font-black tracking-tight text-gray-800">
+        <a href="{{event.get_absolute_url}}" class="hover:text-blue-500">
+          {{ event.title }}
+        </a>
+      </h1>
+
+      <p class="leading-5">
+        {{ event.summary|truncatechars:135 }}
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-x-2 items-start sm:items-end sm:gap-y-2 justify-between text-gray-700">
+        <div>
+          <h6 class="title-font font-semibold">
+            {% if event.location_country %}
+              <span class="mb-0 fw-semibold">
+                <img
+                  alt="Event location flag"
+                  src="{{ event.location_country.flag }}"
+                />
+              </span>
+            {% endif %}
+
+            <div class="flex justify-between">
+              {{ event.location_display }}
+            </div>
+          </h6>
+        </div>
+        <div class="flex justify-end text-sm font-light gap-x-1">
+          {% for tag in event.tags.all %}
+            <a href="" class="hover:text-blue-500">
+              #{{ tag }}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

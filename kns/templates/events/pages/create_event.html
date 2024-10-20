@@ -44,9 +44,14 @@
       <div class="flex justify-between items-center">
         {% include "core/components/globals/cancel_button.html" %}
 
-        <div>
-          <button name="wizard_goto_step" class="bg-gray-500 text-white py-2 px-4 rounded mr-2" type="submit" value="{{ wizard.steps.prev }}">Back</button>
-          <input type="submit" class="bg-blue-500 text-white py-2 px-4 rounded" value="{% if wizard.steps.next %}Next {% else %}Submit{% endif %}"/>
+        <div class="space-x-2">
+          <button name="wizard_goto_step" class="focus:outline-none text-white bg-gray-700 hover:bg-gray-800 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer" type="submit" value="{{ wizard.steps.prev }}">Back</button>
+
+          <input
+            type="submit"
+            class="focus:outline-none text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 cursor-pointer"
+            value="{% if wizard.steps.next %}Next {% else %}Submit{% endif %}"
+          />
         </div>
       </div>
     </form>

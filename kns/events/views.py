@@ -37,7 +37,7 @@ def index(request):
         The rendered HTML response for the events index page, containing
         all events.
     """
-    events = Event.objects.all()
+    events = Event.objects.all().order_by("start_date")
 
     context = {
         "events": events,
