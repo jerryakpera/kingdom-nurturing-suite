@@ -256,3 +256,57 @@ class TestEvent(TestCase):
         )
 
         self.assertEqual(self.event.get_absolute_url(), expected_url)
+
+    def test_is_event_organizer(self):
+        """
+        Test the is_event_organizer method to ensure it correctly identifies
+        if a profile is the organizer of the event.
+        """
+        # Profile is the event organizer
+        self.assertTrue(self.event.is_event_organizer(self.profile))
+
+        # Create a different profile
+        other_user = User.objects.create_user(
+            email="notorganizer@example.com",
+            password="password123",
+        )
+        other_profile = other_user.profile
+
+        # Profile is not the event organizer
+        self.assertFalse(self.event.is_event_organizer(other_profile))
+
+    def test_can_edit_event_before_registration_deadline(self):
+        """
+        Test the can_edit_event method to ensure the event can be edited
+        by the organizer before the registration deadline passes.
+        """
+        # Set a future registration deadline
+        self.event.registration_deadline_date = timezone.now().date() + timedelta(
+            days=2
+        )
+        self.event.save()
+
+        # Organizer can edit the event
+        self.assertTrue(self.event.can_edit_event(self.profile))
+
+    def test_can_edit_event_after_registration_deadline(self):
+        """
+        Test the can_edit_event method to ensure the event cannot be edited
+        after the registration deadline passes.
+        """
+        # Set a past registration deadline
+        self.event.registration_deadline_date = timezone.now().date() - timedelta(
+            days=1
+        )
+        self.event.save()
+
+        # Organizer cannot edit the event after the deadline
+        self.assertFalse(self.event.can_edit_event(self.profile))
+
+        # Create a different profile and check they cannot edit the event
+        other_user = User.objects.create_user(
+            email="notorganizer@example.com",
+            password="password123",
+        )
+        other_profile = other_user.profile
+        self.assertFalse(self.event.can_edit_event(other_profile))

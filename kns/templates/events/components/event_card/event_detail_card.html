@@ -2,7 +2,11 @@
 
 <div class="rounded-lg border space-y-2">
   <div class="px-3 py-2">
-    <h2 class="text-lg font-semibold leading-6">{{ event.title }}</h2>
+    <h2 class="text-lg font-bold leading-5">{{ event.title }}</h2>
+  </div>
+
+  <div class="px-3 flex justify-end">
+    {% include "events/components/event_menu/event_menu.html" %}
   </div>
 
   <div class="p-0">
@@ -47,13 +51,6 @@
           {% endif %}
         </div>
       </div>
-    </div>
-
-    <div>
-      <div class="text-xs text-gray-500 uppercase font-semibold">Summary</div>
-      <p class="text-sm">
-        {{ event.summary }}
-      </p>
     </div>
   </div>
 </div>

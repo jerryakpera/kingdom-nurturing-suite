@@ -235,12 +235,7 @@ def event_detail(request, event_slug):
     django.http.HttpResponse
         The rendered HTML response for the event detail page.
     """
-    event = get_object_or_404(Event, slug=event_slug)
-    event.request = request
-
-    context = {
-        "event": event,
-    }
+    context = {}
 
     return render(
         request=request,

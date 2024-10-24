@@ -1,0 +1,20 @@
+<button id="eventMenuDropdownButton" data-dropdown-toggle="event-menu-dropdown" class="p-1.5 pt-1 pb-0 font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800" type="button">
+  <iconify-icon icon="mdi:menu" class="text-lg"></iconify-icon>
+</button>
+
+<!-- Dropdown menu -->
+<div id="event-menu-dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+  <ul class="py-2 text-sm text-gray-700" aria-labelledby="eventMenuDropdownButton">
+    <li>
+      <a href="#" class="block px-4 py-2 hover:bg-gray-100">Earnings</a>
+    </li>
+
+    {% if can_edit_event %}
+      {% include "events/components/event_menu/edit_menu.html" %}
+    {% endif %}
+
+    <li>
+      <a href="#" class="block px-4 py-2 hover:bg-gray-100">Sign out</a>
+    </li>
+  </ul>
+</div>

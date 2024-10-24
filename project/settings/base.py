@@ -86,6 +86,7 @@ TEMPLATES = [
                 "kns.core.context_processors.notifications_context",
                 "kns.profiles.context_processors.profile_context",
                 "kns.groups.context_processors.group_context",
+                "kns.events.context_processors.event_context",
             ],
         },
     },

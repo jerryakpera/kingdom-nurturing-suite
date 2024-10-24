@@ -237,8 +237,14 @@ class Event(
         -------
         bool
             True if the deadline has passed, False otherwise.
+            Returns False if no registration deadline is set.
         """
+
         today = timezone.now().date()
+
+        if not self.registration_deadline_date:
+            # No deadline is set, so return False
+            return False
 
         return today > self.registration_deadline_date
 
@@ -275,6 +281,48 @@ class Event(
 
         # If no primary image, return the first image added to the event
         return self.images.first()
+
+    def is_event_organizer(self, profile):
+        """
+        Check if the given profile is the organizer of this event.
+
+        Parameters
+        ----------
+        profile : Profile
+            The profile to check against the event organizer.
+
+        Returns
+        -------
+        bool
+            True if the given profile is the author (organizer) of the
+            event, False otherwise.
+        """
+        return self.author == profile
+
+    def can_edit_event(self, profile):
+        """
+        Determine if the given profile can edit this event.
+
+        A profile can edit the event if they are the organizer and the
+        registration deadline
+        has not passed.
+
+        Parameters
+        ----------
+        profile : Profile
+            The profile to check for edit permissions.
+
+        Returns
+        -------
+        bool
+            True if the profile can edit the event (i.e., is the organizer
+            and the registration
+            deadline has not passed), False otherwise.
+        """
+        is_event_organizer = self.is_event_organizer(profile)
+        registration_deadline_passed = self.has_registration_deadline_passed()
+
+        return is_event_organizer and not registration_deadline_passed
 
 
 class EventImage(models.Model):  # pragma: no cover

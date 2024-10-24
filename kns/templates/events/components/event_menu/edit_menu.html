@@ -1,0 +1,45 @@
+<li>
+  <button
+    id="doubleDropdownButton"
+    data-dropdown-toggle="doubleDropdown"
+    data-dropdown-placement="right-start"
+    type="button"
+    class="flex items-center justify-between w-full px-4 py-2 hover:bg-gray-100"
+  >
+    Edit
+    <svg
+      class="w-2.5 h-2.5 ms-3 rtl:rotate-180"
+      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 6 10"
+    >
+      <path
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="m1 9 4-4-4-4"
+      />
+    </svg>
+  </button>
+  <div id="doubleDropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44">
+    <ul class="py-2 text-sm text-gray-700" aria-labelledby="doubleDropdownButton">
+      <li>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Content</a>
+      </li>
+      <li>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Dates</a>
+      </li>
+      <li>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Location</a>
+      </li>
+      <li>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Misc</a>
+      </li>
+      <li>
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Contact</a>
+      </li>
+    </ul>
+  </div>
+</li>
